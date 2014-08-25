@@ -1,15 +1,174 @@
 <html>
    <head>
-      <title>Box2dWeb Demo</title>
+      <title>Wheelchair Rx</title>
+        <script type="text/javascript" src="js/Box2dWeb-2.1.a.3.min.js"></script>
+        <script type="text/javascript" src="js/jquery-1.11.1.min.js"></script>
+        <script type="text/javascript" src='js/draw_world.js'></script>
+        <script type="text/javascript" src='js/main.js'></script>
+        <script type="text/javascript" >
+            function toggleDebug() {
+                if(typeof config === "undefined") config = {};
+                config.debug = !config.debug;
+            }
+            function toggleChair() {
+                if(typeof config === "undefined") config = {};
+                config.skeleton = !config.skeleton;
+                resetWorld();
+            }
+            function toggleImages() {
+                if(typeof config === "undefined") config = {};
+                config.showImages = !config.showImages;
+                resetWorld();
+            }
+        </script>
+        <style>
+            body {
+                background-color: #02162c;
+            }
+            .mxrx {
+                margin-top: 50px;
+                margin-left: 20px;
+                padding-top: 0px;
+                background-color: #5a8ac0;
+                width: 15%;
+                height: 80%;
+            }
+            .mxrx label {
+                margin-top: 4px;
+                display: block;
+                color: #1b3e64;
+                width: 100%;
+            }
+            .mxrx label.labelFocus {
+                font-weight: bold;
+                color: #173a61;
+            }
+            .mxrx input[type="text"] {
+                padding: 5px;
+                background-color: #adc5e0;
+                border: solid 2px #1b3e64;
+            }
+            .mxrx input[type="text"]:focus,
+            .mxrx input[type="text"].focus {
+                background-color: #d8e5f4;
+                color: #173a61;
+                font-weight: bold;
+                border: solid 3px #173a61;
+                box-shadow: inset 0 0 0 1px #90adcd;
+            }
+            .tmp-left h3 {
+                color: #5a8ac0;
+            }
+            .tmp-left {
+                background-color: #173a61;
+                padding: 0 5;
+            }
+            .i-app {
+                padding: 0 8;
+                background-color: #5a8ac0;
+            }
+            .o-app {
+                padding: 0 5;
+            }
+            .o-app h2 {
+                margin: 0px;
+                font-size: 32px;
+                color: #5a8ac0;
+            }
+            h3 {
+                margin: 0px;
+                color: #173a61;
+            }
+            #inner {
+                padding: 30px;
+                background-color: #173a61;
+            }
+            #outer {
+                margin: 0 auto;
+                width: 500;
+                height: 300;
+                background-color: #5a8ac0;
+            }
+            .btn-box {
+                -moz-box-shadow: inset 1px 1px 0px 0px #90adcd;
+                -webkit-box-shadow: inset 1px 1px 0px 0px #90adcd;
+                -box-shadow: inset 1px 1px 0px 0px #90adcd;
+                -webkit-border-top-left-radius: 0px;
+                -moz-border-radius-topleft: 0px;
+                -border-top-left-radius: 0px;
+                -webkit-border-top-right-radius: 0px;
+                -moz-border-radius-topright: 0px;
+                -border-top-right-radius: 0px;
+                -webkit-border-bottom-right-radius: 0px;
+                -moz-border-radius-bottomright: 0px;
+                -border-bottom-right-radius: 0px;
+                -moz-border-radius-bottomleft: 0px;
+                -webkit-border-radius-bottom-left: 0px;
+                -border-radius-bottom-left: 0px;
+                text-indent: 0;
+                border: 1px solid #1b3e64;
+                display: inline-block;
+                background-color: #1b3e64;
+                color: #90adcd;
+                font-family: Trebuchet MS;
+                font-size: 15px;
+                font-weight: bold;
+                font-style: normal;
+                height: 35px;
+                line-height: 35px;
+                margin: 5px;
+            }
+            .btn-box:hover {
+                background-color: #173a61;
+            }
+            canvas {
+                margin-bottom: 20px;
+            }
+            #container {
+                position: absolute;
+                margin: auto;
+                top: 0;
+                right: 0;
+                bottom: 50%;
+                left: 0;
+                width: 550;
+                height: 350;
+                background-color: #173a61;
+            }
+        </style>
    </head>
-   <!--<body onload="init();">-->
    <body>
-   <!--<canvas id="canvas" width="600" height="400" style="background-color:#333333;" ></canvas>-->
-      <canvas id="canvas" width="500" height="300" style="background-color:#333333;" ></canvas>
+   <div class="mxrx">
+       <div class="tmp-left"><h3>Temporary Controls</h3></div>
+       <label for="lower-arm-length">Lower Arm Length</label>
+       <input type="text" id="lower-arm-length" name="lowerArmLength" value="11" readonly />
+       <label for="upper-arm-length">Upper Arm Length</label>
+       <input type="text" id="upper-arm-length" name="upperArmLength" value="11" readonly />
+       <label for="forarm-length">Forarm Length</label>
+       <input type="text" id="forarm-length" name="forarmLength" value="renamed" readonly />
+       <label for="torso-length">Torso Length</label>
+       <input type="text" id="torso-length" name="torsoLength" value="26" readonly />
+       <label for="trunk-depth">Trunk Depth</label>
+       <input type="text" id="trunk-depth" name="trunkDepth" value="9" readonly />
+       <label for="lower-leg-length">Lower Leg Length</label>
+       <input type="text" id="lower-leg-length" name="lowerLegLength" value="17" readonly />
+       <label for="thigh-depth">Thigh Depth</label>
+       <input type="text" id="thigh-depth" name="thighDepth" value="20" readonly />
+       <label for="chest-width">Chest Width</label>
+       <input type="text" id="chest-width" name="chestWidth" value="TODO" readonly />
+       <label for="hip-width">Hip Width</label>
+       <input type="text" id="hip-width" name="hipWidth" value="DISABLED" readonly disabled />
+   </div>
+      <div id="container">
+          <div class="o-app"><h2>Wheelchair Rx</h2></div>
+          <div class=i-app>
+              <h3>Side measures</h3>
+              <canvas id="canvas" width="500" height="300" style="background-color:#5a8ac0;" ></canvas>
+              <input id="btn-reset" class="btn-box" type="button"  value="Reset" />
+              <input id="btn-images" class="btn-box" type="button"  value="Toggle Images" onclick="toggleImages();" />
+              <input id="btn-skeleton" class="btn-box" type="button"  value="Toggle Chair" onclick="toggleChair();" />
+              <input id="btn-debug" class="btn-box" type="button"  value="Toggle Debug Rotation" onclick="toggleDebug();" />
+          </div>
+      </div>
    </body>
-   <script type="text/javascript" src="Box2dWeb-2.1.a.3.min.js"></script>
-    <script src="lib/prototype-1.6.0.2.js"></script>
-    <!-- THIS WILL BE MODIFIED TO PROVIDE ACTUAL GRAPHICS -->
-    <script src='draw_world.js'></script>
-    <script src='main.js'></script>
 </html>

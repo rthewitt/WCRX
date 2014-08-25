@@ -6,7 +6,7 @@ var canvasHeight = 300;
 var canvasTop;
 var canvasLeft;
 
-var CHEAT, CONTEXT;
+var CHEAT, CONTEXT, UPDATE;
 
 // Masking bits for advanced collisions
 var HM_TORSO = 0x0002,
@@ -165,7 +165,7 @@ function initWorld(world) {
             if((!!config && !!config.skeleton) || !config)
 			    world.SetDebugDraw(debugDraw);
          
-         window.setInterval(update, 1000 / 60);
+         UPDATE = window.setInterval(update, 1000 / 60);
 
          var canvasPosition = getElementPosition(document.getElementById("canvas"));
 
@@ -223,8 +223,7 @@ function initPerson(world, wheelBody) {
     fixDef.shape = new b2PolygonShape();
     fixDef.shape.SetAsOrientedBox(thighDepth/2, legSkeletonWidth/2, new b2Vec2(0, 0), 0);
     bodyDef.position.Set(chairX+inches(10), chairY-inches(7));
-    bodyDef.userData = new ImageData('fake-upper-leg', { x: -thighDepth/2, y: legSkeletonWidth}, [80, 22], 0);
-    //bodyDef.userData = new ImageData('fake-upper-leg', { x: 0, y: 0}, [80, 22], 0);
+    bodyDef.userData = new ImageData('fake-upper-leg', [60, 22], 0);
     var upperLeg = world.CreateBody(bodyDef);
     bfx = upperLeg.CreateFixture(fixDef);
     bfx.SetFilterData(bodyFilterData);
@@ -234,9 +233,7 @@ function initPerson(world, wheelBody) {
     fixDef.shape = new b2PolygonShape();
     fixDef.shape.SetAsOrientedBox(lowerLegLength/2, legSkeletonWidth/2, new b2Vec2(0, 0), 0);
     bodyDef.position.Set(chairX+inches(17)+thighDepth, chairY-inches(7));
-    // change the offset object below
-    bodyDef.userData = new ImageData('fake-lower-leg', { x: -legSkeletonWidth/2, y: 0}, [40, 60], -0.5*Math.PI);
-    //bodyDef.userData = new ImageData('fake-lower-leg', { x: 0, y: 0}, [40, 60], -0.5*Math.PI);
+    bodyDef.userData = new ImageData('fake-lower-leg', [60, 47], 0);
     var lowerLeg = world.CreateBody(bodyDef);
     bfx = lowerLeg.CreateFixture(fixDef);
     bfx.SetFilterData(bodyFilterData);
@@ -244,8 +241,9 @@ function initPerson(world, wheelBody) {
 
     // foot (fixture)
     fixDef.shape = new b2PolygonShape();
-    var footVec = new b2Vec2(lowerLegLength/2, -inches(2));
-    fixDef.shape.SetAsOrientedBox(legSkeletonWidth/2, inches(4), footVec, 0);
+    var footVec = new b2Vec2(lowerLegLength/2 - inches(1), -inches(3.2));
+    fixDef.shape.SetAsOrientedBox(inches(1), inches(6), footVec, 0);
+
     var shoe = lowerLeg.CreateFixture(fixDef);
     
 
@@ -262,10 +260,9 @@ function initPerson(world, wheelBody) {
     // torso
     fixDef.shape = new b2PolygonShape();
     fixDef.shape.SetAsBox(trunkDepth/2, torsoLength/2);
+    //fixDef.shape.SetAsOrientedBox(trunkDepth/2, torsoLength/2, new b2Vec2(0, 0), 0);
     bodyDef.position.Set(chairX+inches(10), chairY-inches(19));
-    // These are ALL WRONG.  There is no pattern, it does not mirror the behavior of the underlying body
-    //bodyDef.userData = new ImageData('fake-torso', { x: -trunkDepth, y: -torsoLength/2}, [40, 80], 0);
-    bodyDef.userData = new ImageData('fake-torso', { x: -trunkDepth, y: -trunkDepth}, [40, 80], 0);
+    bodyDef.userData = new ImageData('fake-torso', [40, 95], 0);
     var torso = world.CreateBody(bodyDef);
     bfx = torso.CreateFixture(fixDef);
     bfx.SetFilterData(bodyFilterData);
@@ -447,17 +444,42 @@ function initChair(world) {
     return wheelBody; // reference for human placement
 }
 
-// will correspond to update()
-function update(cnt) {
+function update() {
     CHEAT.ApplyForce(new b2Vec2(-12, 0), new b2Vec2(0, -lowerArmLength));
     CHEAT.ApplyForce(new b2Vec2(12, 0), new b2Vec2(0, +lowerArmLength));
+    // This is used to debug rotational problems, centroids
+    //CHEAT.ApplyForce(new b2Vec2(52, 0), new b2Vec2(0, +lowerArmLength));
     world.Step(1.0 / 60, 10, 10);
     world.DrawDebugData();
     world.ClearForces();
     drawWorld(world, CONTEXT);
 }
 
-Event.observe(window, 'load', function() {
+function destroyWorld(world) {
+    window.clearInterval(UPDATE);
+    world.ClearForces();
+    for(b = world.GetBodyList(); b; b = b.GetNext()) {
+        world.DestroyBody(b);
+    }
+    update();
+}
+
+function resetWorld() {
+    if(!!world) {
+        destroyWorld(world);
+    }
     world = createWorld();
     initWorld(world);
+}
+
+$(document).ready(function($) {
+//Event.observe(window, 'load', function() {
+    resetWorld();
+    $(":input").focus(function() {
+        $("label[for='" + this.id + "']").addClass("labelfocus");
+    }).blur(function() {
+        $("label").removeClass("labelfocus");
+    });
+    $("#btn-reset").click(resetWorld);
 });
+
