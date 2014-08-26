@@ -1,16 +1,19 @@
 var config = {
     showImages: true,
-    skeleton: false,
+    skeleton: true,
     debug: false
 };
 
 // offset for rotational andhor
 // change this to pixels so we can establish from asset?
 var rotationalOffset = {
-    fake_torso: [0, 0],
-    fake_upper_leg: [0, 0],
-    //fake_lower_leg: [0, -13]
-    fake_lower_leg: [0, -7]
+    torso: [-11, -18],
+    upper_arm: [-5, 0],
+    lower_arm: [-7, -6],
+    hand: [150, 230],
+    upper_leg: [-11, -3],
+    lower_leg: [0, -7],
+    wheel: [-7, 5]
 };
 
 function drawWorld(world, context) {
@@ -20,14 +23,15 @@ function drawWorld(world, context) {
     // Why does this translate need a static pad?  These work for torso, upper-leg.  Shape dependent???
     var wtfX=20, wtfY=10;
 
-    function drawPart(entity, imgData) {
+    function drawPart(entity, imgData, isFixture) {
         context.save();
-        var pos = entity.GetPosition();
+        var pos = !isFixture ? entity.GetPosition() : new Box2D.Common.Math.b2Vec2.b2Vec2(0, 0);
 
 
         context.translate(pos.x * PTM + wtfX, pos.y * PTM + wtfY);
         context.rotate(imgData.rotAngle); 
-        context.rotate(entity.GetAngle());
+
+        if(!isFixture) context.rotate(entity.GetAngle());
 
         // testing rotational offset!!
         var offset = rotationalOffset[imgData.name];
@@ -71,7 +75,7 @@ function drawWorld(world, context) {
             } 
             for(f = b.GetFixtureList(); f; f = f.GetNext()) {
                 userData = f.GetUserData();
-         //       if(userData instanceof ImageData) drawPart(f, userData);
+                //if(userData instanceof ImageData) drawPart(f, userData, true);
             }
 
         } 
@@ -82,7 +86,7 @@ function drawWorld(world, context) {
 // change partName -> lookup of JSON file?
 function ImageData(partName, dims, rot) {
     var img = new Image();
-    img.src = "images/"+partName+".png"; // svg coming soon
+    img.src = "images/"+partName+".svg"; // svg coming soon
 
     this.name = partName.replace(/-/g,'_');
     this.img = img;

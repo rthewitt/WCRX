@@ -203,11 +203,13 @@ function initPerson(world, wheelBody) {
     // place hand on wheel... only so we can establish userData for sprite?
     fixDef.shape = new b2PolygonShape();
     fixDef.shape.SetAsOrientedBox(0.1, 0.1, new b2Vec2(0, -wheelRadius), 0);
+    fixDef.userData = new ImageData('hand', [35, 35], 0);
     var hand = wheelBody.CreateFixture(fixDef);
     var hmd = new b2FilterData();
     hmd.categoryBits = HM_HAND;
     hmd.maskBits = GROUND;
     hand.SetFilterData(hmd);
+    delete fixDef.userData;
 
 
     var bodyDef = new b2BodyDef();
@@ -223,7 +225,7 @@ function initPerson(world, wheelBody) {
     fixDef.shape = new b2PolygonShape();
     fixDef.shape.SetAsOrientedBox(thighDepth/2, legSkeletonWidth/2, new b2Vec2(0, 0), 0);
     bodyDef.position.Set(chairX+inches(10), chairY-inches(7));
-    bodyDef.userData = new ImageData('fake-upper-leg', [60, 22], 0);
+    bodyDef.userData = new ImageData('upper-leg', [77, 28], 0);
     var upperLeg = world.CreateBody(bodyDef);
     bfx = upperLeg.CreateFixture(fixDef);
     bfx.SetFilterData(bodyFilterData);
@@ -233,7 +235,7 @@ function initPerson(world, wheelBody) {
     fixDef.shape = new b2PolygonShape();
     fixDef.shape.SetAsOrientedBox(lowerLegLength/2, legSkeletonWidth/2, new b2Vec2(0, 0), 0);
     bodyDef.position.Set(chairX+inches(17)+thighDepth, chairY-inches(7));
-    bodyDef.userData = new ImageData('fake-lower-leg', [60, 47], 0);
+    bodyDef.userData = new ImageData('lower-leg', [65, 47], 0);
     var lowerLeg = world.CreateBody(bodyDef);
     bfx = lowerLeg.CreateFixture(fixDef);
     bfx.SetFilterData(bodyFilterData);
@@ -262,7 +264,7 @@ function initPerson(world, wheelBody) {
     fixDef.shape.SetAsBox(trunkDepth/2, torsoLength/2);
     //fixDef.shape.SetAsOrientedBox(trunkDepth/2, torsoLength/2, new b2Vec2(0, 0), 0);
     bodyDef.position.Set(chairX+inches(10), chairY-inches(19));
-    bodyDef.userData = new ImageData('fake-torso', [40, 95], 0);
+    bodyDef.userData = new ImageData('torso', [42, 130], 0);
     var torso = world.CreateBody(bodyDef);
     bfx = torso.CreateFixture(fixDef);
     bfx.SetFilterData(bodyFilterData);
@@ -291,26 +293,29 @@ function initPerson(world, wheelBody) {
     fixDef.shape = new b2PolygonShape();
     fixDef.shape.SetAsOrientedBox(armSkeletonWidth/2, upperArmLength/2, upperOffset, UPPER_ARM_ANGLE);
     bodyDef.position.Set(shoulderX, shoulderY+upperArmLength/2);
+    bodyDef.userData = new ImageData('upper-arm', [23, 43], 0);
     var upperArm = world.CreateBody(bodyDef);
     bfx = upperArm.CreateFixture(fixDef);
     bfx.SetFilterData(bodyFilterData);
+    delete bodyDef.userData;
 
     // lower arm
     fixDef.shape = new b2PolygonShape();
     fixDef.shape.SetAsOrientedBox(armSkeletonWidth/2, lowerArmLength/2, new b2Vec2(0, 0), LOWER_ARM_ANGLE);
     bodyDef.position.Set(shoulderX, shoulderY + upperArmLength+lowerArmLength/2);
+    bodyDef.userData = new ImageData('lower-arm', [16, 36], 0);
     var lowerArm = world.CreateBody(bodyDef);
     lowerArm.CreateFixture(fixDef);
+    delete bodyDef.userData;
 
     var shoulderDef = new b2RevoluteJointDef();
     shoulderDef.collideConnected = false;
-    //shoulderDef.Initialize(upperArm, torso, new b2Vec2(shoulderX, shoulderY));
     shoulderDef.bodyA = upperArm;
     shoulderDef.bodyB = torso;
-    shoulderDef.localAnchorB.Set(0, -torsoLength/2);
+    shoulderDef.localAnchorB.Set(-trunkDepth/2, -torsoLength/2);
     //shoulderDef.localAnchorA.Set(upperArmLength, upperArmLength/2);
     // DYNAMIC ANGLE: 3
-    shoulderDef.localAnchorA.Set(0, -upperArmLength/2);
+    shoulderDef.localAnchorA.Set(-armSkeletonWidth/2, -upperArmLength/2);
     world.CreateJoint(shoulderDef);
 
     // elbow joint
@@ -349,8 +354,10 @@ function initChair(world) {
 
     fixDef.shape = new b2CircleShape(wheelRadius);
 
+    bodyDef.userData = new ImageData('wheel', [85, 85], 0);
     var wheelBody = world.CreateBody(bodyDef);
     wheelBody.CreateFixture(fixDef);
+    delete bodyDef.userData;
 
 
     var fmd = new b2FilterData();
@@ -449,6 +456,7 @@ function update() {
     CHEAT.ApplyForce(new b2Vec2(12, 0), new b2Vec2(0, +lowerArmLength));
     // This is used to debug rotational problems, centroids
     //CHEAT.ApplyForce(new b2Vec2(52, 0), new b2Vec2(0, +lowerArmLength));
+    //CHEAT.ApplyImpulse(new b2Vec2(2, 2), new b2Vec2(0, lowerArmLength));
     world.Step(1.0 / 60, 10, 10);
     world.DrawDebugData();
     world.ClearForces();
