@@ -1,26 +1,13 @@
 <html>
    <head>
       <title>Wheelchair Rx</title>
+        <script data-main="js/main" src="js/libs/requirejs/require.js"></script>
+        <!--
         <script type="text/javascript" src="js/Box2dWeb-2.1.a.3.min.js"></script>
         <script type="text/javascript" src="js/jquery-1.11.1.min.js"></script>
         <script type="text/javascript" src='js/draw_world.js'></script>
         <script type="text/javascript" src='js/main.js'></script>
-        <script type="text/javascript" >
-            function toggleDebug() {
-                if(typeof config === "undefined") config = {};
-                config.debug = !config.debug;
-            }
-            function toggleChair() {
-                if(typeof config === "undefined") config = {};
-                config.skeleton = !config.skeleton;
-                resetWorld();
-            }
-            function toggleImages() {
-                if(typeof config === "undefined") config = {};
-                config.showImages = !config.showImages;
-                resetWorld();
-            }
-        </script>
+        -->
         <style>
             body {
                 background-color: #02162c;
@@ -165,9 +152,9 @@
               <h3>Side measures</h3>
               <canvas id="canvas" width="500" height="300" style="background-color:#5a8ac0;" ></canvas>
               <input id="btn-reset" class="btn-box" type="button"  value="Reset" />
-              <input id="btn-images" class="btn-box" type="button"  value="Toggle Images" onclick="toggleImages();" />
-              <input id="btn-skeleton" class="btn-box" type="button"  value="Toggle Chair" onclick="toggleChair();" />
-              <input id="btn-debug" class="btn-box" type="button"  value="Toggle Debug Rotation" onclick="toggleDebug();" />
+              <input id="btn-images" class="btn-box" type="button"  value="Toggle Images" />
+              <input id="btn-skeleton" class="btn-box" type="button"  value="Toggle Chair" />
+              <input id="btn-debug" class="btn-box" type="button"  value="Toggle Debug Rotation" />
           </div>
       </div>
    </body>
