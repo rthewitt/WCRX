@@ -1,4 +1,4 @@
-define(function(){
+define(["./scaledPolygons"], function(pollyColl){
 
     var GROUND = 1,
         HM_TORSO = 2,
@@ -9,6 +9,7 @@ define(function(){
 
     var seatMask = HM_TORSO | GROUND;
     var personMask = WC_BARRIER | GROUND;
+
     
     return {
         showImages: true,
@@ -109,7 +110,8 @@ define(function(){
             },
             LBar: {
                 name: "L-beam",
-                type: "box",
+                type: "poly",
+                polygons: pollyColl.LBar,
                 size: { x: 23, y: 15 }, // for now, seatDepth + 5"
                 pos: { z: 0 },
                 cat: WC_FRAME,
