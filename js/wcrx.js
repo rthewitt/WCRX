@@ -65,6 +65,7 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         this.name = def.name.replace(/-/g,'_');
         this.type = def.type;
         this.img = img;
+        this.pos = def.pos;
         this.rotAngle = 0;
         var shape, size, dims;
         switch(def.type) {
@@ -124,7 +125,7 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         bodyDef.position.Set(chairX, chairY-this.inches(30));
         bodyDef.userData = bodyPart;
         var body = this.world.CreateBody(bodyDef);
-        body.SetAngle(-1.7 * Math.PI);
+        //body.SetAngle(-1.7 * Math.PI);
 
         function reify(shape) {
             fixDef.shape = shape;
@@ -167,7 +168,7 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         for(var bp in this.config.person) {
             var b2b = getBodyPart.call(this, this.config.person[bp], humanFixDef); 
             bodies[bp] = b2b;
-            parts[bp] = b2b.userData;
+            parts[bp] = b2b.GetUserData();
         }
 
         var knee = getRevJoint.call(this, bodies.upperLeg, bodies.lowerLeg, 
@@ -214,7 +215,7 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         for(var cp in this.config.chair) {
             var b2b = getBodyPart.call(this, this.config.chair[cp], chairFixDef);
             bodies[cp] = b2b;
-            parts[cp] = b2b.userData;
+            parts[cp] = b2b.GetUserData();
         }
     }
 
@@ -363,7 +364,7 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         bodyDef.position.Set(chairX+this.inches(15), chairY-this.inches(30));
 
         this.initChair();
-        //this.initPerson();
+        this.initPerson();
 
         return;
         /*

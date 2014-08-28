@@ -71,8 +71,20 @@ define(["box2dweb"], function(Box2d) {
 
         }
 
+        var zList = [];
         for(b = world.GetBodyList(); b; b = b.GetNext()) {
-            if(!config.showImages) return;
+            if(config.showImages) zList.push(b);
+        }
+
+        zList.sort(function(a, b){ 
+            var aud = a.GetUserData();
+            var bud = b.GetUserData();
+            var az = !!aud ? aud.pos.z : 0;
+            var bz = !!bud ? bud.pos.z : 0;
+            return az - bz;
+        });
+
+        zList.forEach(function(b) {
             // change this, determine if fixture will work and add userData
             if(b.GetType() == b2Body.b2_dynamicBody) {
                 var userData = b.GetUserData();
@@ -80,13 +92,14 @@ define(["box2dweb"], function(Box2d) {
                 if(!!userData) {
                     drawPart(b, userData);
                 } 
+                /*
                 for(f = b.GetFixtureList(); f; f = f.GetNext()) {
                     userData = f.GetUserData();
                     if(userData instanceof ImageData) drawPart(f, userData, true);
                 }
-
+                */
             } 
-        }
+        });
     }
 
     return {

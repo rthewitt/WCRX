@@ -28,7 +28,7 @@ define(["./scaledPolygons"], function(pollyColl){
                 name: "lower-arm",
                 type: "box",
                 size: { x: 3, y: 11},
-                pos: { z: 0 },
+                pos: { z: 3 },
                 cat: HM_TORSO,
                 mask: personMask
             },
@@ -36,7 +36,7 @@ define(["./scaledPolygons"], function(pollyColl){
                 name: "upper-arm",
                 type: "box",
                 size: { x: 3 * 1.25, y: 11}, // extra width
-                pos: { z: 0 },
+                pos: { z: 3 },
                 cat: HM_TORSO,
                 mask: personMask
             },
@@ -71,7 +71,7 @@ define(["./scaledPolygons"], function(pollyColl){
                 name: "seat-back",
                 type: "box",
                 size: { x: 2, y: 15 },
-                pos: { z: 0 },
+                pos: { z: 1 },
                 cat: WC_BARRIER,
                 mask: seatMask
             },
@@ -79,7 +79,7 @@ define(["./scaledPolygons"], function(pollyColl){
                 name: "seat-bottom",
                 type: "box",
                 size: { x: 2, y: 18 },
-                pos: { z: 0 },
+                pos: { z: 1 },
                 cat: WC_BARRIER,
                 mask: seatMask
             },
@@ -88,7 +88,7 @@ define(["./scaledPolygons"], function(pollyColl){
                 name: "handlebars",
                 type: "box",
                 size: { x: 2 * 4, y: 16 }, // width
-                pos: { z: 0 },
+                pos: { z: 1 },
                 cat: WC_FRAME,
                 mask: GROUND
             },
@@ -96,7 +96,7 @@ define(["./scaledPolygons"], function(pollyColl){
                 name: "wheel",
                 type: "circle",
                 size: { r: 12 },
-                pos: { z: 0 },
+                pos: { z: 2 },
                 cat: WC_WHEEL,
                 mask: GROUND
             },
@@ -104,7 +104,7 @@ define(["./scaledPolygons"], function(pollyColl){
                 name: "support-wheel",
                 type: "circle",
                 size: { r: 2.5 },
-                pos: { z: 0 },
+                pos: { z: 2 },
                 cat: WC_WHEEL,
                 mask: GROUND
             },
@@ -113,7 +113,7 @@ define(["./scaledPolygons"], function(pollyColl){
                 type: "poly",
                 polygons: pollyColl.LBar,
                 size: { x: 23, y: 15 }, // for now, seatDepth + 5"
-                pos: { z: 0 },
+                pos: { z: 1 },
                 cat: WC_FRAME,
                 mask: GROUND
             },
@@ -121,7 +121,7 @@ define(["./scaledPolygons"], function(pollyColl){
                 name: "foot-rest",
                 type: "box",
                 size: { x: 4, y: 7 },
-                pos: { z: 0 },
+                pos: { z: 1 },
                 cat: WC_BARRIER,
                 mask: seatMask
             }
