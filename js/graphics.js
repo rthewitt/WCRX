@@ -7,13 +7,12 @@ define(["box2dweb"], function(Box2d) {
     // offset for rotational andhor
     // change this to pixels so we can establish from asset?
     var rotationalOffset = {
-        torso: [-11, -18],
-        upper_arm: [-5, 0],
-        lower_arm: [-7, -6],
-        hand: [150, 230],
-        upper_leg: [-11, -3],
-        lower_leg: [0, -7],
-        //wheel: [0, 0]
+        torso: [0, 0],
+        upper_arm: [0, 0],
+        lower_arm: [0, 0],
+        hand: [0, 0],
+        upper_leg: [0, 0],
+        lower_leg: [0, 0],
         wheel: [0, 0]
     };
 
@@ -27,7 +26,8 @@ define(["box2dweb"], function(Box2d) {
         // Why does this translate need a static pad?  These work for torso, upper-leg.  Shape dependent???
         //var wtfX=20, wtfY=18;
         // works for wheel
-        var wtfX=13, wtfY=18;
+        //var wtfX=13, wtfY=18;
+        var wtfX=0, wtfY=0;
 
         function drawPart(entity, imgData, isFixture) {
             context.save();
@@ -41,7 +41,7 @@ define(["box2dweb"], function(Box2d) {
 
             // testing rotational offset!!
             var offset = rotationalOffset[imgData.name];
-            if(!offset) console.log(imgData.name);
+            if(!offset) offset = [0, 0];
             context.translate(-imgData.dims.x/2 + offset[0], -imgData.dims.y/2 + offset[1]);
 
             context.drawImage(imgData.img, 0, 0, imgData.dims.x, imgData.dims.y);
@@ -82,7 +82,7 @@ define(["box2dweb"], function(Box2d) {
                 } 
                 for(f = b.GetFixtureList(); f; f = f.GetNext()) {
                     userData = f.GetUserData();
-                    //if(userData instanceof ImageData) drawPart(f, userData, true);
+                    if(userData instanceof ImageData) drawPart(f, userData, true);
                 }
 
             } 
@@ -102,8 +102,9 @@ define(["box2dweb"], function(Box2d) {
             var debugDraw = new b2DebugDraw();
             debugDraw.SetSprite(context);
             // TODO verify this
-            debugDraw.SetDrawScale(30.0);
-            debugDraw.SetFillAlpha(0.5);
+            //debugDraw.SetDrawScale(30.0);
+            debugDraw.SetDrawScale(config.PTM);
+            debugDraw.SetFillAlpha(0.3);
             debugDraw.SetLineThickness(1.0);
             debugDraw.SetFlags(b2DebugDraw.e_shapeBit | b2DebugDraw.e_jointBit);
             if((!!config && !!config.skeleton) || !config)

@@ -17,11 +17,9 @@ require.config({
     },
 });
 
-define(["require", "backbone", "box2dweb", "./wcrx", "./app", "./graphics", "./config"], function(require, Backbone, Box2D, wcrx, wApp, graphics, config) {
+define(["require", "backbone", "box2dweb", "./wcrx", "./graphics", "./config"], function(require, Backbone, Box2D, wcrx, graphics, config) {
 
-    console.log('initting wcrx');
     wcrx.init(config);
-
 
      function getElementPosition(element) {
         var elem=element, tagname="", x=0, y=0;
@@ -51,10 +49,10 @@ define(["require", "backbone", "box2dweb", "./wcrx", "./app", "./graphics", "./c
 
     function resetAll() {
         if(!!window.UPDATE) window.clearInterval(window.UPDATE);
-        wApp.reset();
-        graphics.setDebug(wApp.world);
+        wcrx.reset();
+        graphics.setDebug(wcrx.world);
         window.UPDATE = window.setInterval(function() {
-            wApp.update(graphics.draw);
+            wcrx.update(graphics.draw);
         }, 1000 / 60);
     };
 
@@ -69,7 +67,7 @@ define(["require", "backbone", "box2dweb", "./wcrx", "./app", "./graphics", "./c
 
         var canvas = document.getElementById('canvas');
         var context = canvas.getContext('2d');
-        graphics.init(config, context, wApp.world);
+        graphics.init(config, context, wcrx.world);
         resetAll();
          
         var canvasPosition = getElementPosition(canvas);

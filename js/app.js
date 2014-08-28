@@ -1,45 +1,24 @@
 define(["box2dweb", "./wcrx"], function(Box2D, WheelChairRx) {
-    // TODO REMOVE THESE
-    var PTM = 28.0, ITM = 9.0; // inches to "meters"
 
     // ///////////////////////////////// REMOVE ////////////////////////////////
       
 // Masking bits for advanced collisions
-var HM_TORSO = 0x0002,
-    HM_HAND = 0x0008,
-    WC_WHEEL = 0x0002,
-    WC_FRAME = 0x0004,
-    GROUND = 0x0006;
 
-    var inches = function(n) {
-        return WheelChairRx.inches(n);
-    };
+
     var CHEAT;
     // Chair Measurements
-    var wheelRadius = 12 / ITM;
-    var chairX = 150 / PTM;
+    var wheelRadius = inches(12);
+    var chairX = pixels(150);
     // TODO move out, broken reference
-    var chairY = (300 / PTM) - (20 / ITM);
-    var chairBackHeight = 18 / ITM;
-    var chairBackSeatHeight = 15 / ITM;
-    var chairFrontSeatHeight = 18 / ITM;
-    var chairSeatDepth = 18 / ITM;
-    var chairLegBarLength = 16 / ITM; // added
+    var chairY = pixels(300) - inches(20);
+    var chairBackHeight = inches(18);
+    var chairBackSeatHeight = inches(15);
+    var chairFrontSeatHeight = inches(18);
+    var chairSeatDepth = inches(18);
+    var chairLegBarLength = inches(16);
 
-    var frameSkeletonWidth = 2 / ITM;
+    var frameSkeletonWidth = inches(2);
 
-    function ImageData(partName, dims, rot) {
-        var img = new Image();
-        img.src = "images/"+partName+".svg"; // svg coming soon
-
-        this.name = partName.replace(/-/g,'_');
-        this.img = img;
-        this.rotAngle= rot;
-        this.dims = {
-            x: dims[0],
-            y: dims[1]
-        }
-    }
     // /////////////////////////////////////////////////////////////////////////
 
     var shoulderX = chairX;
@@ -63,170 +42,8 @@ var HM_TORSO = 0x0002,
 
     var App = function() {};
 
-    function setupWorld() {
-        console.log('setting up world');
-        this.world = new b2World(
-            new b2Vec2(0, 10), // gravity 
-            true //allow sleep
-        );
-        createGround.call(this); 
-        console.log('already set up world');
-    }
 
     // TODO use handlers for force, manage animation with an idle state?
-    App.prototype.update = function(CB) {
-        // TODO remove global
-        //CHEAT.ApplyForce(new b2Vec2(-12, 0), new b2Vec2(0, -lowerArmLength));
-        //CHEAT.ApplyForce(new b2Vec2(12, 0), new b2Vec2(0, +lowerArmLength));
-        this.world.Step(1.0 / 60, 10, 10);
-        this.world.DrawDebugData();
-        this.world.ClearForces();
-        CB(this.world);
-    }
-
-    // canvas y: 300, ground: 340 - (w=50) = 290
-    function createGround() {
-         var fixDef = new b2FixtureDef;
-         fixDef.density = 1.0;
-         fixDef.friction = 0.5;
-         fixDef.restitution = 0.2;
-         
-         var bodyDef = new b2BodyDef;
-
-         var gmd = new b2FilterData();
-         gmd.categoryBits = GROUND;
-         //gmd.maskBits = HM_TORSO | WC_FRAME;
-         gmd.maskBits = 0xFFFF;
-         
-         //create ground
-         bodyDef.type = b2Body.b2_staticBody;
-         fixDef.shape = new b2PolygonShape;
-         fixDef.shape.SetAsBox(20, 2);
-         bodyDef.position.Set(10, 300 / 30 + 1.8);
-         var gfx = this.world.CreateBody(bodyDef).CreateFixture(fixDef);
-         gfx.SetFilterData(gmd);
-         /* walls, ceiling
-         bodyDef.position.Set(10, -1.8);
-         this.world.CreateBody(bodyDef).CreateFixture(fixDef);
-         fixDef.shape.SetAsBox(2, 14);
-         bodyDef.position.Set(-1.8, 13);
-         this.world.CreateBody(bodyDef).CreateFixture(fixDef);
-         bodyDef.position.Set(21.8, 13);
-         this.world.CreateBody(bodyDef).CreateFixture(fixDef);
-         */
-    }; 
-
-    // TODO remove, migrate
-    function initChair() {
-
-        // Wheel
-        var fixDef = new b2FixtureDef();
-        fixDef.density = 1.0;
-        fixDef.friction = 0.6;
-        fixDef.restitution = 0.5;
-
-        var bodyDef = new b2BodyDef();
-        bodyDef.type = b2Body.b2_dynamicBody;
-        bodyDef.position.Set(chairX, chairY);
-
-        fixDef.shape = new b2CircleShape(wheelRadius);
-
-        bodyDef.userData = new ImageData('wheel', [85, 85], 0);
-        var wheelBody = this.world.CreateBody(bodyDef);
-        wheelBody.CreateFixture(fixDef);
-        delete bodyDef.userData;
-
-
-        var fmd = new b2FilterData();
-        fmd.categoryBits = WC_FRAME;
-        fmd.maskBits = HM_TORSO | GROUND;
-
-        var frx; // fixture holder
-
-        // raise bar
-        fixDef.shape = new b2PolygonShape();
-        fixDef.shape.SetAsBox(0.1, 0.2);
-        var chairFrame = this.world.CreateBody(bodyDef);
-        frx = chairFrame.CreateFixture(fixDef);
-        frx.SetFilterData(fmd);
-        // seat (Actually bar, we'll make a seat later!)
-        fixDef.shape = new b2PolygonShape();
-        // TODO make the offset an actual measurement
-        fixDef.shape.SetAsOrientedBox((chairSeatDepth+(5/ITM))/2, frameSkeletonWidth/2, new b2Vec2(inches(8), inches(-5)), -0.1*Math.PI); 
-        frx = chairFrame.CreateFixture(fixDef);
-        frx.SetFilterData(fmd);
-        // backrest
-        fixDef.shape = new b2PolygonShape();
-        var backVector = new b2Vec2(-0.4, -0.6);
-        fixDef.shape.SetAsOrientedBox(frameSkeletonWidth/2, chairBackHeight/2, backVector); 
-        frx = chairFrame.CreateFixture(fixDef);
-        frx.SetFilterData(fmd);
-        // leg bar
-        fixDef.shape = new b2PolygonShape();
-        var legBarVec = new b2Vec2(inches(23), 0);
-        fixDef.shape.SetAsOrientedBox(frameSkeletonWidth/2, chairLegBarLength/2, legBarVec, -0.15*Math.PI);
-        frx = chairFrame.CreateFixture(fixDef);
-        frx.SetFilterData(fmd);
-
-        // support bar
-        var weirdDiffX = 1.6; // removed, matches leg bar shift above
-        // TODO determine from where the 23 inches could be inferred
-        var weirdDiffY = 0.8;
-
-        fixDef.shape = new b2PolygonShape();
-        bodyDef.position.Set(chairX+inches(23), chairY+weirdDiffY);
-        fixDef.shape.SetAsOrientedBox(inches(5)/2, frameSkeletonWidth/2, new b2Vec2(0, 0), -0.4*Math.PI);
-        var supportBar = this.world.CreateBody(bodyDef);
-        supportBar.CreateFixture(fixDef);
-        var verts = fixDef.shape.GetVertices();
-        verts.sort(function(a, b) { return b.y - a.y; });
-        /*
-        for(var v=0; v<verts.length; v++) {
-            console.log(verts[v]);
-        }*/
-
-        //var frAxleLoc = { x: chairX+inches(23)+verts[0].x, y: chairY+weirdDiffY+verts[0].y };
-        var frAxleLoc = { x: chairX+inches(22), y: chairY+weirdDiffY+verts[0].y };
-        var weldLoc = { 
-            x: chairX + weirdDiffX,
-            y: chairY + weirdDiffY
-        }
-        // support wheel
-        fixDef.shape = new b2CircleShape(inches(2.5));
-        bodyDef.position.Set(frAxleLoc.x, frAxleLoc.y);
-        var supportWheel = this.world.CreateBody(bodyDef);
-        supportWheel.CreateFixture(fixDef);
-
-        // Add joint for Wheel, frame
-        var axleDef = new b2RevoluteJointDef();
-        axleDef.collideConnected = false;
-        axleDef.Initialize(wheelBody, chairFrame, new b2Vec2(chairX, chairY)); // TODO anchor A, B
-        this.world.CreateJoint(axleDef);
-
-        // Front axle
-        var frAxleDef = new b2RevoluteJointDef();
-        frAxleDef.collideConnected = false;
-        frAxleDef.Initialize(supportWheel, supportBar, new b2Vec2(frAxleLoc.x, frAxleLoc.y)); // are these anchors accurate?  Why the blue line?
-        this.world.CreateJoint(frAxleDef);
-
-        // should create a weld joint at verts[3] (outer, upper vertex of support bar)
-        var weldJointDef = new b2WeldJointDef();
-        //weldJointDef.Initialize(supportBar, chairFrame, new b2Vec2(weldLoc.x, weldLoc.y));
-        weldJointDef.bodyA = supportBar;
-        weldJointDef.bodyB = chairFrame;
-        weldJointDef.localAnchorA.Set(-inches(5)/2, 0);
-        weldJointDef.localAnchorB.Set(2.3, 0.8);
-        var weldJoint = this.world.CreateJoint(weldJointDef);
-
-        // Testing forces
-        setTimeout(function() {
-            chairFrame.ApplyImpulse(new b2Vec2(25, 25), new b2Vec2(chairX-(25/ITM), chairY));
-        }, 2000);
-
-        console.log('why not working');
-
-        return wheelBody; // reference for human placement
-    }
 
 
     // currently EXPECTS wheelbody, person placement.  TODO add flow control
@@ -380,29 +197,5 @@ var HM_TORSO = 0x0002,
         CHEAT = lowerArm;
     }
 
-    function resetWorld() {
-        if(!!this.world) this.destroy();
-        setupWorld.call(this);
-
-        // fix this flow
-        var wheelBody = initChair.call(this);
-        console.log(wheelBody.GetPosition());
-
-        // migrating person
-         //initPerson.call(this, wheelBody);
-    };
-
-    function destroyWorld() {
-        this.world.ClearForces();
-        for(b = this.world.GetBodyList(); b; b = b.GetNext()) {
-            this.world.DestroyBody(b);
-        }
-    }
-
-    App.prototype.init = resetWorld;
-    App.prototype.reset = resetWorld;
-    App.prototype.destroy = destroyWorld;
-
-    return new App;
 });
 
