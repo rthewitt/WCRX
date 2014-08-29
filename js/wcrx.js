@@ -394,13 +394,18 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         elbow.SetMaxMotorTorque(20);
         } else elbow.SetMaxMotorTorque(0);
 
+        // give the illusion of conscious balance
         if(this.chairParts.initted) {
-            // give the illusion of conscious balance
-            /*
+            /* Broken and jittery
+            var axle = this.chairParts.joints.axle;
             var angleError = axle.GetJointAngle() - (0.0 * Math.PI); // change
             var gain = 20.0;
             axle.SetMotorSpeed(-gain * angleError);
             axle.SetMaxMotorTorque(20);
+            */
+            /* gentle rocking, test later
+            var lowerArm = this.humanPartBodies.lowerArm;
+            lowerArm.ApplyForce(new b2Vec2(0.1, 0), new b2Vec2(0, 0));
             */
         }
     }

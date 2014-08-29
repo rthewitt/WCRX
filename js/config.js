@@ -29,7 +29,7 @@ define(["./scaledPolygons"], function(pollyColl){
                 name: "lower-arm",
                 type: "box",
                 size: { x: 4, y: 11},
-                pos: { z: 5 },
+                pos: { z: 6 },
                 cat: HM_TORSO,
                 mask: personMask
             },
@@ -37,7 +37,7 @@ define(["./scaledPolygons"], function(pollyColl){
                 name: "upper-arm",
                 type: "box",
                 size: { x: 4.5 * 1.25, y: 11}, // extra width
-                pos: { z: 5 },
+                pos: { z: 6 },
                 cat: HM_TORSO,
                 mask: personMask
             },
@@ -99,7 +99,7 @@ define(["./scaledPolygons"], function(pollyColl){
                 name: "wheel",
                 type: "circle",
                 size: { r: 12 },
-                pos: { z: 4 },
+                pos: { z: 5 },
                 cat: WC_WHEEL,
                 mask: GROUND
             },
@@ -115,7 +115,7 @@ define(["./scaledPolygons"], function(pollyColl){
                 name: "support-wheel-connector",
                 type: "box",
                 size: { x: 4, y: 7 },
-                pos: { z: 3 },
+                pos: { z: 4 },
                 cat: WC_FRAME,
                 mask: GROUND
             },
@@ -123,7 +123,7 @@ define(["./scaledPolygons"], function(pollyColl){
                 name: "raise-bar",
                 type: "box",
                 size: { x: 3, y: 7 },
-                pos: { z: 3 },
+                pos: { z: 4 },
                 cat: WC_FRAME,
                 mask: GROUND
             },
