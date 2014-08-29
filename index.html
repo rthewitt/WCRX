@@ -20,6 +20,9 @@
                 width: 15%;
                 height: 80%;
             }
+            .button-holder {
+                text-align: center;
+            }
             .mxrx label {
                 margin-top: 4px;
                 display: block;
@@ -151,10 +154,14 @@
           <div class=i-app>
               <h3>Side measures</h3>
               <canvas id="canvas" width="500" height="300" style="background-color:#5a8ac0;" ></canvas>
-              <input id="btn-reset" class="btn-box" type="button"  value="Reset" />
-              <input id="btn-images" class="btn-box" type="button"  value="Toggle Images" />
-              <input id="btn-skeleton" class="btn-box" type="button"  value="Toggle Chair" />
-              <input id="btn-debug" class="btn-box" type="button"  value="Toggle Debug Rotation" />
+              <div class="button-holder">
+                  <input id="btn-reset" class="btn-box" type="button"  value="Reset" />
+                  <input id="btn-images" class="btn-box" type="button"  value="Images" />
+                  <input id="btn-skeleton" class="btn-box" type="button"  value="Skeleton" />
+                  <input id="btn-person" class="btn-box" type="button"  value="Person" />
+                  <input id="btn-chair" class="btn-box" type="button"  value="Chair" />
+                  <input id="btn-debug" class="btn-box" type="button"  value="Rotation" />
+              </div>
           </div>
       </div>
    </body>

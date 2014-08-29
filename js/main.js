@@ -88,24 +88,29 @@ define(["require", "backbone", "box2dweb", "./wcrx", "./graphics", "./config"], 
        
         // TODO after moving all of this out, apply scale (not 30)
         function handleMouseMove(e) {
-           mouseX = (e.clientX - canvasPosition.x) / 30;
-           mouseY = (e.clientY - canvasPosition.y) / 30;
+           mouseX = (e.clientX - canvasPosition.x) / config.PTM;
+           mouseY = (e.clientY - canvasPosition.y) / config.PTM;
            console.log('x: '+mouseX + ', y: '+mouseY);
         }
         $("#btn-reset").click(resetAll);
         $('#btn-debug').click(function() {
-            if(typeof config === "undefined") config = {};
             config.debug = !config.debug;
         });
+        $('#btn-chair').click(function() {
+            if(!wcrx.chairParts.initted)
+                wcrx.initChair();
+            else wcrx.destroyChair();
+        });
+        $('#btn-person').click(function() {
+            if(!wcrx.humanParts.initted)
+                wcrx.initPerson();
+            else wcrx.destroyPerson();
+        });
         $('#btn-skeleton').click(function() {
-            if(typeof config === "undefined") config = {};
             config.skeleton = !config.skeleton;
-            resetAll();
         });
         $('#btn-images').click(function() {
-            if(typeof config === "undefined") config = {};
             config.showImages = !config.showImages;
-            resetAll();
         });
 
     });

@@ -20,7 +20,6 @@ define(["box2dweb"], function(Box2d) {
     var PTM, ITM;
 
     function drawWorld(world) {
-
         if(!config.skeleton) context.clearRect(0, 0, context.canvas.width, context.canvas.height);
 
         // Why does this translate need a static pad?  These work for torso, upper-leg.  Shape dependent???
@@ -120,7 +119,6 @@ define(["box2dweb"], function(Box2d) {
             debugDraw.SetFillAlpha(0.3);
             debugDraw.SetLineThickness(1.0);
             debugDraw.SetFlags(b2DebugDraw.e_shapeBit | b2DebugDraw.e_jointBit);
-            if((!!config && !!config.skeleton) || !config)
                 world.SetDebugDraw(debugDraw);
         },
         draw: drawWorld

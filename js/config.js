@@ -7,13 +7,13 @@ define(["./scaledPolygons"], function(pollyColl){
         WC_BARRIER = 16,
         WC_FRAME = 32;
 
-    var seatMask = HM_TORSO | GROUND;
+    var seatMask = WC_FRAME | HM_TORSO | GROUND;
     var personMask = WC_BARRIER | GROUND;
 
     
     return {
         showImages: true,
-        skeleton: true,
+        skeleton: false,
         debug: false,
 
         groundCat: GROUND,
@@ -23,12 +23,13 @@ define(["./scaledPolygons"], function(pollyColl){
         ITM: 39.3701,
 
 
+        // ratios are here, but will be moved INTO the code and out of the config
         person: {
             lowerArm: {
                 name: "lower-arm",
                 type: "box",
                 size: { x: 3, y: 11},
-                pos: { z: 3 },
+                pos: { z: 5 },
                 cat: HM_TORSO,
                 mask: personMask
             },
@@ -36,14 +37,14 @@ define(["./scaledPolygons"], function(pollyColl){
                 name: "upper-arm",
                 type: "box",
                 size: { x: 3 * 1.25, y: 11}, // extra width
-                pos: { z: 3 },
+                pos: { z: 5 },
                 cat: HM_TORSO,
                 mask: personMask
             },
             torso: {
                 name: "torso",
                 type: "box",
-                size: { x: 9, y: 26*1.25 }, // includes head (change)
+                size: { x: 9, y: 22*1.48 }, // ratio: head+neck 
                 pos: { z: 0 },
                 cat: HM_TORSO,
                 mask: personMask
@@ -51,16 +52,16 @@ define(["./scaledPolygons"], function(pollyColl){
             upperLeg: {
                 name: "upper-leg",
                 type: "box",
-                size: { x: 20, y: 5 },
-                pos: { z: 0 },
+                size: { x: 22, y: 7 },
+                pos: { z: 2 },
                 cat: HM_TORSO,
                 mask: personMask
             },
             lowerLeg: {
                 name: "lower-leg",
                 type: "box",
-                size: { x: 17, y: 4*2 }, // includes foot
-                pos: { z: 0 },
+                size: { x: 20, y: 5 * 2 }, // ratio: +foot
+                pos: { z: 2 },
                 cat: HM_TORSO,
                 mask: personMask
             }
@@ -70,16 +71,16 @@ define(["./scaledPolygons"], function(pollyColl){
             seatBack: {
                 name: "seat-back",
                 type: "box",
-                size: { x: 2, y: 15 },
-                pos: { z: 1 },
+                size: { x: 2, y: 8 },
+                pos: { z: 2 },
                 cat: WC_BARRIER,
                 mask: seatMask
             },
             foam: {
                 name: "seat-bottom",
                 type: "box",
-                size: { x: 2, y: 18 },
-                pos: { z: 1 },
+                size: { x: 13, y: 2 },
+                pos: { z: 2 },
                 cat: WC_BARRIER,
                 mask: seatMask
             },
@@ -87,8 +88,8 @@ define(["./scaledPolygons"], function(pollyColl){
             handlebars: {
                 name: "handlebars",
                 type: "box",
-                size: { x: 2 * 4, y: 16 }, // width
-                pos: { z: 1 },
+                size: { x: 1.5 * 4, y: 13 }, // width
+                pos: { z: 2 },
                 cat: WC_FRAME,
                 mask: GROUND
             },
@@ -96,7 +97,7 @@ define(["./scaledPolygons"], function(pollyColl){
                 name: "wheel",
                 type: "circle",
                 size: { r: 12 },
-                pos: { z: 2 },
+                pos: { z: 4 },
                 cat: WC_WHEEL,
                 mask: GROUND
             },
@@ -104,8 +105,24 @@ define(["./scaledPolygons"], function(pollyColl){
                 name: "support-wheel",
                 type: "circle",
                 size: { r: 2.5 },
-                pos: { z: 2 },
+                pos: { z: 1 },
                 cat: WC_WHEEL,
+                mask: GROUND
+            },
+            frontConnector: {
+                name: "support-wheel-connector",
+                type: "box",
+                size: { x: 4, y: 7 },
+                pos: { z: 3 },
+                cat: WC_FRAME,
+                mask: GROUND
+            },
+            raiseBar: {
+                name: "raise-bar",
+                type: "box",
+                size: { x: 3, y: 7 },
+                pos: { z: 3 },
+                cat: WC_FRAME,
                 mask: GROUND
             },
             LBar: {
@@ -113,15 +130,17 @@ define(["./scaledPolygons"], function(pollyColl){
                 type: "poly",
                 polygons: pollyColl.LBar,
                 size: { x: 23, y: 15 }, // for now, seatDepth + 5"
-                pos: { z: 1 },
+                pos: { z: 3 },
                 cat: WC_FRAME,
                 mask: GROUND
             },
             footRest: {
                 name: "foot-rest",
                 type: "box",
-                size: { x: 4, y: 7 },
-                pos: { z: 1 },
+                size: { x: 4, y: 6 },
+                pos: { z: 2 },
+                //cat: WC_FRAME,
+                //mask: GROUND 
                 cat: WC_BARRIER,
                 mask: seatMask
             }
