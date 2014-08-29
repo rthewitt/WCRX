@@ -13,7 +13,7 @@ define(["./scaledPolygons"], function(pollyColl){
     
     return {
         showImages: true,
-        skeleton: false,
+        skeleton: true,
         debug: false,
 
         groundCat: GROUND,
