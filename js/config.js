@@ -13,7 +13,7 @@ define(["./scaledPolygons"], function(pollyColl){
     
     return {
         showImages: true,
-        skeleton: true,
+        skeleton: false,
         debug: false,
 
         groundCat: GROUND,
@@ -28,7 +28,7 @@ define(["./scaledPolygons"], function(pollyColl){
             lowerArm: {
                 name: "lower-arm",
                 type: "box",
-                size: { x: 3, y: 11},
+                size: { x: 4, y: 11},
                 pos: { z: 5 },
                 cat: HM_TORSO,
                 mask: personMask
@@ -36,14 +36,15 @@ define(["./scaledPolygons"], function(pollyColl){
             upperArm: {
                 name: "upper-arm",
                 type: "box",
-                size: { x: 3 * 1.25, y: 11}, // extra width
+                size: { x: 4.5 * 1.25, y: 11}, // extra width
                 pos: { z: 5 },
                 cat: HM_TORSO,
                 mask: personMask
             },
             torso: {
                 name: "torso",
-                type: "box",
+                type: "poly",
+                polygons: pollyColl.torso,
                 size: { x: 9, y: 22*1.48 }, // ratio: head+neck 
                 pos: { z: 0 },
                 cat: HM_TORSO,
@@ -59,8 +60,9 @@ define(["./scaledPolygons"], function(pollyColl){
             },
             lowerLeg: {
                 name: "lower-leg",
-                type: "box",
-                size: { x: 20, y: 5 * 2 }, // ratio: +foot
+                type: "poly",
+                polygons: pollyColl.lowerLeg,
+                size: { x: 20, y: 5.0 * 2 }, // ratio: +foot
                 pos: { z: 2 },
                 cat: HM_TORSO,
                 mask: personMask

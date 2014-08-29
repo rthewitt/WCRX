@@ -229,6 +229,7 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         seatTarget.Add(new b2Vec2(sx, sy));
         console.log('target: '+seatTarget.x+', '+seatTarget.y);
         bodies.torso.SetPosition(seatTarget);
+
         //bodies.torso.SetPositionAndAngle(seatTarget, 0);
         //bodies.upperLeg.SetPosition(new b2Vec2(chairX, chairY));
         //bodies.upperLeg.SetPosition(new b2Vec2(chairX, chairY));
@@ -239,6 +240,7 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
                 { x: 0, y: parts.lowerArm.size.y/2 },
                 { x: 0, y: -wheel.size.r }, true);
 
+        // TODO try this with different values and strategies
         /*
         var XXXseat = this.chairParts.seatBack;
         var intoSeat = new b2DistanceJointDef();
@@ -247,8 +249,8 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         intoSeat.collideConnected = true;
         intoSeat.anchorA = new b2Vec2(-parts.upperLeg.size.x/2, parts.upperLeg.size.y/2);
         intoSeat.anchorB = new b2Vec2(XXXseat.size.x/2, 0);
-        intoSeat.length = this.inches(1);
-        intoSeat.dampingRation = 0.5;
+        intoSeat.length = this.inches(10);
+        intoSeat.dampingRation = 0.1;
         intoSeat.frequencyHz = 15;
         this.world.CreateJoint(intoSeat);
         */
@@ -258,7 +260,7 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
     function initC() {
         
         var chairFixDef = new b2FixtureDef(); 
-        chairFixDef.density = 1.0;
+        chairFixDef.density = 10.0;
         chairFixDef.friction = 0.6;
         chairFixDef.restitution = 0.5;
 
@@ -278,10 +280,8 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         var axle = getRevJoint.call(this, bodies.wheel, bodies.raiseBar, 
                 { x: 0, y: 0 },
                 { x: -parts.raiseBar.size.x/2 * 0.55, y: parts.raiseBar.size.y/2 * 0.88  });
-        /*
         axle.SetLimits(-0.3 * Math.PI, 0);
         axle.EnableLimit(true);
-        */
 
         // could make this a prismatic joint?
         var slider = getWeldJoint.call(this, bodies.raiseBar, bodies.LBar,
@@ -454,95 +454,49 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         bodyDef.type = b2Body.b2_dynamicBody;
         bodyDef.position.Set(chairX+this.inches(15), chairY-this.inches(30));
 
-        //this.initChair();
-        //this.initPerson();
+        this.initChair();
+        this.initPerson();
 
         this.SIG_destroyChair = false;
         this.SIG_destroyPerson = false;
         this.haltUpdate = false;
 
-
-        // torso
-        /*
+        return;
         var polygons = [[
-        {x:0.1893940269947052,y:0.8636363744735718},
-            {x:0.19696968793869019,y:0.24242424964904785},
-            {x:0.36363643407821655,y:0.034090906381607056},
-            {x:0.7878788113594055,y:0.03030303120613098},
-            {x:0.8604651093482971,y:0.7209300994873047}],
-            //move
-        [
-        {x:0.8604651093482971,y:0.7209300994873047},
-            {x:0.8863633871078491,y:1.7045456171035767},
-            {x:0.5348837375640869,y:2.302325487136841},
-            {x:0.1627907007932663,y:2.3255813121795654},
-            {x:0.023255813866853714,y:1.9767440557479858},
-            {x:0.04651162773370743,y:1.3720929622650146},
-            {x:0.1893940269947052,y:0.8636363744735718}],
-            [
-        {x:0.5348837375640869,y:2.302325487136841},
-            {x:0.604651153087616,y:2.4418604373931885},
-            {x:0.1860465109348297,y:2.7209300994873047},
-            {x:0.1627907007932663,y:2.3255813121795654}],
-            [
-        {x:0.604651153087616,y:2.4418604373931885},
-            {x:0.7906976938247681,y:2.465116262435913},
-            {x:0.8604651093482971,y:2.883720874786377},
-            {x:0.8000001907348633,y:3.2100000381469727},
-            {x:0.5900002121925354,y:3.330000162124634}],
-            [
-        {x:0.5900002121925354,y:3.330000162124634},
-            {x:0.3299999237060547,y:3.3399999141693115},
-            {x:0.13953489065170288,y:3.162790536880493},
-            {x:0.09302325546741486,y:2.930232524871826},
-            {x:0.1860465109348297,y:2.7209300994873047},
-            {x:0.604651153087616,y:2.4418604373931885}
-        ]];
-        */
-
-        var polygons = [[
-        {x:0.1893940269947052,y:0.8636363744735718},
-            {x:0.8604651093482971,y:0.7209300994873047},
-            {x:0.7878788113594055,y:0.03030303120613098},
-            {x:0.36363643407821655,y:0.034090906381607056},
-            {x:0.19696968793869019,y:0.24242424964904785}
-            ],[
-        {x:0.8604651093482971,y:0.7209300994873047},
-            {x:0.1893940269947052,y:0.8636363744735718},
-            {x:0.04651162773370743,y:1.3720929622650146},
-            {x:0.023255813866853714,y:1.9767440557479858},
-            {x:0.1627907007932663,y:2.3255813121795654},
-            {x:0.5348837375640869,y:2.302325487136841},
-            {x:0.8863633871078491,y:1.7045456171035767}
-            ], [
-        {x:0.5348837375640869,y:2.302325487136841},
-            {x:0.1627907007932663,y:2.3255813121795654},
-            {x:0.1860465109348297,y:2.7209300994873047},
-            {x:0.604651153087616,y:2.4418604373931885}
-            ], [
-        {x:0.604651153087616,y:2.4418604373931885},
-            {x:0.5900002121925354,y:3.330000162124634},
-            {x:0.8000001907348633,y:3.2100000381469727},
-            {x:0.8604651093482971,y:2.883720874786377},
-            {x:0.7906976938247681,y:2.465116262435913}
-            ], [
-        {x:0.5900002121925354,y:3.330000162124634},
-            {x:0.604651153087616,y:2.4418604373931885},
-            {x:0.1860465109348297,y:2.7209300994873047},
-            {x:0.09302325546741486,y:2.930232524871826},
-            {x:0.13953489065170288,y:3.162790536880493},
-            {x:0.3299999237060547,y:3.3399999141693115}
+        {x:0.6583333611488342,y:0.20749995112419128},
+        {x:0.8426966071128845,y:0.10112360119819641},
+        {x:0.4516666829586029,y:0.005833268165588379},
+        {x:0.1250000298023224,y:0.01416662335395813},
+        {x:0.03166666626930237,y:0.06583330035209656},
+        {x:0.004999995231628418,y:0.15083330869674683},
+        {x:0.0766666829586029,y:0.22749996185302734},
+        {x:0.3199999928474426,y:0.22916662693023682}
+        ],[
+        {x:0.8426966071128845,y:0.10112360119819641},
+            {x:0.6583333611488342,y:0.20749995112419128},
+            {x:0.8333332538604736,y:0.2424999475479126}
+        ],[
+        {x:0.9883333444595337,y:0.20249998569488525},
+            {x:0.8333332538604736,y:0.2424999475479126},
+            {x:0.9233332872390747,y:0.4925000071525574},
+            {x:0.9716666340827942,y:0.4925000071525574}
+        ],[
+        {x:0.8333332538604736,y:0.2424999475479126},
+            {x:0.9883333444595337,y:0.20249998569488525},
+            {x:1,y:0.10083329677581787},
+            {x:0.9533333778381348,y:0.0641666054725647},
+            {x:0.8426966071128845,y:0.10112360119819641}
         ]];
 
 
         var img = new Image();
-        img.src = 'images/torso.svg';
+        img.src = 'images/lower-leg.svg';
 var ud = {
-        name: 'torso',
+        name: 'lower_leg',
         img: img,
-        rotAngle: 0,
-        size: {x: 80 / this.config.PTM, y: 80 / this.config.PTM },
-        dims: {x: 77, y: 267},
+        rotAngle: 0, //-0.5*Math.PI,
+        size: {x: 89 / this.config.PTM, y: 44 / this.config.PTM },
+        dims: {x: 185, y: 92},
         pos: { z: 10 }
 };
     bodyDef.userData = ud;
@@ -556,11 +510,16 @@ var ud = {
        var vertices = [];
         var poly;
        for(var p=0; p<polygon.length; p++) {
-          var someVec = new b2Vec2(ud.size.x * polygon[p].x, -ud.size.y * polygon[p].y); 
-          var cent = new b2Vec2(-0.206, 0.7);
+          //var someVec = new b2Vec2(ud.size.x * polygon[p].x, -ud.size.y * polygon[p].y); 
+          var someVec = new b2Vec2(polygon[p].x, -polygon[p].y); 
+          var cent = new b2Vec2(-0.50, 0.25);
           cent.Add(someVec);
           vertices.push(cent);
-          newVertexArray.push(cent); 
+
+          var ratioVec = new b2Vec2(cent.x/this.pixels(185), cent.y/this.pixels(92));
+
+          // original pixels for match
+          newVertexArray.push(ratioVec); 
         }
             npolygons.push(newVertexArray);
            poly = new b2PolygonShape();
