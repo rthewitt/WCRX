@@ -22,18 +22,12 @@ define(["box2dweb"], function(Box2d) {
     function drawWorld(world) {
         if(!config.skeleton) context.clearRect(0, 0, context.canvas.width, context.canvas.height);
 
-        // Why does this translate need a static pad?  These work for torso, upper-leg.  Shape dependent???
-        //var wtfX=20, wtfY=18;
-        // works for wheel
-        //var wtfX=13, wtfY=18;
-        var wtfX=0, wtfY=0;
-
         function drawPart(entity, imgData, isFixture) {
             context.save();
             var pos = !isFixture ? entity.GetPosition() : new Box2D.Common.Math.b2Vec2.b2Vec2(0, 0);
 
 
-            context.translate(pos.x * PTM + wtfX, pos.y * PTM + wtfY);
+            context.translate(pos.x * PTM, pos.y * PTM);
             context.rotate(imgData.rotAngle); 
 
             if(!isFixture) context.rotate(entity.GetAngle());
@@ -43,6 +37,7 @@ define(["box2dweb"], function(Box2d) {
             if(!offset) offset = [0, 0];
             context.translate(-imgData.dims.x/2 + offset[0], -imgData.dims.y/2 + offset[1]);
 
+            if(!!imgData.opacity) context.globalAlpha = imgData.opacity;
             context.drawImage(imgData.img, 0, 0, imgData.dims.x, imgData.dims.y);
             context.restore();
 
@@ -50,19 +45,16 @@ define(["box2dweb"], function(Box2d) {
 
             // translated center
             if(!!config.debug) {
+                var cpx = pos.x*PTM, cpy = pos.y*PTM;
                 context.beginPath();
-                context.arc(pos.x*PTM+wtfX, pos.y*PTM+wtfY, 5, 0, 2*Math.PI, false);
-                context.fillStyle = 'green';
+                context.arc(cpx, cpy, 7, 0, 2*Math.PI, false);
+                context.fillStyle = 'black';
                 context.fill();
                 context.stroke();
-                context.restore();
-
-                // center of body
-                context.save();
+                //context.restore();
                 context.beginPath();
-                context.translate(pos.x*PTM, pos.y*PTM);
-                context.arc(0, 0, 5, 0, 2*Math.PI, false);
-                context.fillStyle = 'red';
+                context.arc(cpx, cpy, 5, 0, 2*Math.PI, false);
+                context.fillStyle = 'green';
                 context.fill();
                 context.stroke();
                 context.restore();

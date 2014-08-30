@@ -28,6 +28,7 @@ define(["./scaledPolygons"], function(pollyColl){
             lowerArm: {
                 name: "lower-arm",
                 type: "box",
+                opacity: 0.5,
                 size: { x: 4, y: 11},
                 pos: { z: 6 },
                 cat: HM_TORSO,
@@ -36,6 +37,7 @@ define(["./scaledPolygons"], function(pollyColl){
             upperArm: {
                 name: "upper-arm",
                 type: "box",
+                opacity: 0.7,
                 size: { x: 4.5 * 1.25, y: 11}, // extra width
                 pos: { z: 6 },
                 cat: HM_TORSO,
@@ -52,7 +54,8 @@ define(["./scaledPolygons"], function(pollyColl){
             },
             upperLeg: {
                 name: "upper-leg",
-                type: "box",
+                type: "poly",
+                polygons: pollyColl.upperLeg,
                 size: { x: 22, y: 7 },
                 pos: { z: 2 },
                 cat: HM_TORSO,
@@ -63,7 +66,7 @@ define(["./scaledPolygons"], function(pollyColl){
                 type: "poly",
                 polygons: pollyColl.lowerLeg,
                 size: { x: 20, y: 5.0 * 2 }, // ratio: +foot
-                pos: { z: 2 },
+                pos: { z: 1 },
                 cat: HM_TORSO,
                 mask: personMask
             }
@@ -107,8 +110,16 @@ define(["./scaledPolygons"], function(pollyColl){
                 name: "support-wheel",
                 type: "circle",
                 size: { r: 2.5 },
-                pos: { z: 1 },
+                pos: { z: 3 },
                 cat: WC_WHEEL,
+                mask: GROUND
+            },
+            frameConnector: {
+                name: "frame-connector",
+                type: "box",
+                size: { x: 4, y: 6 }, // TODO determine based on frame/handlebars size?
+                pos: { z: 4 },
+                cat: WC_FRAME,
                 mask: GROUND
             },
             frontConnector: {
@@ -141,10 +152,10 @@ define(["./scaledPolygons"], function(pollyColl){
                 type: "box",
                 size: { x: 4, y: 6 },
                 pos: { z: 2 },
-                //cat: WC_FRAME,
-                //mask: GROUND 
-                cat: WC_BARRIER,
-                mask: seatMask
+                cat: WC_FRAME,
+                mask: GROUND 
+                //cat: WC_BARRIER,
+                //mask: seatMask
             }
         }
     }

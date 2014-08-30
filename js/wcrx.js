@@ -80,6 +80,7 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         this.name = def.name.replace(/-/g,'_');
         this.type = def.type;
         this.img = img;
+        this.opacity = def.opacity || null;
         this.pos = def.pos;
         this.rotAngle = 0;
         var shape, size, dims;
@@ -198,7 +199,7 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
 
         var joints = this.humanParts.joints;
         var knee = getRevJoint.call(this, bodies.upperLeg, bodies.lowerLeg, 
-                { x: parts.upperLeg.size.x/2 * 0.8, y: 0 },
+                { x: parts.upperLeg.size.x/2 * 0.85, y: -parts.upperLeg.size.y * 0.1 },
                 { x: -parts.lowerLeg.size.x/2, y: parts.lowerLeg.size.y/2 * 0.5 });
 
         var elbow = getRevJoint.call(this, bodies.upperArm, bodies.lowerArm, 
@@ -229,31 +230,17 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         seatTarget.Add(new b2Vec2(sx, sy));
         console.log('target: '+seatTarget.x+', '+seatTarget.y);
         bodies.torso.SetPosition(seatTarget);
-
-        //bodies.torso.SetPositionAndAngle(seatTarget, 0);
-        //bodies.upperLeg.SetPosition(new b2Vec2(chairX, chairY));
-        //bodies.upperLeg.SetPosition(new b2Vec2(chairX, chairY));
-        //bodies.upperLeg.SetPosition(new b2Vec2(chairX, chairY));
           
-        var wheel = this.chairParts.wheel;
-        var wrist = getRevJoint.call(this, bodies.lowerArm, this.chairPartBodies.wheel, 
-                { x: 0, y: parts.lowerArm.size.y/2 },
-                { x: 0, y: -wheel.size.r }, true);
+        var wrist = bindWrist.call(this);
+    }
 
-        // TODO try this with different values and strategies
-        /*
-        var XXXseat = this.chairParts.seatBack;
-        var intoSeat = new b2DistanceJointDef();
-        intoSeat.bodyA = bodies.upperLeg;
-        intoSeat.bodyB = this.chairPartBodies.seatBack;
-        intoSeat.collideConnected = true;
-        intoSeat.anchorA = new b2Vec2(-parts.upperLeg.size.x/2, parts.upperLeg.size.y/2);
-        intoSeat.anchorB = new b2Vec2(XXXseat.size.x/2, 0);
-        intoSeat.length = this.inches(10);
-        intoSeat.dampingRation = 0.1;
-        intoSeat.frequencyHz = 15;
-        this.world.CreateJoint(intoSeat);
-        */
+    // call with context
+    function bindWrist() {
+        if(!this.chairParts.initted || !this.humanParts.initted) return;
+        var wheel = this.chairParts.wheel, lowerArm = this.humanParts.lowerArm;
+        return getRevJoint.call(this, this.humanPartBodies.lowerArm, this.chairPartBodies.wheel, 
+                { x: 0, y: lowerArm.size.y/2 },
+                { x: 0, y: -wheel.size.r }, true);
     }
 
     // fill just fill these arrays, same code
@@ -288,6 +275,10 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
                 { x: 0, y: -parts.raiseBar.size.y/2 },
                 { x: -parts.LBar.size.x/2 * 0.6, y: -parts.LBar.size.y/2 }); // TODO from back-to-axle distance
 
+        var frameWeld = getWeldJoint.call(this, bodies.handlebars, bodies.frameConnector,
+                { x: parts.handlebars.size.x/2, y: parts.handlebars.size.y/2 * 0.5 },
+                { x: 0, y: -parts.frameConnector.size.y/2 });
+
         var backWeld = getWeldJoint.call(this, bodies.handlebars, bodies.seatBack, 
                 { x: parts.handlebars.size.x/2, y: parts.handlebars.size.y/2 },
                 { x: -parts.seatBack.size.x/2, y: parts.seatBack.size.y/2 });
@@ -319,6 +310,7 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         joints.frontAxle = frontAxle;
         // remove?
         joints.backWeld = backWeld;
+        joints.frameWeld = frameWeld;
         joints.seatWeld = seatWeld;
         joints.handleBarPos = handleBarPos;
         joints.frontWeld = frontWeld;
@@ -362,7 +354,7 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
     // move this to human-chair constraints
     function enforceChairConstraints() {
             var axle = this.chairParts.joints.axle;
-            console.log('axle angle: '+axle.GetJointAngle()/Math.PI);
+            //console.log('axle angle: '+axle.GetJointAngle()/Math.PI);
         //this.chairPartBodies.frontConnector.ApplyForce(new b2Vec2(0, -1), new b2Vec2(0, 0));
     }
     
@@ -372,9 +364,14 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
 
         var hip = this.humanParts.joints.hip;
         var angleError = hip.GetJointAngle() - (0.0 * Math.PI); // change
-        if(this.chairParts.initted || angleError > 0.4 * Math.PI || angleError < -0.8 * Math.PI) {
+        //if(this.chairParts.initted || angleError > 0.4 * Math.PI || angleError < -0.8 * Math.PI) {
+        if((this.chairParts.initted && 
+                    ( angleError < -0.2 * Math.PI || angleError > 0.3 * Math.PI)) 
+                || angleError > 0.4 * Math.PI || angleError < -0.8 * Math.PI) {
+                    gain = 5.0;
             hip.SetMotorSpeed(-gain * angleError);
             hip.SetMaxMotorTorque(20);
+                    gain = 20.0;
         } else hip.SetMaxMotorTorque(0);
 
 
@@ -406,6 +403,38 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
             /* gentle rocking, test later
             var lowerArm = this.humanPartBodies.lowerArm;
             lowerArm.ApplyForce(new b2Vec2(0.1, 0), new b2Vec2(0, 0));
+            */
+
+            this.humanPartBodies.upperLeg.ApplyForce(new b2Vec2(-0.5, -0.1), new b2Vec2(-this.humanParts.upperLeg.size.x/2, 0));
+
+            // try to keep foot stable without collision
+            /*
+            var footRest = this.chairParts.footRest, lowerLeg = this.humanParts.lowerLeg;
+            var stableFoot = new b2DistanceJointDef();
+            stableFoot.bodyA = this.humanPartBodies.lowerLeg;
+            stableFoot.bodyB = this.chairPartBodies.footRest;
+            stableFoot.collideConnected = false;
+            stableFoot.anchorA = new b2Vec2(lowerLeg.size.x/2, 0);
+            stableFoot.anchorB = new b2Vec2(0, 0);
+            stableFoot.length = this.inches(10);
+            stableFoot.dampingRation = 0.1;
+            stableFoot.frequencyHz = 15;
+            this.world.CreateJoint(stableFoot);
+            */
+
+            //var XXXseat = this.chairParts.seatBack;
+            /*
+            var XXXseat = this.chairParts.foam;
+            var intoSeat = new b2DistanceJointDef();
+            intoSeat.bodyA = this.humanPartBodies.upperLeg;
+            intoSeat.bodyB = this.chairPartBodies.seatBack;
+            intoSeat.collideConnected = true;
+            intoSeat.anchorA = new b2Vec2(-this.humanParts.upperLeg.size.x/2, this.humanParts.upperLeg.size.y/2);
+            intoSeat.anchorB = new b2Vec2(0, XXXseat.size.y/2);
+            intoSeat.length = this.inches(10);
+            intoSeat.dampingRation = 0.1;
+            intoSeat.frequencyHz = 15;
+            this.world.CreateJoint(intoSeat);
             */
         }
     }
@@ -468,40 +497,34 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
 
         return;
         var polygons = [[
-        {x:0.6583333611488342,y:0.20749995112419128},
-        {x:0.8426966071128845,y:0.10112360119819641},
-        {x:0.4516666829586029,y:0.005833268165588379},
-        {x:0.1250000298023224,y:0.01416662335395813},
-        {x:0.03166666626930237,y:0.06583330035209656},
-        {x:0.004999995231628418,y:0.15083330869674683},
-        {x:0.0766666829586029,y:0.22749996185302734},
-        {x:0.3199999928474426,y:0.22916662693023682}
+        {x:0.34090909361839294,y:0.3181818127632141},
+        {x:0.011363636702299118,y:0.3068181872367859},
+        {x:0.09000003337860107,y:0.36500000953674316},
+        {x:0.20749998092651367,y:0.375}
         ],[
-        {x:0.8426966071128845,y:0.10112360119819641},
-            {x:0.6583333611488342,y:0.20749995112419128},
-            {x:0.8333332538604736,y:0.2424999475479126}
+        {x:0.011363636702299118,y:0.3068181872367859},
+            {x:0.9774999618530273,y:0.0949999988079071},
+            {x:0.875,y:0.04545453190803528},
+            {x:0.6704545617103577,y:0.011363625526428223},
+            {x:0.09500002861022949,y:0.007499963045120239},
+            {x:0.011363636702299118,y:0.10227271914482117}
         ],[
-        {x:0.9883333444595337,y:0.20249998569488525},
-            {x:0.8333332538604736,y:0.2424999475479126},
-            {x:0.9233332872390747,y:0.4925000071525574},
-            {x:0.9716666340827942,y:0.4925000071525574}
-        ],[
-        {x:0.8333332538604736,y:0.2424999475479126},
-            {x:0.9883333444595337,y:0.20249998569488525},
-            {x:1,y:0.10083329677581787},
-            {x:0.9533333778381348,y:0.0641666054725647},
-            {x:0.8426966071128845,y:0.10112360119819641}
+        {x:0.9774999618530273,y:0.0949999988079071},
+            {x:0.011363636702299118,y:0.3068181872367859},
+            {x:0.34090909361839294,y:0.3181818127632141},
+            {x:0.6704545617103577,y:0.3068181872367859},
+            {x:0.9125000238418579,y:0.2549999952316284},
+            {x:0.9824999570846558,y:0.19249999523162842}
         ]];
 
-
         var img = new Image();
-        img.src = 'images/lower-leg.svg';
+        img.src = 'images/upper-leg.svg';
 var ud = {
-        name: 'lower_leg',
+        name: 'upper_leg',
         img: img,
         rotAngle: 0, //-0.5*Math.PI,
         size: {x: 89 / this.config.PTM, y: 44 / this.config.PTM },
-        dims: {x: 185, y: 92},
+        dims: {x: 187, y: 75},
         pos: { z: 10 }
 };
     bodyDef.userData = ud;
@@ -517,11 +540,11 @@ var ud = {
        for(var p=0; p<polygon.length; p++) {
           //var someVec = new b2Vec2(ud.size.x * polygon[p].x, -ud.size.y * polygon[p].y); 
           var someVec = new b2Vec2(polygon[p].x, -polygon[p].y); 
-          var cent = new b2Vec2(-0.50, 0.25);
+          var cent = new b2Vec2(-0.49, 0.18);
           cent.Add(someVec);
           vertices.push(cent);
 
-          var ratioVec = new b2Vec2(cent.x/this.pixels(185), cent.y/this.pixels(92));
+          var ratioVec = new b2Vec2(cent.x/this.pixels(187), cent.y/this.pixels(75));
 
           // original pixels for match
           newVertexArray.push(ratioVec); 
@@ -573,7 +596,12 @@ var ud = {
         return numPixels / this.config.PTM;
     };
     WCRX.prototype.initPerson = initP;
-    WCRX.prototype.initChair = initC;
+    WCRX.prototype.initChair = function() { 
+        initC.call(this);
+        if(!!this.humanParts.initted) {
+            var wrist = bindWrist.call(this);
+        }
+    };
     WCRX.prototype.init = function(conf) {
         this.config = conf;
 
