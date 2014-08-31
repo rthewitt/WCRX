@@ -93,7 +93,7 @@ define(["./scaledPolygons"], function(pollyColl){
             handlebars: {
                 name: "handlebars",
                 type: "box",
-                size: { x: 1.5 * 4, y: 13 }, // width
+                size: { x: 1.5 * 4, y: 13 }, // x=?*image, y=seatBackHeight
                 pos: { z: 2 },
                 cat: WC_FRAME,
                 mask: GROUND
@@ -102,7 +102,7 @@ define(["./scaledPolygons"], function(pollyColl){
                 name: "wheel",
                 type: "circle",
                 size: { r: 12 },
-                pos: { z: 5 },
+                pos: { z: 5 }, // r=wheelDiameter / 2
                 cat: WC_WHEEL,
                 mask: GROUND
             },
@@ -142,7 +142,7 @@ define(["./scaledPolygons"], function(pollyColl){
                 name: "L-beam",
                 type: "poly",
                 polygons: pollyColl.LBar,
-                size: { x: 23, y: 13 }, // for now, seatDepth + 5"
+                size: { x: 23, y: 13 }, // x=seatDepth + 5", y=?
                 pos: { z: 3 },
                 cat: WC_FRAME,
                 mask: GROUND

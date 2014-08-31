@@ -17,9 +17,7 @@ require.config({
     },
 });
 
-define(["require", "backbone", "box2dweb", "./wcrx", "./graphics", "./config"], function(require, Backbone, Box2D, wcrx, graphics, config) {
-
-    wcrx.init(config);
+define(["require", "backbone", "box2dweb", "./wcrx", "./graphics", "./config"], function(require, Backbone, Box2D, WCRX, graphics, config) {
 
      function getElementPosition(element) {
         var elem=element, tagname="", x=0, y=0;
@@ -37,7 +35,7 @@ define(["require", "backbone", "box2dweb", "./wcrx", "./graphics", "./config"], 
                  elem = elem.offsetParent;
            }
         }
-        return {x: x, y: y};
+        return { x: x, y: y };
      }
 
     var App = Backbone.View.extend({
@@ -47,13 +45,40 @@ define(["require", "backbone", "box2dweb", "./wcrx", "./graphics", "./config"], 
     });
     new App;
 
+    graphics.init(config);
+    var canvases = ['canvas', 'canvas2'];
+    var sims = [];
+
+    canvases.forEach(function(cvs) {
+        var wcrx = new WCRX();
+        wcrx.init(config);
+
+        var canvas = document.getElementById(cvs);
+        var context = canvas.getContext('2d');
+        var canvasPosition = getElementPosition(canvas);
+
+        sims.push({ 
+            wcrx: wcrx,
+            context: context,
+            draw: graphics.getDraw(context, wcrx.world)
+        });
+
+        resetAll();
+    });
+
     function resetAll() {
-        if(!!window.UPDATE) window.clearInterval(window.UPDATE);
-        wcrx.reset();
-        graphics.setDebug(wcrx.world);
-        window.UPDATE = window.setInterval(function() {
-            wcrx.update(graphics.draw);
-        }, 1000 / 60);
+        sims.forEach(function(sim) {
+            var wcrx = sim.wcrx;
+            if(!!wcrx.token) {
+                window.clearInterval(wcrx.token);
+                delete wcrx.token;
+            }
+            wcrx.reset();
+            graphics.setDebug(wcrx.world, sim.context);
+            wcrx.token = window.setInterval(function() {
+                wcrx.update(sim.draw);
+            }, 1000 / 60);
+        });
     };
 
 
@@ -65,12 +90,6 @@ define(["require", "backbone", "box2dweb", "./wcrx", "./graphics", "./config"], 
         });
  
 
-        var canvas = document.getElementById('canvas');
-        var context = canvas.getContext('2d');
-        graphics.init(config, context, wcrx.world);
-        resetAll();
-         
-        var canvasPosition = getElementPosition(canvas);
 
         document.addEventListener("mousedown", function(e) {
            isMouseDown = true;
@@ -86,11 +105,12 @@ define(["require", "backbone", "box2dweb", "./wcrx", "./graphics", "./config"], 
         }, true);
 
        
-        // TODO after moving all of this out, apply scale (not 30)
         function handleMouseMove(e) {
+            /*
            mouseX = (e.clientX - canvasPosition.x) / config.PTM;
            mouseY = (e.clientY - canvasPosition.y) / config.PTM;
            console.log('x: '+mouseX + ', y: '+mouseY);
+           */
         }
         $("#btn-reset").click(resetAll);
         $('#btn-debug').click(function() {
@@ -112,6 +132,5 @@ define(["require", "backbone", "box2dweb", "./wcrx", "./graphics", "./config"], 
         $('#btn-images').click(function() {
             config.showImages = !config.showImages;
         });
-
     });
 });

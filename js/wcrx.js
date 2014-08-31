@@ -618,5 +618,5 @@ var ud = {
         ///////////////////
     };
 
-    return new WCRX;
+    return WCRX;
 });

@@ -3,23 +3,10 @@ define(["box2dweb"], function(Box2d) {
     var b2Body = Box2D.Dynamics.b2Body,
         b2DebugDraw = Box2D.Dynamics.b2DebugDraw;
 
-
-    // offset for rotational andhor
-    // change this to pixels so we can establish from asset?
-    var rotationalOffset = {
-        torso: [0, 0],
-        upper_arm: [0, 0],
-        lower_arm: [0, 0],
-        hand: [0, 0],
-        upper_leg: [0, 0],
-        lower_leg: [0, 0],
-        wheel: [0, 0]
-    };
-
-    var config, context;
+    var config;
     var PTM, ITM;
 
-    function drawWorld(world) {
+    function drawWorld(context, world) {
         if(!config.skeleton) context.clearRect(0, 0, context.canvas.width, context.canvas.height);
 
         function drawPart(entity, imgData, isFixture) {
@@ -32,10 +19,7 @@ define(["box2dweb"], function(Box2d) {
 
             if(!isFixture) context.rotate(entity.GetAngle());
 
-            // testing rotational offset!!
-            var offset = rotationalOffset[imgData.name];
-            if(!offset) offset = [0, 0];
-            context.translate(-imgData.dims.x/2 + offset[0], -imgData.dims.y/2 + offset[1]);
+            context.translate(-imgData.dims.x/2, -imgData.dims.y/2);
 
             if(!!imgData.opacity) context.globalAlpha = imgData.opacity;
             context.drawImage(imgData.img, 0, 0, imgData.dims.x, imgData.dims.y);
@@ -94,25 +78,25 @@ define(["box2dweb"], function(Box2d) {
     }
 
     return {
+        getDraw: function(ctx){
+            return function(world) {
+                drawWorld(ctx, world);
+            };
+        },
         init: function(conf, ctx){
             config = conf;
-            context = ctx;
-            // TODO fix
             PTM = config.PTM;
             ITM = config.ITM;
         },
-        setDebug: function(world) {
+        setDebug: function(world, context) {
             //setup debug draw
             var debugDraw = new b2DebugDraw();
             debugDraw.SetSprite(context);
-            // TODO verify this
-            //debugDraw.SetDrawScale(30.0);
             debugDraw.SetDrawScale(config.PTM);
             debugDraw.SetFillAlpha(0.3);
             debugDraw.SetLineThickness(1.0);
             debugDraw.SetFlags(b2DebugDraw.e_shapeBit | b2DebugDraw.e_jointBit);
-                world.SetDebugDraw(debugDraw);
+            world.SetDebugDraw(debugDraw);
         },
-        draw: drawWorld
     };
 });

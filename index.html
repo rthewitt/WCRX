@@ -2,23 +2,28 @@
    <head>
       <title>Wheelchair Rx</title>
         <script data-main="js/main" src="js/libs/requirejs/require.js"></script>
-        <!--
-        <script type="text/javascript" src="js/Box2dWeb-2.1.a.3.min.js"></script>
-        <script type="text/javascript" src="js/jquery-1.11.1.min.js"></script>
-        <script type="text/javascript" src='js/draw_world.js'></script>
-        <script type="text/javascript" src='js/main.js'></script>
-        -->
         <style>
             body {
                 background-color: #02162c;
             }
-            .mxrx {
-                margin-top: 50px;
+            #temp-controls {
+                width: 100%
+            }
+            #human-measure {
+                float:left;
                 margin-left: 20px;
+            }
+            #chair-measure {
+                float: right;
+                margin-right: 20px;
+            }
+            .mxrx {
+                display: inline-block;
+                margin-top: 50px;
                 padding-top: 0px;
+                padding-bottom: 10px;
                 background-color: #5a8ac0;
                 width: 15%;
-                height: 80%;
             }
             .button-holder {
                 text-align: center;
@@ -27,7 +32,7 @@
                 margin-bottom: 10;
             }
             .mxrx label {
-                margin-top: 4px;
+                margin-top: 8px;
                 display: block;
                 color: #1b3e64;
                 width: 100%;
@@ -35,6 +40,11 @@
             .mxrx label.labelFocus {
                 font-weight: bold;
                 color: #173a61;
+            }
+            .mxrx input, .mxrx label {
+                width: 80%;
+                margin-left: 10%;
+                margin-right: 10%;
             }
             .mxrx input[type="text"] {
                 padding: 5px;
@@ -49,17 +59,19 @@
                 border: solid 3px #173a61;
                 box-shadow: inset 0 0 0 1px #90adcd;
             }
-            .tmp-left h3 {
+            .tmp-internal h3 {
                 color: #5a8ac0;
                 font-weight: bold;
             }
-            .tmp-left {
+            .tmp-internal {
                 background-color: #173a61;
-                padding: 0 5;
+                //padding: 0 5;
             }
             .i-app {
                 padding: 0 8;
                 background-color: #5a8ac0;
+                min-height: 600px;
+                height: 100%
             }
             .o-app {
                 padding: 0 5;
@@ -83,16 +95,6 @@
                 margin: 0px;
                 color: #173a61;
                 font-weight: normal;
-            }
-            #inner {
-                padding: 30px;
-                background-color: #173a61;
-            }
-            #outer {
-                margin: 0 auto;
-                width: 500;
-                height: 300;
-                background-color: #5a8ac0;
             }
             .btn-box {
                 -moz-box-shadow: inset 1px 1px 0px 0px #90adcd;
@@ -127,57 +129,80 @@
                 background-color: #173a61;
             }
             canvas {
-                margin-bottom: 20px;
+                display: block;
+                left: 0;
+                right: 0;
+                margin: 15px auto;
             }
             #container {
                 position: absolute;
                 margin: auto;
                 top: 0;
                 right: 0;
-                bottom: 50%;
                 left: 0;
-                width: 550;
-                height: 350;
+                width: 45%;
                 background-color: #173a61;
             }
         </style>
    </head>
    <body>
-   <div class="mxrx">
-       <div class="tmp-left"><h3>Temporary Controls</h3></div>
-       <label for="lower-arm-length">Lower Arm Length</label>
-       <input type="text" id="lower-arm-length" name="lowerArmLength" value="11" readonly />
-       <label for="upper-arm-length">Upper Arm Length</label>
-       <input type="text" id="upper-arm-length" name="upperArmLength" value="11" readonly />
-       <label for="forarm-length">Forarm Length</label>
-       <input type="text" id="forarm-length" name="forarmLength" value="renamed" readonly />
-       <label for="torso-length">Torso Length</label>
-       <input type="text" id="torso-length" name="torsoLength" value="22" readonly />
-       <label for="trunk-depth">Trunk Depth</label>
-       <input type="text" id="trunk-depth" name="trunkDepth" value="9" readonly />
-       <label for="lower-leg-length">Lower Leg Length</label>
-       <input type="text" id="lower-leg-length" name="lowerLegLength" value="20" readonly />
-       <label for="thigh-depth">Thigh Depth</label>
-       <input type="text" id="thigh-depth" name="thighDepth" value="22" readonly />
-       <label for="chest-width">Chest Width</label>
-       <input type="text" id="chest-width" name="chestWidth" value="TODO" readonly />
-       <label for="hip-width">Hip Width</label>
-       <input type="text" id="hip-width" name="hipWidth" value="DISABLED" readonly disabled />
+   <div id="temp-controls">
+       <div id="human-measure" class="mxrx">
+           <div class="tmp-internal"><h3>Human Controls</h3></div>
+           <label for="upper-arm-length">Upper Arm Length</label>
+           <input type="text" id="upper-arm-length" name="upperArmLength" value="11" readonly />
+           <label for="lower-arm-length">Forearm Length</label>
+           <input type="text" id="lower-arm-length" name="lowerArmLength" value="11" readonly />
+           <label for="torso-length">Torso Length</label>
+           <input type="text" id="torso-length" name="torsoLength" value="22" readonly />
+           <label for="trunk-depth">Trunk Depth</label>
+           <input type="text" id="trunk-depth" name="trunkDepth" value="9" readonly />
+           <label for="lower-leg-length">Lower Leg Length</label>
+           <input type="text" id="lower-leg-length" name="lowerLegLength" value="20" readonly />
+           <label for="thigh-depth">Thigh Depth</label>
+           <input type="text" id="thigh-depth" name="thighDepth" value="22" readonly />
+           <label for="chest-width">Chest Width</label>
+           <input type="text" id="chest-width" name="chestWidth" value="TODO" readonly />
+           <label for="hip-width">Hip Width</label>
+           <input type="text" id="hip-width" name="hipWidth" value="DISABLED" readonly disabled />
+       </div>
+       <div id="chair-measure" class="mxrx">
+           <div class="tmp-internal"><h3>Chair Controls</h3></div>
+           <label for="seat-back-height">Seat Back Height</label>
+           <input type="text" id="seat-back-height" name="seatBackHeight" value="11" readonly />
+           <label for="seat-depth">Seat Depth</label>
+           <input type="text" id="seat-depth" name="seatDepth" value="11" readonly />
+           <label for="foam-height">Foam Height</label>
+           <input type="text" id="foam-height" name="foamHeight" value="TODO" readonly />
+           <label for="wheel-diameter">Wheel Diameter</label>
+           <input type="text" id="wheel-diameter" name="wheelDiameter" value="10" readonly />
+           <label for="axle-distance">Axle Distance</label>
+           <input type="text" id="axle-distance" name="axleDistance" value="T0D0" readonly />
+           <label for="foot-rest-angle">Foot Rest Angle</label>
+           <input type="text" id="foot-rest-angle" name="footRestAngle" value="TODO" readonly />
+           <label for="ground-clr">Ground Clearance</label>
+           <input type="text" id="ground-clr" name="groundClr" value="Inferred?" readonly />
+           <label for="seat-width">Seating Surface Width</label>
+           <input type="text" id="seat-width" name="seatWidth" value="TODO" readonly />
+           <label for="foot-rest-width">Foot Rest Width</label>
+           <input type="text" id="foot-rest-width" name="footRestWidth" value="TODO" readonly />
+       </div>
    </div>
-      <div id="container">
-          <div class="o-app"><h2><p>Wheelchair</p> <p>Rx</p></h2></div>
-          <div class=i-app>
-              <h3>Side measures</h3>
-              <canvas id="canvas" width="500" height="300" style="background-color:#5a8ac0;" ></canvas>
-              <div class="button-holder">
-                  <input id="btn-reset" class="btn-box" type="button"  value="Reset" />
-                  <input id="btn-images" class="btn-box" type="button"  value="Images" />
-                  <input id="btn-skeleton" class="btn-box" type="button"  value="Skeleton" />
-                  <input id="btn-person" class="btn-box" type="button"  value="Person" />
-                  <input id="btn-chair" class="btn-box" type="button"  value="Chair" />
-                  <input id="btn-debug" class="btn-box" type="button"  value="Rotation" />
-              </div>
-          </div>
-      </div>
+   <div id="container">
+       <div class="o-app"><h2><p>Wheelchair</p> <p>Rx</p></h2></div>
+         <div class=i-app>
+             <h3>Side measures</h3>
+             <canvas id="canvas" width="500" height="300" style="background-color:#5a8ac0;" ></canvas>
+             <canvas id="canvas2" width="500" height="300" style="background-color:#5a8ac0;" ></canvas>
+             <div class="button-holder">
+                 <input id="btn-reset" class="btn-box" type="button"  value="Reset" />
+                 <input id="btn-images" class="btn-box" type="button"  value="Images" />
+                 <input id="btn-skeleton" class="btn-box" type="button"  value="Skeleton" />
+                 <input id="btn-person" class="btn-box" type="button"  value="Person" />
+                 <input id="btn-chair" class="btn-box" type="button"  value="Chair" />
+                 <input id="btn-debug" class="btn-box" type="button"  value="Rotation" />
+             </div>
+         </div>
+   </div>
    </body>
 </html>
