@@ -28,7 +28,7 @@ define(["./scaledPolygons"], function(pollyColl){
             lowerArm: {
                 name: "lower-arm",
                 type: "box",
-                opacity: 0.5,
+                opacity: 0.8,
                 size: { x: 4, y: 11},
                 pos: { z: 6 },
                 cat: HM_TORSO,
@@ -142,7 +142,7 @@ define(["./scaledPolygons"], function(pollyColl){
                 name: "L-beam",
                 type: "poly",
                 polygons: pollyColl.LBar,
-                size: { x: 23, y: 15 }, // for now, seatDepth + 5"
+                size: { x: 23, y: 13 }, // for now, seatDepth + 5"
                 pos: { z: 3 },
                 cat: WC_FRAME,
                 mask: GROUND
