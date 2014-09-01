@@ -13,16 +13,16 @@ define(["box2dweb"], function(Box2d) {
             context.save();
             var pos = !isFixture ? entity.GetPosition() : new Box2D.Common.Math.b2Vec2.b2Vec2(0, 0);
 
-
             context.translate(pos.x * PTM, pos.y * PTM);
-            context.rotate(imgData.rotAngle); 
+            context.rotate(imgData.get('rotAngle')); 
 
             if(!isFixture) context.rotate(entity.GetAngle());
 
-            context.translate(-imgData.dims.x/2, -imgData.dims.y/2);
+            context.translate(-imgData.get('dims').x/2, -imgData.get('dims').y/2);
 
-            if(!!imgData.opacity) context.globalAlpha = imgData.opacity;
-            context.drawImage(imgData.img, 0, 0, imgData.dims.x, imgData.dims.y);
+            var opc = imgData.get('opacity');
+            if(!!opc) context.globalAlpha = opc;
+            context.drawImage(imgData.get('img'), 0, 0, imgData.get('dims').x, imgData.get('dims').y);
             context.restore();
 
             context.save();
@@ -43,7 +43,6 @@ define(["box2dweb"], function(Box2d) {
                 context.stroke();
                 context.restore();
             }
-
         }
 
         var zList = [];
@@ -54,8 +53,8 @@ define(["box2dweb"], function(Box2d) {
         zList.sort(function(a, b){ 
             var aud = a.GetUserData();
             var bud = b.GetUserData();
-            var az = !!aud ? aud.pos.z : 0;
-            var bz = !!bud ? bud.pos.z : 0;
+            var az = !!aud ? aud.get('pos').z : 0;
+            var bz = !!bud ? bud.get('pos').z : 0;
             return az - bz;
         });
 
@@ -65,6 +64,7 @@ define(["box2dweb"], function(Box2d) {
                 var userData = b.GetUserData();
                 //if(userData instanceof ImageData) {
                 if(!!userData) {
+                    //console.log(userData.get('dims'));
                     drawPart(b, userData);
                 } 
                 /*

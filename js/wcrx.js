@@ -1,6 +1,8 @@
 define(["box2dweb", "underscore"], function(Box2D, _) {
 
-    var WCRX = function() { 
+    var WCRX = function(chairMeasures, humanMeasures) { 
+        this.chairMeasures = chairMeasures;
+        this.humanMeasures = humanMeasures;
         this.chairParts = {
             joints: {},
             initted: false
@@ -18,19 +20,8 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
     };
 
     //////// REMOVE ///////
-
-    var wheelRadius,
-        chairX,
-        chairY,
-        chairBackHeight,
-        chairBackSeatHeight,
-        chairFrontSeatHeight,
-        chairSeatDepth,
-        chairLegBarLength;
-
-
-    var frameSkeletonWidth;
-
+    var chairX,
+        chairY;
     //////////////////////////
 
 
@@ -51,7 +42,6 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
           b2WeldJointDef = Box2D.Dynamics.Joints.b2WeldJointDef;
 
 
-    // was: canvas y: 300, ground: 340 - (w=50) = 290
     function createGround() {
          var fixDef = new b2FixtureDef;
          fixDef.density = 1.0;
@@ -73,47 +63,6 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
          gfx.SetFilterData(gmd);
     }; 
 
-    function BodyPart(def, conf) {
-        var img = new Image();
-        img.src = 'images/'+def.name+'.svg';
-
-        this.name = def.name.replace(/-/g,'_');
-        this.type = def.type;
-        this.img = img;
-        this.opacity = def.opacity || null;
-        this.pos = def.pos;
-        this.rotAngle = 0;
-        var shape, size, dims;
-        switch(def.type) {
-            case 'circle':
-                shape = new b2CircleShape(def.size.r / conf.ITM); 
-                size = { r: def.size.r / conf.ITM };
-                dims = { x: 2 * size.r * conf.PTM, y: 2 * size.r * conf.PTM };
-                break;
-            case 'poly':
-                shape = [];
-                size = {
-                    x: def.size.x / conf.ITM,
-                    y: def.size.y / conf.ITM
-                };
-                dims = { x: size.x * conf.PTM, y: size.y * conf.PTM };
-                setScaledPolygons(shape, def.polygons, size);
-                break;
-            case 'box':
-                shape = new b2PolygonShape;
-                size = {
-                    x: def.size.x / conf.ITM,
-                    y: def.size.y / conf.ITM
-                };
-                dims = { x: size.x * conf.PTM, y: size.y * conf.PTM };
-                shape.SetAsOrientedBox(size.x / 2, size.y / 2, new b2Vec2(0, 0), 0);
-                break;
-        }
-        this.dims = dims;
-        this.shape = shape;
-        this.size = size;
-    }
-
     function setScaledPolygons(shapeArray, polygons, size) {
         for(var px=0; px<polygons.length; px++) {
             var polygon = polygons[px];
@@ -127,14 +76,52 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
     }
 
 
-    function getBodyPart(def, fixDef, bodyDef, isFixture) {
+    function getBodyPart(idata, fixDef, bodyDef, isFixture) {
+        var img = new Image();
+        img.src = 'images/'+idata.get('name')+'.svg';
+        idata.set('img', img);
+
+        var _size = idata.get('size');
+        var shape, size, dims;
+        var PTM = this.config.PTM, ITM = this.config.ITM;
+        switch(idata.get('type')) {
+            case 'circle':
+                shape = new b2CircleShape(this.inches(_size.r)); 
+                //size = { r: this.inches(_size.r) };
+                size = { r: this.inches(_size.r) };
+                dims = { x: 2 * size.r * PTM, y: 2 * size.r * PTM };
+                //console.log('_size: '+JSON.stringify(_size));
+                //console.log('size: '+JSON.stringify(size));
+                console.log(dims);
+                break;
+            case 'poly':
+                shape = [];
+                size = {
+                    x: this.inches(_size.x),
+                    y: this.inches(_size.y)
+                };
+                dims = { x: size.x * PTM, y: size.y * PTM };
+                setScaledPolygons(shape, idata.get('polygons'), size);
+                break;
+            case 'box':
+                shape = new b2PolygonShape;
+                size = {
+                    x: this.inches(_size.x),
+                    y: this.inches(_size.y)
+                };
+                dims = { x: size.x * PTM, y: size.y * PTM };
+                shape.SetAsOrientedBox(size.x / 2, size.y / 2, new b2Vec2(0, 0), 0);
+                break;
+        }
+        idata.set('dims', dims);
+        idata.set('shape', shape);
+        idata.set('size', size);
 
         var fdd = new b2FilterData();
-        fdd.categoryBits = def.cat;
-        fdd.maskBits = def.mask;
+        fdd.categoryBits = idata.get('cat');
+        fdd.maskBits = idata.get('mask');
 
-        var bodyPart = new BodyPart(def, this.config);
-        bodyDef.userData = bodyPart;
+        bodyDef.userData = idata;
         var body = this.world.CreateBody(bodyDef);
         //body.SetAngle(-1.7 * Math.PI);
 
@@ -149,9 +136,9 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
             fixDef.userData = undefined;
         }
 
-        if(bodyPart.shape instanceof Array) {
-            _.each(bodyPart.shape, reify);
-        } else reify(bodyPart.shape); 
+        if(shape instanceof Array) {
+            _.each(shape, reify);
+        } else reify(shape); 
 
         return body;
     }
@@ -191,28 +178,37 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
 
         var parts = this.humanParts, bodies = this.humanPartBodies;
 
-        for(var bp in this.config.person) {
-            var b2b = getBodyPart.call(this, this.config.person[bp], humanFixDef, bodyDef); 
+        var person = this.humanMeasures.get('person');
+        for(var bp in person) {
+            var b2b = getBodyPart.call(this, person[bp], humanFixDef, bodyDef);
             bodies[bp] = b2b;
             parts[bp] = b2b.GetUserData();
         }
 
+        function X(name) {
+            return person[name].get('size').x;
+        }
+
+        function Y(name) {
+            return person[name].get('size').y;
+        }
+
         var joints = this.humanParts.joints;
         var knee = getRevJoint.call(this, bodies.upperLeg, bodies.lowerLeg, 
-                { x: parts.upperLeg.size.x/2 * 0.85, y: -parts.upperLeg.size.y * 0.1 },
-                { x: -parts.lowerLeg.size.x/2, y: parts.lowerLeg.size.y/2 * 0.5 });
+                { x: X('upperLeg')/2 * 0.85, y: -Y('upperLeg') * 0.1 },
+                { x: -X('lowerLeg')/2, y: Y('lowerLeg')/2 * 0.5 });
 
         var elbow = getRevJoint.call(this, bodies.upperArm, bodies.lowerArm, 
-                { x: -parts.upperArm.size.x/2, y: parts.upperArm.size.y/2 },
-                { x: -parts.lowerArm.size.x/2, y: -parts.lowerArm.size.y/2 });
+                { x: -X('upperArm')/2, y: Y('upperArm')/2 },
+                { x: -X('lowerArm')/2, y: -Y('lowerArm')/2 });
 
         var hip = getRevJoint.call(this, bodies.upperLeg, bodies.torso, 
-                { x: -parts.upperLeg.size.x/2, y: parts.upperLeg.size.y/2 },
-                { x: -parts.torso.size.x/2 * 0.5, y: parts.torso.size.y/2 });
+                { x: -X('upperLeg')/2, y: Y('upperLeg')/2 },
+                { x: -X('torso')/2 * 0.5, y: Y('torso')/2 });
 
         var shoulder = getRevJoint.call(this, bodies.upperArm, bodies.torso, 
-                { x: -parts.upperArm.size.x/2, y: -parts.upperArm.size.y/2 },
-                { x: -parts.torso.size.x/2, y: -(parts.torso.size.y/2)*0.4 });
+                { x: -X('upperArm')/2, y: -Y('upperArm')/2 },
+                { x: -X('torso')/2, y: -(Y('torso')/2)*0.4 });
 
         // dynamic joints for person control
         joints.hip = hip;
@@ -225,8 +221,8 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
 
         var seat = this.chairParts.foam;
         var seatTarget = this.chairPartBodies.foam.GetPosition();
-        var sx = this.inches(parts.torso.size.x/2) + this.inches(7);
-        var sy = -this.inches(seat.size.y/2) - this.inches(parts.torso.size.y) - this.inches(20);
+        var sx = this.inches(X('torso')/2) + this.inches(7);
+        var sy = -this.inches(seat.get('size').y/2) - this.inches(Y('torso')) - this.inches(20);
         seatTarget.Add(new b2Vec2(sx, sy));
         console.log('target: '+seatTarget.x+', '+seatTarget.y);
         bodies.torso.SetPosition(seatTarget);
@@ -239,8 +235,8 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         if(!this.chairParts.initted || !this.humanParts.initted) return;
         var wheel = this.chairParts.wheel, lowerArm = this.humanParts.lowerArm;
         return getRevJoint.call(this, this.humanPartBodies.lowerArm, this.chairPartBodies.wheel, 
-                { x: 0, y: lowerArm.size.y/2 },
-                { x: 0, y: -wheel.size.r }, true);
+                { x: 0, y: lowerArm.get('size').y/2 },
+                { x: 0, y: -wheel.get('size').r }, true);
     }
 
     // fill just fill these arrays, same code
@@ -257,52 +253,61 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
 
         var parts = this.chairParts, bodies = this.chairPartBodies;
 
-        for(var cp in this.config.chair) {
-            var b2b = getBodyPart.call(this, this.config.chair[cp], chairFixDef, bodyDef);
+        var wheelChair = this.chairMeasures.get('wheelChair');
+        for(var cp in wheelChair) {
+            var b2b = getBodyPart.call(this, wheelChair[cp], chairFixDef, bodyDef);
             bodies[cp] = b2b;
             parts[cp] = b2b.GetUserData();
+        }
+
+        function X(name) {
+            return wheelChair[name].get('size').x;
+        }
+
+        function Y(name) {
+            return wheelChair[name].get('size').y;
         }
 
         var joints = this.chairParts.joints;
         var axle = getRevJoint.call(this, bodies.wheel, bodies.raiseBar, 
                 { x: 0, y: 0 },
-                { x: -parts.raiseBar.size.x/2 * 0.55, y: parts.raiseBar.size.y/2 * 0.88  });
+                { x: -X('raiseBar')/2 * 0.55, y: Y('raiseBar')/2 * 0.88  });
         axle.SetLimits(-0.3 * Math.PI, 0);
         axle.EnableLimit(true);
 
         // could make this a prismatic joint?
         var slider = getWeldJoint.call(this, bodies.raiseBar, bodies.LBar,
-                { x: 0, y: -parts.raiseBar.size.y/2 },
-                { x: -parts.LBar.size.x/2 * 0.6, y: -parts.LBar.size.y/2 }); // TODO from back-to-axle distance
+                { x: 0, y: -Y('raiseBar')/2 },
+                { x: -X('LBar')/2 * 0.6, y: -Y('LBar')/2 }); // TODO from back-to-axle distance
 
         var frameWeld = getWeldJoint.call(this, bodies.handlebars, bodies.frameConnector,
-                { x: parts.handlebars.size.x/2, y: parts.handlebars.size.y/2 * 0.5 },
-                { x: 0, y: -parts.frameConnector.size.y/2 });
+                { x: X('handlebars')/2, y: Y('handlebars')/2 * 0.5 },
+                { x: 0, y: -Y('frameConnector')/2 });
 
         var backWeld = getWeldJoint.call(this, bodies.handlebars, bodies.seatBack, 
-                { x: parts.handlebars.size.x/2, y: parts.handlebars.size.y/2 },
-                { x: -parts.seatBack.size.x/2, y: parts.seatBack.size.y/2 });
+                { x: X('handlebars')/2, y: Y('handlebars')/2 },
+                { x: -X('seatBack')/2, y: Y('seatBack')/2 });
 
         var backToAxle = this.inches(3.5); // TODO make this real
         var seatWeld = getWeldJoint.call(this, bodies.LBar, bodies.foam, // TODO fixture or spacer
-                { x: -parts.LBar.size.x/2 + backToAxle, y: -parts.LBar.size.y/2 },  // TODO handlebar width inference
-                { x: -parts.foam.size.x/2, y: parts.foam.size.y/2 });
+                { x: -X('LBar')/2 + backToAxle, y: -Y('LBar')/2 },  // TODO handlebar width inference
+                { x: -X('foam')/2, y: Y('foam')/2 });
 
         var handleBarPos = getWeldJoint.call(this, bodies.LBar, bodies.handlebars,
-                { x: -parts.LBar.size.x/2, y: 0 },
-                { x: parts.handlebars.size.x/2 * 0.6, y: parts.handlebars.size.y });
+                { x: -X('LBar')/2, y: 0 },
+                { x: X('handlebars')/2 * 0.6, y: Y('handlebars') });
 
         var frontAxle = getRevJoint.call(this, bodies.supportWheel, bodies.frontConnector, 
                 { x: 0, y: 0 },
-                { x: -parts.frontConnector.size.x/2 * 0.7, y: parts.frontConnector.size.y/2 * 0.8 });
+                { x: -X('frontConnector')/2 * 0.7, y: Y('frontConnector')/2 * 0.8 });
 
         var frontWeld = getWeldJoint.call(this, bodies.LBar, bodies.frontConnector, // TODO
-                { x: parts.LBar.size.x/2 * 0.7, y: parts.LBar.size.y/2 },
-                { x: 0, y: -parts.frontConnector.size.y/2 * 0.8 });
+                { x: X('LBar')/2 * 0.7, y: Y('LBar')/2 },
+                { x: 0, y: -Y('frontConnector')/2 * 0.8 });
 
         var footRest = getWeldJoint.call(this, bodies.LBar, bodies.footRest,
-                { x: parts.LBar.size.x/2, y: parts.LBar.size.y/2 }, // TODO minus bar width
-                { x: parts.footRest.size.x/2, y: -parts.footRest.size.y/2  * 0.5 }); // TODO distance determined by gap / angle
+                { x: X('LBar')/2, y: Y('LBar')/2 }, // TODO minus bar width
+                { x: X('footRest')/2, y: -Y('footRest')/2  * 0.5 }); // TODO distance determined by gap / angle
 
         // dynamic joints for control
         joints.axle = axle;
@@ -316,10 +321,16 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         joints.frontWeld = frontWeld;
         joints.footRest = footRest;
 
+        for(var bod in bodies) {
+            var ud = bodies[bod].GetUserData();
+            //if(!!ud) console.log(ud.get('dims'));
+        }
+
         parts.initted = true;
     }
 
     function _destroyChair() {
+        console.log('destroying chair');
         for(var j in this.chairParts.joints) {
             var jj = this.chairParts.joints[j];
             this.world.DestroyJoint(jj);
@@ -332,6 +343,7 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
             initted: false
         }; 
         this.chairPartBodies = {}; 
+        this.chairMeasures.unset('wheelChair');
         this.SIG_destroyChair = false;
     }
 
@@ -405,7 +417,8 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
             lowerArm.ApplyForce(new b2Vec2(0.1, 0), new b2Vec2(0, 0));
             */
 
-            this.humanPartBodies.upperLeg.ApplyForce(new b2Vec2(-0.5, -0.1), new b2Vec2(-this.humanParts.upperLeg.size.x/2, 0));
+            var ulx = this.humanParts.upperLeg.get('size').x;
+            this.humanPartBodies.upperLeg.ApplyForce(new b2Vec2(-0.5, -0.1), new b2Vec2(-ulx/2, 0));
 
             // try to keep foot stable without collision
             /*
@@ -570,8 +583,9 @@ var ud = {
         for(b = this.world.GetBodyList(); b; b = b.GetNext()) {
             this.world.DestroyBody(b);
         }
+        this.chairMeasures.resetChair();
+        this.humanMeasures.resetPerson();
     };
-
 
     WCRX.prototype.destroyChair = function() {
         this.SIG_destroyChair = true;
@@ -606,15 +620,8 @@ var ud = {
         this.config = conf;
 
         // TEMPORARY /////////////////
-        wheelRadius = this.inches(12);
         chairX = this.pixels(200);
         chairY = this.pixels(300)-0.1-this.inches(3);
-        chairBackHeight = this.inches(18);
-        chairBackSeatHeight = this.inches(15);
-        chairFrontSeatHeight = this.inches(18);
-        chairSeatDepth = this.inches(18);
-        chairLegBarLength = this.inches(22);
-        frameSkeletonWidth = this.inches(2);
         ///////////////////
     };
 

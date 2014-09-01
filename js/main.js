@@ -1,16 +1,16 @@
-require.config({
-    paths: {
-        "jquery": ["http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min", 
-                    "libs/jquery/dist/jquery.min"],
-        "underscore": "libs/underscore/underscore",
-        "backbone": "libs/backbone/backbone",
-        "box2dweb": "libs/box2dweb/Box2dWeb-2.1.a.3.min"
-    },
-    shim: {
-        "box2dweb": {
-            exports: "Box2D"
+    require.config({
+        paths: {
+            "jquery": ["http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min", 
+                        "libs/jquery/dist/jquery.min"],
+            "underscore": "libs/underscore/underscore",
+            "backbone": "libs/backbone/backbone",
+            "box2dweb": "libs/box2dweb/Box2dWeb-2.1.a.3.min"
         },
-        "backbone": {
+        shim: {
+            "box2dweb": {
+                exports: "Box2D"
+            },
+            "backbone": {
             deps: ["jquery", "underscore"],
             exports: "Backbone"
         }
@@ -38,48 +38,100 @@ define(["require", "backbone", "box2dweb", "./wcrx", "./graphics", "./config"], 
         return { x: x, y: y };
      }
 
-    var App = Backbone.View.extend({
-        initialize: function() {
-            // TODO
-        }
-    });
-    new App;
+
+
 
     graphics.init(config);
     var canvases = ['canvas', 'canvas2'];
     var sims = [];
+    window.sims = sims; // TODO remove
 
     canvases.forEach(function(cvs) {
-        var wcrx = new WCRX();
+        var cmx = new config.ChairMeasures({ tempId: cvs });
+        var hmx = new config.HumanMeasures({ tempId: cvs });
+
+        var wcrx = new WCRX(cmx, hmx); 
         wcrx.init(config);
 
         var canvas = document.getElementById(cvs);
         var context = canvas.getContext('2d');
-        var canvasPosition = getElementPosition(canvas);
+        //var canvasPosition = getElementPosition(canvas);
 
-        sims.push({ 
+        var draw = graphics.getDraw(context);
+
+        var sim = { 
             wcrx: wcrx,
             context: context,
-            draw: graphics.getDraw(context, wcrx.world)
-        });
+            draw: graphics.getDraw(context)
+        };
+        sims.push(sim);
 
-        resetAll();
+        resetSim(sim);
     });
 
-    function resetAll() {
-        sims.forEach(function(sim) {
-            var wcrx = sim.wcrx;
-            if(!!wcrx.token) {
-                window.clearInterval(wcrx.token);
-                delete wcrx.token;
-            }
-            wcrx.reset();
-            graphics.setDebug(wcrx.world, sim.context);
-            wcrx.token = window.setInterval(function() {
-                wcrx.update(sim.draw);
-            }, 1000 / 60);
-        });
-    };
+    var Person = Backbone.Model.extend({
+        defaults: config.person,
+        initialize: function() {
+            this.on("change:lowerLegLength", function(model) {
+                var lll = model.get("lowerLegLength");
+                console.log('TODO: '+lll);
+            });
+        }
+    });
+    var person = new Person;
+
+    var personControls = Backbone.View.extend({
+        el: "#humanForm",
+        model: sims[0].wcrx.humanMeasures,
+        events: {
+            "change input":"changed",
+            "change select":"changed"
+        },
+        initialize: function() {
+            _.bindAll(this, "changed");
+        },
+        changed: function(evt) {
+            var changed = evt.currentTarget;
+            var value = $(evt.currentTarget).val();
+            var mx = this.model.set(changed.name, value);
+            resetSim(sims[0]);
+        }
+    });
+    new personControls;
+
+    var chairControls = Backbone.View.extend({
+        el: "#chairForm",
+        model: sims[0].wcrx.chairMeasures,
+        events: {
+            "change input":"changed",
+            "change select":"changed"
+        },
+        initialize: function() {
+            _.bindAll(this, "changed");
+        },
+        changed: function(evt) {
+            var changed = evt.currentTarget;
+            var value = $(evt.currentTarget).val();
+            var mx = this.model.set(changed.name, value);
+            resetSim(sims[0]);
+        }
+    });
+    new chairControls;
+
+    function resetSim(sim) {
+        var wcrx = sim.wcrx;
+        if(!!wcrx.token) {
+            window.clearInterval(wcrx.token);
+            delete wcrx.token;
+        }
+        wcrx.reset();
+        graphics.setDebug(wcrx.world, sim.context);
+        wcrx.token = window.setInterval(function() {
+            wcrx.update(sim.draw);
+        }, 1000 / 60);
+    }
+
+    function resetAll() { sims.forEach(resetSim); };
 
 
     $(document).ready(function($) {
@@ -117,14 +169,22 @@ define(["require", "backbone", "box2dweb", "./wcrx", "./graphics", "./config"], 
             config.debug = !config.debug;
         });
         $('#btn-chair').click(function() {
-            if(!wcrx.chairParts.initted)
-                wcrx.initChair();
-            else wcrx.destroyChair();
+            sims.forEach(function(sim) {
+                var wcrx = sim.wcrx;
+                if(!wcrx.chairParts.initted) {
+                    wcrx.chairMeasures.resetChair();
+                    wcrx.initChair();
+                } else wcrx.destroyChair();
+            });
         });
         $('#btn-person').click(function() {
-            if(!wcrx.humanParts.initted)
-                wcrx.initPerson();
-            else wcrx.destroyPerson();
+            sims.forEach(function(sim) {
+                var wcrx = sim.wcrx;
+                if(!wcrx.humanParts.initted) {
+                    wcrx.humanMeasures.resetPerson();
+                    wcrx.initPerson();
+                } else wcrx.destroyPerson();
+            });
         });
         $('#btn-skeleton').click(function() {
             config.skeleton = !config.skeleton;
