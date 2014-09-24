@@ -194,6 +194,7 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         }
 
         var joints = this.humanParts.joints;
+        /*
         var knee = getRevJoint.call(this, bodies.upperLeg, bodies.lowerLeg, 
                 { x: X('upperLeg')/2 * 0.85, y: -Y('upperLeg') * 0.1 },
                 { x: -X('lowerLeg')/2, y: Y('lowerLeg')/2 * 0.5 });
@@ -201,19 +202,28 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         var elbow = getRevJoint.call(this, bodies.upperArm, bodies.lowerArm, 
                 { x: -X('upperArm')/2, y: Y('upperArm')/2 },
                 { x: -X('lowerArm')/2, y: -Y('lowerArm')/2 });
+                */
+
+
+        var t2 = getRevJoint.call(this, bodies.waist, bodies.midsection,
+                { x: 0, y: -Y('waist')/2 },
+                { x: 0, y: person['midsection'].get('size').r * (2/3) }, true);
 
         var t1 = getRevJoint.call(this, bodies.chest, bodies.midsection,
                 { x: 0, y: Y('chest')/2 },
-                { x: 0, y: 0 });
+                { x: 0, y: -person['midsection'].get('size').r * (2/3) }, true);
+        //t1.SetLimits(-0.3 * Math.PI, 0.5 * Math.PI);
+        
+        t1.SetLimits(-0.3 * Math.PI, 0);
+        t1.EnableLimit(true);
+        
 
-        var t2 = getRevJoint.call(this, bodies.waist, bodies.midsection,
-                { x: 0, y: Y('waist')/2 },
-                { x: 0, y: 0 });
-
+        var hip = getRevJoint.call(this, bodies.upperLeg, bodies.waist, 
+                { x: -X('upperLeg')/2, y: 0 },
+                { x: -X('waist')/2, y: 0 });
+                //{ x: -X('upperLeg')/2, y: Y('upperLeg')/2 },
+                //{ x: -X('waist')/2, y: Y('waist')/2 });
         /*
-        var hip = getRevJoint.call(this, bodies.upperLeg, bodies.torso, 
-                { x: -X('upperLeg')/2, y: Y('upperLeg')/2 },
-                { x: -X('torso')/2 * 0.5, y: Y('torso')/2 });
 
         var shoulder = getRevJoint.call(this, bodies.upperArm, bodies.torso, 
                 { x: -X('upperArm')/2, y: -Y('upperArm')/2 },
@@ -221,28 +231,41 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
                 */
 
         // dynamic joints for person control
-        //joints.hip = hip;
-        joints.knee = knee;
-        joints.elbow = elbow;
+        joints.hip = hip;
+        //joints.knee = knee;
+        //joints.elbow = elbow;
         //joints.shoulder = shoulder;
+        joints.t1 = t1;
+        joints.t2 = t2;
         parts.initted = true;
 
         if(!this.chairParts.initted) return;
 
-        /***** ADD THIS BACK IN SORTOF
+        // individual will have a measured distance from seatback
+        // where they make contact with seat bottom
+        var seat = this.chairParts.foam;
+        var delta = this.inches(5);
+        var ss = seat.get('size')
+        var seatRev = getRevJoint.call(this, bodies.waist, this.chairPartBodies.foam,
+                { x: -X('waist')/2, y: Y('waist')/2 }, 
+                { x: -ss.x/2 + delta, y: -ss.y/2 }, true); 
+
+        /*
+        // TODO here's that measurement
         var seat = this.chairParts.foam;
         var seatTarget = this.chairPartBodies.foam.GetPosition();
-        var sx = this.inches(X('torso')/2) + this.inches(7);
-        var sy = -this.inches(seat.get('size').y/2) - this.inches(Y('torso')) - this.inches(20);
+        var sx = this.inches(X('waist')/2) + this.inches(7);
+        var sy = -this.inches(seat.get('size').y/2) - this.inches(Y('waist')) - this.inches(20);
         seatTarget.Add(new b2Vec2(sx, sy));
         console.log('target: '+seatTarget.x+', '+seatTarget.y);
-        bodies.torso.SetPosition(seatTarget);
-        ********/
+        bodies.waist.SetPosition(seatTarget);
           
         var wrist = bindWrist.call(this);
+        */
     }
 
     // call with context
+    /*
     function bindWrist() {
         if(!this.chairParts.initted || !this.humanParts.initted) return;
         var wheel = this.chairParts.wheel, lowerArm = this.humanParts.lowerArm;
@@ -250,6 +273,7 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
                 { x: 0, y: lowerArm.get('size').y/2 },
                 { x: 0, y: -wheel.get('size').r }, true);
     }
+    */
 
     // fill just fill these arrays, same code
     function initC() {
@@ -309,8 +333,8 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
 
 
         var handleBarPos = getWeldJoint.call(this, bodies.LBar, bodies.handlebars,
-                { x: -X('LBar')/2, y: 0 },
-                { x: X('handlebars')/2 - vertPipeWidth, y: Y('handlebars') });
+                { x: -X('LBar')/2, y: -Y('LBar')/2 },
+                { x: X('handlebars')/2 - vertPipeWidth, y: Y('handlebars')/2 });
 
         var frontAxle = getRevJoint.call(this, bodies.supportWheel, bodies.frontConnector, 
                 { x: 0, y: 0 },
@@ -400,7 +424,6 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
             hip.SetMaxMotorTorque(20);
                     gain = 20.0;
         } else hip.SetMaxMotorTorque(0);
-        ******/
 
         // keep knee from bending backwards
         var knee = this.humanParts.joints.knee;
@@ -417,6 +440,7 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         elbow.SetMotorSpeed(-gain * angleError);
         elbow.SetMaxMotorTorque(20);
         } else elbow.SetMaxMotorTorque(0);
+        ******/
 
         // give the illusion of conscious balance
         if(this.chairParts.initted) {
@@ -433,8 +457,8 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
             lowerArm.ApplyForce(new b2Vec2(0.1, 0), new b2Vec2(0, 0));
             */
 
-            var ulx = this.humanParts.upperLeg.get('size').x;
-            this.humanPartBodies.upperLeg.ApplyForce(new b2Vec2(-0.5, -0.1), new b2Vec2(-ulx/2, 0));
+            // Latest attempt, not needed every update, just wanted to tip.  We can set angle on bodypart instead
+            //this.humanPartBodies.chest.ApplyForce(new b2Vec2(-0.2, 0), new b2Vec2(0, 0));
 
             // try to keep foot stable without collision
             /*
@@ -526,23 +550,31 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
 
         return;
         var polygons = [[
-        {x:0.025641025975346565,y:1.076923131942749},
-        {x:0.9399998188018799,y:0.02750009298324585},
-        {x:0.22499990463256836,y:0.017500102519989014},
-        {x:0.13499987125396729,y:0.1400001049041748},
-        {x:0,y:0.6666666865348816}
+        {x:0.8449999094009399,y:1.6750000715255737},
+        {x:0.9450000524520874,y:1.7050000429153442},
+        {x:0.9800000190734863,y:1.6600000858306885},
+        {x:0.9699999094009399,y:0.02249997854232788},
+        {x:0.7775000333786011,y:0.02249997854232788},
+        {x:0.7749999761581421,y:1.6200001239776611}
         ],[
-        {x:0.9399998188018799,y:0.02750009298324585},
-            {x:0.025641025975346565,y:1.076923131942749},
-            {x:0.1794871836900711,y:1.4871795177459717},
-            {x:0.5949998497962952,y:1.4150002002716064},
-            {x:0.8974359035491943,y:0.9230769276618958},
-            {x:0.9849997758865356,y:0.6400001645088196}
+        {x:0.9450000524520874,y:1.7050000429153442},
+            {x:0.8449999094009399,y:1.6750000715255737},
+            {x:0.8449999094009399,y:2.06000018119812},
+            {x:0.9450000524520874,y:2.120000123977661}
+        ],[
+        {x:0.9450000524520874,y:2.120000123977661},
+            {x:0.8449999094009399,y:2.06000018119812},
+            {x:0.6899999380111694,y:2.130000114440918},
+            {x:0.7150000333786011,y:2.2950000762939453}
+        ],[
+        {x:0.7150000333786011,y:2.2950000762939453},
+            {x:0.6899999380111694,y:2.130000114440918},
+            {x:0.04500001668930054,y:2.134999990463257},
+            {x:0.04500001668930054,y:2.2950000762939453}
         ]];
 
-
         var img = new Image();
-        img.src = 'images/v2/chest.svg';
+        img.src = 'images/v2/handlebars.svg';
     bodyDef.userData = ud = this.config.polyCraft;
     ud.set('img', img);
 
@@ -630,9 +662,11 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
     WCRX.prototype.initPerson = initP;
     WCRX.prototype.initChair = function() { 
         initC.call(this);
+        /****** TEMP REMOVE
         if(!!this.humanParts.initted) {
             var wrist = bindWrist.call(this);
         }
+        *******/
     };
     WCRX.prototype.init = function(conf) {
         this.config = conf;
