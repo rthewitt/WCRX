@@ -78,7 +78,7 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
 
     function getBodyPart(idata, fixDef, bodyDef, isFixture) {
         var img = new Image();
-        img.src = 'images/'+idata.get('name')+'.svg';
+        img.src = 'images/v2/'+idata.get('name')+'.svg';
         idata.set('img', img);
 
         var _size = idata.get('size');
@@ -340,8 +340,7 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         }
         this.chairParts = {
             joints: {},
-            initted: false
-        }; 
+            initted: false }; 
         this.chairPartBodies = {}; 
         this.chairMeasures.unset('wheelChair');
         this.SIG_destroyChair = false;
@@ -405,6 +404,7 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
 
         // give the illusion of conscious balance
         if(this.chairParts.initted) {
+
             /* Broken and jittery
             var axle = this.chairParts.joints.axle;
             var angleError = axle.GetJointAngle() - (0.0 * Math.PI); // change
@@ -501,46 +501,47 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         bodyDef.type = b2Body.b2_dynamicBody;
         bodyDef.position.Set(chairX+this.inches(15), chairY-this.inches(30));
 
-        this.initChair();
-        this.initPerson();
+        //this.initChair();
+        //this.initPerson();
 
         this.SIG_destroyChair = false;
         this.SIG_destroyPerson = false;
         this.haltUpdate = false;
 
-        return;
+
         var polygons = [[
-        {x:0.34090909361839294,y:0.3181818127632141},
-        {x:0.011363636702299118,y:0.3068181872367859},
-        {x:0.09000003337860107,y:0.36500000953674316},
-        {x:0.20749998092651367,y:0.375}
-        ],[
-        {x:0.011363636702299118,y:0.3068181872367859},
-            {x:0.9774999618530273,y:0.0949999988079071},
-            {x:0.875,y:0.04545453190803528},
-            {x:0.6704545617103577,y:0.011363625526428223},
-            {x:0.09500002861022949,y:0.007499963045120239},
-            {x:0.011363636702299118,y:0.10227271914482117}
-        ],[
-        {x:0.9774999618530273,y:0.0949999988079071},
-            {x:0.011363636702299118,y:0.3068181872367859},
-            {x:0.34090909361839294,y:0.3181818127632141},
-            {x:0.6704545617103577,y:0.3068181872367859},
-            {x:0.9125000238418579,y:0.2549999952316284},
-            {x:0.9824999570846558,y:0.19249999523162842}
+        {x:0,y:0.4117647111415863},
+        {x:0.0350000262260437,y:0.877500057220459},
+        {x:0.8449999094009399,y:0.877500057220459},
+        {x:0.9724999666213989,y:0.6899999976158142},
+        {x:0.9599999189376831,y:0.26249998807907104},
+        {x:0.8500000238418579,y:0.04249995946884155},
+        {x:0.29750001430511475,y:0.005000025033950806},
+        {x:0.0882352963089943,y:0.1764705777168274}
         ]];
 
+
         var img = new Image();
-        img.src = 'images/upper-leg.svg';
-var ud = {
-        name: 'upper_leg',
-        img: img,
-        rotAngle: 0, //-0.5*Math.PI,
-        size: {x: 89 / this.config.PTM, y: 44 / this.config.PTM },
-        dims: {x: 187, y: 75},
-        pos: { z: 10 }
-};
-    bodyDef.userData = ud;
+        img.src = 'images/v2/hip.svg';
+    bodyDef.userData = ud = this.config.polyCraft;
+    ud.set('img', img);
+
+    var _size = ud.get('size');
+    var shape, size, dims;
+    shape = [];
+    console.log('_size: '+_size.x + ', '+_size.y);
+    size = {
+        x: this.inches(_size.x),
+        y: this.inches(_size.y)
+    };
+    //dims = { x: 48, y: 49  };
+    //dims = { x: size.x * this.config.PTM, y: size.y * this.config.PTM };
+    dims = { x: size.x * this.config.PTM, y: size.y * this.config.PTM };
+    console.log("size: "+size.x +", "+size.y);
+    console.log("dims: "+dims.x +", "+dims.y);
+    ud.set('dims', dims);
+    ud.set('shape', shape);
+    //ud.set('size', size);
 
     var bb = this.world.CreateBody(bodyDef);
     //bb.SetAngle(1.9*Math.PI);
@@ -551,13 +552,13 @@ var ud = {
        var vertices = [];
         var poly;
        for(var p=0; p<polygon.length; p++) {
-          //var someVec = new b2Vec2(ud.size.x * polygon[p].x, -ud.size.y * polygon[p].y); 
-          var someVec = new b2Vec2(polygon[p].x, -polygon[p].y); 
-          var cent = new b2Vec2(-0.49, 0.18);
+          var someVec = new b2Vec2(size.x * polygon[p].x, -size.y * polygon[p].y); 
+          var cent = new b2Vec2(-0.12, 0.12);
           cent.Add(someVec);
+          
           vertices.push(cent);
 
-          var ratioVec = new b2Vec2(cent.x/this.pixels(187), cent.y/this.pixels(75));
+          var ratioVec = new b2Vec2(cent.x/this.inches(10), cent.y/this.inches(11));
 
           // original pixels for match
           newVertexArray.push(ratioVec); 

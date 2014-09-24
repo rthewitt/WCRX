@@ -298,5 +298,15 @@ define(["./scaledPolygons", "backbone"], function(pollyColl, Backbone){
         HumanMeasures: HumanMeasures
     };
 
+    conf.polyCraft = new ImageData({
+                name: "hip",
+                type: "poly",
+                //size: { x: 100, y: 110 },
+                size: { x: 10, y: 11 },
+                pos: { z: 10 },
+                cat: HM_TORSO,
+                mask: personMask
+            });
+
     return conf;
 });
