@@ -41,6 +41,33 @@ define(["./scaledPolygons", "backbone"], function(pollyColl, Backbone){
                 cat: HM_TORSO,
                 mask: personMask
             }),
+            waist: new ImageData({
+                name: "waist",
+                type: "poly",
+                polygons: pollyColl.waist,
+                size: null,
+                pos: { z: 0 },
+                cat: HM_TORSO,
+                mask: personMask
+            }),
+            midsection: new ImageData({
+                name: "midsection",
+                type: "circle",
+                size: null,
+                pos: { z: 0 },
+                cat: HM_TORSO,
+                mask: personMask
+            }),
+            chest: new ImageData({
+                name: "chest",
+                type: "poly",
+                polygons: pollyColl.chest,
+                size: null,
+                pos: { z: 0 },
+                cat: HM_TORSO,
+                mask: personMask
+            }),
+            /*
             torso: new ImageData({
                 name: "torso",
                 type: "poly",
@@ -50,6 +77,7 @@ define(["./scaledPolygons", "backbone"], function(pollyColl, Backbone){
                 cat: HM_TORSO,
                 mask: personMask
             }),
+            */
             upperLeg: new ImageData({
                 name: "upper-leg",
                 type: "poly",
@@ -168,6 +196,8 @@ define(["./scaledPolygons", "backbone"], function(pollyColl, Backbone){
             upperArmLength: 11,
             upperArmWidth: 4.5,
             torsoLength: 22,
+            torsoLength2: 6,
+            midWidth: 4,
             trunkDepth: 9,
             upperLegLength: 22,
             upperLegWidth: 7,
@@ -188,8 +218,19 @@ define(["./scaledPolygons", "backbone"], function(pollyColl, Backbone){
             pd.lowerArm.set("size",   
                 { x: this.get("lowerArmWidth"), y: this.get("lowerArmLength") });
 
+            pd.waist.set("size",   
+                { x: this.get("upperLegWidth"), y: this.get("upperLegWidth") });
+
+            pd.midsection.set("size", 
+                { r: this.get("midWidth") });
+
+            pd.chest.set("size",   
+                { x: this.get("trunkDepth"), y: this.get("torsoLength2") });
+
+            /*
             pd.torso.set("size",   
                 { x: this.get("trunkDepth"), y: this.get("torsoLength") * 1.48 });
+                */
 
             pd.upperLeg.set("size",   
                 { x: this.get("upperLegLength"), y: this.get("upperLegWidth") });
@@ -217,6 +258,7 @@ define(["./scaledPolygons", "backbone"], function(pollyColl, Backbone){
             wheelDiameter: 24,
             seatBackWidth: 2,
             seatBackHeight: 8,
+            axleDistance: 3.5,
             seatDepth: 13,
             foamHeight: 2
         },
@@ -263,6 +305,7 @@ define(["./scaledPolygons", "backbone"], function(pollyColl, Backbone){
         initialize: function() {
             this.resetChair();
             this.on("change:wheelDiameter", this.resetChair);
+            this.on("change:axleDistance", this.resetChair);
             this.on("change:seatBackWidth", this.resetChair);
             this.on("change:seatBackHeight", this.resetChair);
             this.on("change:seatDepth", this.resetChair);
@@ -272,16 +315,6 @@ define(["./scaledPolygons", "backbone"], function(pollyColl, Backbone){
     });
 
 
-
-
-    /*
-    var WheelChair = Backbone.Model.extend({
-        defaults: conf.chair,
-        initialize: function() {
-        },
-    });
-    */
-    
     var conf = {
         showImages: true,
         skeleton: true,
@@ -299,10 +332,9 @@ define(["./scaledPolygons", "backbone"], function(pollyColl, Backbone){
     };
 
     conf.polyCraft = new ImageData({
-                name: "hip",
+                name: "chest",
                 type: "poly",
-                //size: { x: 100, y: 110 },
-                size: { x: 10, y: 11 },
+                size: { x: 10, y: 17 },
                 pos: { z: 10 },
                 cat: HM_TORSO,
                 mask: personMask

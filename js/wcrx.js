@@ -202,6 +202,15 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
                 { x: -X('upperArm')/2, y: Y('upperArm')/2 },
                 { x: -X('lowerArm')/2, y: -Y('lowerArm')/2 });
 
+        var t1 = getRevJoint.call(this, bodies.chest, bodies.midsection,
+                { x: 0, y: Y('chest')/2 },
+                { x: 0, y: 0 });
+
+        var t2 = getRevJoint.call(this, bodies.waist, bodies.midsection,
+                { x: 0, y: Y('waist')/2 },
+                { x: 0, y: 0 });
+
+        /*
         var hip = getRevJoint.call(this, bodies.upperLeg, bodies.torso, 
                 { x: -X('upperLeg')/2, y: Y('upperLeg')/2 },
                 { x: -X('torso')/2 * 0.5, y: Y('torso')/2 });
@@ -209,16 +218,18 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         var shoulder = getRevJoint.call(this, bodies.upperArm, bodies.torso, 
                 { x: -X('upperArm')/2, y: -Y('upperArm')/2 },
                 { x: -X('torso')/2, y: -(Y('torso')/2)*0.4 });
+                */
 
         // dynamic joints for person control
-        joints.hip = hip;
+        //joints.hip = hip;
         joints.knee = knee;
         joints.elbow = elbow;
-        joints.shoulder = shoulder;
+        //joints.shoulder = shoulder;
         parts.initted = true;
 
         if(!this.chairParts.initted) return;
 
+        /***** ADD THIS BACK IN SORTOF
         var seat = this.chairParts.foam;
         var seatTarget = this.chairPartBodies.foam.GetPosition();
         var sx = this.inches(X('torso')/2) + this.inches(7);
@@ -226,6 +237,7 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         seatTarget.Add(new b2Vec2(sx, sy));
         console.log('target: '+seatTarget.x+', '+seatTarget.y);
         bodies.torso.SetPosition(seatTarget);
+        ********/
           
         var wrist = bindWrist.call(this);
     }
@@ -275,33 +287,36 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         axle.SetLimits(-0.3 * Math.PI, 0);
         axle.EnableLimit(true);
 
-        // could make this a prismatic joint?
+        // TODO have "config" or setup convert from inches
+        var backToAxle = this.inches(this.chairMeasures.get('axleDistance'));
+        var vertPipeWidth = X('handlebars') * 0.25;
+
         var slider = getWeldJoint.call(this, bodies.raiseBar, bodies.LBar,
                 { x: 0, y: -Y('raiseBar')/2 },
-                { x: -X('LBar')/2 * 0.6, y: -Y('LBar')/2 }); // TODO from back-to-axle distance
+                { x: -X('LBar')/2 + backToAxle, y: -Y('LBar')/2 }); 
 
         var frameWeld = getWeldJoint.call(this, bodies.handlebars, bodies.frameConnector,
                 { x: X('handlebars')/2, y: Y('handlebars')/2 * 0.5 },
                 { x: 0, y: -Y('frameConnector')/2 });
 
+        var seatWeld = getWeldJoint.call(this, bodies.LBar, bodies.foam, 
+                { x: -X('LBar')/2 + vertPipeWidth, y: -Y('LBar')/2 },  
+                { x: -X('foam')/2, y: Y('foam')/2 });
+
         var backWeld = getWeldJoint.call(this, bodies.handlebars, bodies.seatBack, 
-                { x: X('handlebars')/2, y: Y('handlebars')/2 },
+                { x: X('handlebars')/2, y: Y('handlebars')/2 - Y('foam') },
                 { x: -X('seatBack')/2, y: Y('seatBack')/2 });
 
-        var backToAxle = this.inches(3.5); // TODO make this real
-        var seatWeld = getWeldJoint.call(this, bodies.LBar, bodies.foam, // TODO fixture or spacer
-                { x: -X('LBar')/2 + backToAxle, y: -Y('LBar')/2 },  // TODO handlebar width inference
-                { x: -X('foam')/2, y: Y('foam')/2 });
 
         var handleBarPos = getWeldJoint.call(this, bodies.LBar, bodies.handlebars,
                 { x: -X('LBar')/2, y: 0 },
-                { x: X('handlebars')/2 * 0.6, y: Y('handlebars') });
+                { x: X('handlebars')/2 - vertPipeWidth, y: Y('handlebars') });
 
         var frontAxle = getRevJoint.call(this, bodies.supportWheel, bodies.frontConnector, 
                 { x: 0, y: 0 },
                 { x: -X('frontConnector')/2 * 0.7, y: Y('frontConnector')/2 * 0.8 });
 
-        var frontWeld = getWeldJoint.call(this, bodies.LBar, bodies.frontConnector, // TODO
+        var frontWeld = getWeldJoint.call(this, bodies.LBar, bodies.frontConnector, 
                 { x: X('LBar')/2 * 0.7, y: Y('LBar')/2 },
                 { x: 0, y: -Y('frontConnector')/2 * 0.8 });
 
@@ -373,6 +388,7 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
     function enforcePersonConstraints() {
         var gain = 20.0;
 
+        /****** ADD THIS BACK IN SORT OF
         var hip = this.humanParts.joints.hip;
         var angleError = hip.GetJointAngle() - (0.0 * Math.PI); // change
         //if(this.chairParts.initted || angleError > 0.4 * Math.PI || angleError < -0.8 * Math.PI) {
@@ -384,7 +400,7 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
             hip.SetMaxMotorTorque(20);
                     gain = 20.0;
         } else hip.SetMaxMotorTorque(0);
-
+        ******/
 
         // keep knee from bending backwards
         var knee = this.humanParts.joints.knee;
@@ -501,28 +517,32 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         bodyDef.type = b2Body.b2_dynamicBody;
         bodyDef.position.Set(chairX+this.inches(15), chairY-this.inches(30));
 
-        //this.initChair();
-        //this.initPerson();
+        this.initChair();
+        this.initPerson();
 
         this.SIG_destroyChair = false;
         this.SIG_destroyPerson = false;
         this.haltUpdate = false;
 
-
+        return;
         var polygons = [[
-        {x:0,y:0.4117647111415863},
-        {x:0.0350000262260437,y:0.877500057220459},
-        {x:0.8449999094009399,y:0.877500057220459},
-        {x:0.9724999666213989,y:0.6899999976158142},
-        {x:0.9599999189376831,y:0.26249998807907104},
-        {x:0.8500000238418579,y:0.04249995946884155},
-        {x:0.29750001430511475,y:0.005000025033950806},
-        {x:0.0882352963089943,y:0.1764705777168274}
+        {x:0.025641025975346565,y:1.076923131942749},
+        {x:0.9399998188018799,y:0.02750009298324585},
+        {x:0.22499990463256836,y:0.017500102519989014},
+        {x:0.13499987125396729,y:0.1400001049041748},
+        {x:0,y:0.6666666865348816}
+        ],[
+        {x:0.9399998188018799,y:0.02750009298324585},
+            {x:0.025641025975346565,y:1.076923131942749},
+            {x:0.1794871836900711,y:1.4871795177459717},
+            {x:0.5949998497962952,y:1.4150002002716064},
+            {x:0.8974359035491943,y:0.9230769276618958},
+            {x:0.9849997758865356,y:0.6400001645088196}
         ]];
 
 
         var img = new Image();
-        img.src = 'images/v2/hip.svg';
+        img.src = 'images/v2/chest.svg';
     bodyDef.userData = ud = this.config.polyCraft;
     ud.set('img', img);
 
@@ -534,9 +554,9 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         x: this.inches(_size.x),
         y: this.inches(_size.y)
     };
-    //dims = { x: 48, y: 49  };
+    dims = { x: 48, y: 120  };
     //dims = { x: size.x * this.config.PTM, y: size.y * this.config.PTM };
-    dims = { x: size.x * this.config.PTM, y: size.y * this.config.PTM };
+    //dims = { x: size.x * this.config.PTM, y: size.y * this.config.PTM };
     console.log("size: "+size.x +", "+size.y);
     console.log("dims: "+dims.x +", "+dims.y);
     ud.set('dims', dims);
@@ -552,31 +572,28 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
        var vertices = [];
         var poly;
        for(var p=0; p<polygon.length; p++) {
-          var someVec = new b2Vec2(size.x * polygon[p].x, -size.y * polygon[p].y); 
-          var cent = new b2Vec2(-0.12, 0.12);
-          cent.Add(someVec);
+
+          var scaledVec = new b2Vec2(size.x * polygon[p].x, -size.y * polygon[p].y); 
+          var cent = new b2Vec2(-0.12, 0.33); // center change is specific to configured shape
+          scaledVec.Add(cent);
           
-          vertices.push(cent);
-
-          var ratioVec = new b2Vec2(cent.x/this.inches(10), cent.y/this.inches(11));
-
-          // original pixels for match
-          newVertexArray.push(ratioVec); 
+          vertices.push(scaledVec);
+           
+          // now output the "normalized" vector for future use
+          //var normalized = new b2Vec2(scaledVec.x/size.x, scaledVec.y/size.y);
+          var normalized = new b2Vec2(scaledVec.x/this.pixels(dims.x), scaledVec.y/this.pixels(dims.y));
+          newVertexArray.push(normalized);
         }
             npolygons.push(newVertexArray);
-           poly = new b2PolygonShape();
+            poly = new b2PolygonShape();
             poly.SetAsVector(vertices, vertices.length);
-            //poly = b2PolygonShape.AsVector(vertices, vertices.length);
             fixDef.shape = poly;
             bb.CreateFixture(fixDef);
     }
 
     console.log(JSON.stringify(npolygons));
 
-
         //////////////////////////////
-
-
     };
 
     WCRX.prototype.destroy = function() {
