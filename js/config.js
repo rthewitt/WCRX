@@ -69,6 +69,14 @@ define(["./scaledPolygons", "backbone"], function(pollyColl, Backbone){
                 cat: HM_SOLID,
                 mask: personMask
             }),
+            kneeJ: new ImageData({
+                name: "knee",
+                type: "circle",
+                size: null,
+                pos: { z: 0 },
+                cat: HM_JOINT,
+                mask: personMask
+            }),
             upperLeg: new ImageData({
                 name: "upper-leg",
                 type: "poly",
@@ -77,8 +85,7 @@ define(["./scaledPolygons", "backbone"], function(pollyColl, Backbone){
                 pos: { z: 3 },
                 cat: HM_SOLID,
                 mask: personMask
-            })//,
-            /*
+            }),
             lowerLeg: new ImageData({
                 name: "lower-leg",
                 type: "poly",
@@ -88,13 +95,11 @@ define(["./scaledPolygons", "backbone"], function(pollyColl, Backbone){
                 cat: HM_SOLID,
                 mask: personMask
             })
-            */
         }
     }
 
     function getChair() {
         return {
-            // we'll infer this from seatback height + X"
             seatBack: new ImageData({
                 name: "seat-back",
                 type: "box",
@@ -111,7 +116,6 @@ define(["./scaledPolygons", "backbone"], function(pollyColl, Backbone){
                 cat: WC_BARRIER,
                 mask: seatMask
             }),
-            // seat back
             handlebars: new ImageData({
                 name: "handlebars",
                 type: "poly",
@@ -189,12 +193,12 @@ define(["./scaledPolygons", "backbone"], function(pollyColl, Backbone){
             lowerArmWidth: 4,
             upperArmLength: 11,
             upperArmWidth: 4.5,
-            torsoLength: 22,
+            torsoLength: 17,
             torsoLength2: 10,
-            midWidth: 3.4,
+            contactPoint: 2.0, // seat contact forward
             trunkDepth: 9,
             upperLegLength: 22,
-            upperLegWidth: 7,
+            upperLegWidth: 6,
             lowerLegLength: 20,
             lowerLegWidth: 5
         },
@@ -217,22 +221,28 @@ define(["./scaledPolygons", "backbone"], function(pollyColl, Backbone){
             pd.waist.set("size",   
                 { x: this.get("upperLegWidth"), y: this.get("upperLegWidth") });
 
+
+            var mh = this.get('torsoLength') * (6.8/17),
+                ch = this.get('torsoLength') - mh;
+
             pd.midsection.set("size", 
-                { r: this.get("midWidth") });
+                { r: mh/2 });
 
             pd.chest.set("size",   
-                { x: this.get("trunkDepth"), y: this.get("torsoLength2") });
+                { x: this.get("trunkDepth"), y: ch });
+
+            var kRad = this.get("lowerLegWidth")/2; 
+            pd.kneeJ.set("size", { r: kRad });
 
             pd.upperLeg.set("size",   
-                { x: this.get("upperLegLength"), y: this.get("upperLegWidth") });
+                { x: this.get("upperLegLength") - kRad, y: this.get("upperLegWidth") });
 
-            /*
             pd.lowerLeg.set("size",   
-                { x: this.get("lowerLegLength"), y: this.get("lowerLegWidth") * 2 });
-                */
+                { x: this.get("lowerLegLength") - kRad, y: this.get("lowerLegWidth") });
         },
         initialize: function() {
             this.resetPerson();
+            this.on("change:contactPoint", this.resetPerson);
             this.on("change:lowerArmLength", this.resetPerson);
             this.on("change:lowerArmWidth", this.resetPerson),
             this.on("change:upperArmLength", this.resetPerson),
@@ -249,8 +259,8 @@ define(["./scaledPolygons", "backbone"], function(pollyColl, Backbone){
     var ChairMeasures = Backbone.Model.extend({
         defaults: {
             wheelDiameter: 24,
-            seatBackWidth: 4.5,
-            seatBackHeight: 15,
+            seatBackWidth: 0.4,
+            seatBackHeight: 10,
             axleDistance: 3.5,
             seatDepth: 13,
             foamHeight: 2
@@ -263,14 +273,14 @@ define(["./scaledPolygons", "backbone"], function(pollyColl, Backbone){
         resize: function() {
             var cd = this.get("wheelChair");
             cd.seatBack.set("size",   
-                { x: this.get("seatBackWidth"), y: this.get("seatBackHeight") });
+                { x: this.get("seatBackWidth") , y: this.get("seatBackHeight") - this.get("foamHeight") });
 
             cd.foam.set("size", 
                 { x: this.get("seatDepth"), y: this.get("foamHeight") }); // TODO different model width
 
             var sbh = this.get("seatBackHeight");
             cd.handlebars.set("size",   
-                { x: 8 , y: (4/3)*sbh  });
+                { x: 6 , y: (4/3)*sbh  });
                 //{ x: (3/4)*sbh , y: (4/3)*sbh  });
 
             cd.wheel.set("size", 
@@ -281,19 +291,18 @@ define(["./scaledPolygons", "backbone"], function(pollyColl, Backbone){
 
 
             cd.frameConnector.set("size", 
-                    { x: 4, y: 6 }); 
-
-            cd.seatBack.set("size", 
-                    { x: 2 , y: this.get("seatBackHeight") - this.get("foamHeight") });
+                    { x: 3, y: 6 }); 
 
             cd.frontConnector.set("size", 
                     { x: 4, y: 7 }); // TODO determine from height differences
 
             cd.raiseBar.set("size", 
-                    { x: 3, y: 7 }); // x=seatDepth + 5", y=? TODO determine from height differences 
+                    { x: 2.25, y: 5 }); 
 
+            // size estimated based on google image search
             cd.LBar.set("size", 
-                    { x: 10 + this.get("seatDepth"), y: 13 });
+                    { x: 18.5, y: 11 });
+
 
             cd.footRest.set("size", { x: 4, y: 6 });
         },
@@ -327,9 +336,9 @@ define(["./scaledPolygons", "backbone"], function(pollyColl, Backbone){
     };
 
     conf.polyCraft = new ImageData({
-                name: "handlebars",
+                name: "lower-leg",
                 type: "poly",
-                size: { x: 10, y: 11 },
+                size: { x: 30, y: 22 },
                 pos: { z: 10 },
                 cat: HM_SOLID,
                 mask: personMask

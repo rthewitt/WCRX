@@ -92,7 +92,7 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
                 dims = { x: 2 * size.r * PTM, y: 2 * size.r * PTM };
                 //console.log('_size: '+JSON.stringify(_size));
                 //console.log('size: '+JSON.stringify(size));
-                console.log(dims);
+                //console.log(dims);
                 break;
             case 'poly':
                 shape = [];
@@ -173,7 +173,7 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
 
         var bodyDef = new b2BodyDef();
         bodyDef.type = b2Body.b2_dynamicBody;
-        bodyDef.position.Set(chairX, chairY-1);
+        bodyDef.position.Set(chairX+this.inches(2), chairY-1);
 
 
         var parts = this.humanParts, bodies = this.humanPartBodies;
@@ -194,11 +194,21 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         }
 
         var joints = this.humanParts.joints;
-        /*
-        var knee = getRevJoint.call(this, bodies.upperLeg, bodies.lowerLeg, 
-                { x: X('upperLeg')/2 * 0.85, y: -Y('upperLeg') * 0.1 },
-                { x: -X('lowerLeg')/2, y: Y('lowerLeg')/2 * 0.5 });
+        // joints have gotten more complicated (additional bodies)
+        
+        var knee = bodies.kneeJ;
+        var kr = person['kneeJ'].get('size').r;
 
+        var knee_1 = getRevJoint.call(this, knee, bodies.lowerLeg, 
+                { x: 0, y: 0 },
+                { x: -X('lowerLeg')/2, y: 0 });
+
+        // should be fixture
+        var knee_2 = getWeldJoint.call(this, bodies.upperLeg, knee,
+                { x: X('upperLeg')/2, y: kr * 0.60 },
+                { x: 0, y: 0 });
+
+        /*
         var elbow = getRevJoint.call(this, bodies.upperArm, bodies.lowerArm, 
                 { x: -X('upperArm')/2, y: Y('upperArm')/2 },
                 { x: -X('lowerArm')/2, y: -Y('lowerArm')/2 });
@@ -212,19 +222,20 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         var t1 = getRevJoint.call(this, bodies.chest, bodies.midsection,
                 { x: 0, y: Y('chest')/2 },
                 { x: 0, y: -person['midsection'].get('size').r * (2/3) }, true);
-        //t1.SetLimits(-0.3 * Math.PI, 0.5 * Math.PI);
-        
-        t1.SetLimits(-0.3 * Math.PI, 0);
+
+        // The order of these limits is the reverse of my assumption
+        t1.SetLimits(-1.9 * Math.PI, 0.2 * Math.PI);
         t1.EnableLimit(true);
+        t2.SetLimits(-1.9 * Math.PI, 0.2 * Math.PI);
+        t2.EnableLimit(true);
         
 
         var hip = getRevJoint.call(this, bodies.upperLeg, bodies.waist, 
-                { x: -X('upperLeg')/2, y: 0 },
-                { x: -X('waist')/2, y: 0 });
-                //{ x: -X('upperLeg')/2, y: Y('upperLeg')/2 },
-                //{ x: -X('waist')/2, y: Y('waist')/2 });
-        /*
+                { x: -X('upperLeg')/2, y: Y('upperLeg')/2 },
+                { x: -X('waist')/2, y: Y('waist')/2 });
 
+
+        /*
         var shoulder = getRevJoint.call(this, bodies.upperArm, bodies.torso, 
                 { x: -X('upperArm')/2, y: -Y('upperArm')/2 },
                 { x: -X('torso')/2, y: -(Y('torso')/2)*0.4 });
@@ -232,7 +243,8 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
 
         // dynamic joints for person control
         joints.hip = hip;
-        //joints.knee = knee;
+        joints.knee_1 = knee_1;
+        joints.knee_2 = knee_2;
         //joints.elbow = elbow;
         //joints.shoulder = shoulder;
         joints.t1 = t1;
@@ -241,14 +253,37 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
 
         if(!this.chairParts.initted) return;
 
+        var startPos = this.chairPartBodies.wheel.GetPosition();
+        startPos.Add(new b2Vec2(0, -this.inches(20)));
+        bodies.waist.SetPosition(startPos);
+        var rr = person['midsection'].get('size').r;
+        var newPos = new b2Vec2(-this.inches(0), -rr);
+        newPos.Add(startPos);
+        bodies.midsection.SetPosition(newPos);
+        var secondPos = new b2Vec2(-this.inches(0), -(rr+Y('chest')));
+        secondPos.Add(newPos);
+        bodies.chest.SetPosition(secondPos);
+
+        var sillyForce = new b2Vec2(-1, 1);
+        bodies.midsection.ApplyForce(sillyForce, new b2Vec2(0, 0));
+
+
+        var llx = parts.upperLeg.get('size').x;
+        var lly = parts.upperLeg.get('size').y/2;
+        var llPos = new b2Vec2(llx, lly);
+        llPos.Add(startPos);
+        bodies.lowerLeg.SetPosition(llPos);
+
         // individual will have a measured distance from seatback
         // where they make contact with seat bottom
         var seat = this.chairParts.foam;
-        var delta = this.inches(5);
+        var extra = this.chairParts.seatBack.get('size').x;
+        var delta = this.humanMeasures.get('contactPoint');
+        var forward = this.inches(delta) + extra;
         var ss = seat.get('size')
         var seatRev = getRevJoint.call(this, bodies.waist, this.chairPartBodies.foam,
                 { x: -X('waist')/2, y: Y('waist')/2 }, 
-                { x: -ss.x/2 + delta, y: -ss.y/2 }, true); 
+                { x: -ss.x/2 + forward, y: -ss.y/2 }, true); 
 
         /*
         // TODO here's that measurement
@@ -285,7 +320,7 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
 
         var bodyDef = new b2BodyDef();
         bodyDef.type = b2Body.b2_dynamicBody;
-        bodyDef.position.Set(chairX, chairY-this.inches(10));
+        bodyDef.position.Set(chairX, chairY);
 
         var parts = this.chairParts, bodies = this.chairPartBodies;
 
@@ -311,16 +346,15 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         axle.SetLimits(-0.3 * Math.PI, 0);
         axle.EnableLimit(true);
 
-        // TODO have "config" or setup convert from inches
-        var backToAxle = this.inches(this.chairMeasures.get('axleDistance'));
-        var vertPipeWidth = X('handlebars') * 0.25;
+        var COG = this.inches(this.chairMeasures.get('axleDistance'));
+        var vertPipeWidth = this.inches(1); 
 
         var slider = getWeldJoint.call(this, bodies.raiseBar, bodies.LBar,
-                { x: 0, y: -Y('raiseBar')/2 },
-                { x: -X('LBar')/2 + backToAxle, y: -Y('LBar')/2 }); 
+                { x: X('raiseBar')-this.inches(2), y: -Y('raiseBar')/2 },
+                { x: -X('LBar')/2 + COG, y: -Y('LBar')/2 }); 
 
         var frameWeld = getWeldJoint.call(this, bodies.handlebars, bodies.frameConnector,
-                { x: X('handlebars')/2, y: Y('handlebars')/2 * 0.5 },
+                { x: X('handlebars')/2, y: Y('handlebars')/2 - (Y('frameConnector') * 0.5) },
                 { x: 0, y: -Y('frameConnector')/2 });
 
         var seatWeld = getWeldJoint.call(this, bodies.LBar, bodies.foam, 
@@ -330,7 +364,6 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         var backWeld = getWeldJoint.call(this, bodies.handlebars, bodies.seatBack, 
                 { x: X('handlebars')/2, y: Y('handlebars')/2 - Y('foam') },
                 { x: -X('seatBack')/2, y: Y('seatBack')/2 });
-
 
         var handleBarPos = getWeldJoint.call(this, bodies.LBar, bodies.handlebars,
                 { x: -X('LBar')/2, y: -Y('LBar')/2 },
@@ -345,7 +378,7 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
                 { x: 0, y: -Y('frontConnector')/2 * 0.8 });
 
         var footRest = getWeldJoint.call(this, bodies.LBar, bodies.footRest,
-                { x: X('LBar')/2, y: Y('LBar')/2 }, // TODO minus bar width
+                { x: X('LBar')/2, y: Y('LBar')/2 },
                 { x: X('footRest')/2, y: -Y('footRest')/2  * 0.5 }); // TODO distance determined by gap / angle
 
         // dynamic joints for control
@@ -460,21 +493,6 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
             // Latest attempt, not needed every update, just wanted to tip.  We can set angle on bodypart instead
             //this.humanPartBodies.chest.ApplyForce(new b2Vec2(-0.2, 0), new b2Vec2(0, 0));
 
-            // try to keep foot stable without collision
-            /*
-            var footRest = this.chairParts.footRest, lowerLeg = this.humanParts.lowerLeg;
-            var stableFoot = new b2DistanceJointDef();
-            stableFoot.bodyA = this.humanPartBodies.lowerLeg;
-            stableFoot.bodyB = this.chairPartBodies.footRest;
-            stableFoot.collideConnected = false;
-            stableFoot.anchorA = new b2Vec2(lowerLeg.size.x/2, 0);
-            stableFoot.anchorB = new b2Vec2(0, 0);
-            stableFoot.length = this.inches(10);
-            stableFoot.dampingRation = 0.1;
-            stableFoot.frequencyHz = 15;
-            this.world.CreateJoint(stableFoot);
-            */
-
             //var XXXseat = this.chairParts.seatBack;
             /*
             var XXXseat = this.chairParts.foam;
@@ -504,7 +522,6 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         this.world.Step(1.0 / 60, 10, 10);
 
         if(!!this.SIG_destroyChair) {
-            console.log('was true');
             this.haltUpdate = true;
             _destroyChair.call(this);
             this.haltUpdate = false;
@@ -525,6 +542,7 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
 
         this.world = new b2World(
             new b2Vec2(0, 10), // gravity 
+            //new b2Vec2(0, 0), // no gravity
             true //allow sleep
         );
         createGround.call(this); 
@@ -542,6 +560,13 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         bodyDef.position.Set(chairX+this.inches(15), chairY-this.inches(30));
 
         this.initChair();
+        // test to fix jolt
+        this.update(function(){});
+        this.update(function(){});
+        this.update(function(){});
+        this.update(function(){});
+        // caused serious problems.  This means we have a human construction problem
+        // in fact, toggling person *used* to be the stable technique
         this.initPerson();
 
         this.SIG_destroyChair = false;
@@ -550,43 +575,33 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
 
         return;
         var polygons = [[
-        {x:0.8449999094009399,y:1.6750000715255737},
-        {x:0.9450000524520874,y:1.7050000429153442},
-        {x:0.9800000190734863,y:1.6600000858306885},
-        {x:0.9699999094009399,y:0.02249997854232788},
-        {x:0.7775000333786011,y:0.02249997854232788},
-        {x:0.7749999761581421,y:1.6200001239776611}
+        {x:0.6416665315628052,y:0.30166682600975037},
+        {x:0.57833331823349,y:0.03500014916062355},
+        {x:0.19833329319953918,y:0.006666809786111116},
+        {x:0.048333290964365005,y:0.03333348408341408},
+        {x:-5.9604644775390625E-8,y:0.08500014990568161},
+        {x:0,y:0.35593220591545105}
         ],[
-        {x:0.9450000524520874,y:1.7050000429153442},
-            {x:0.8449999094009399,y:1.6750000715255737},
-            {x:0.8449999094009399,y:2.06000018119812},
-            {x:0.9450000524520874,y:2.120000123977661}
-        ],[
-        {x:0.9450000524520874,y:2.120000123977661},
-            {x:0.8449999094009399,y:2.06000018119812},
-            {x:0.6899999380111694,y:2.130000114440918},
-            {x:0.7150000333786011,y:2.2950000762939453}
-        ],[
-        {x:0.7150000333786011,y:2.2950000762939453},
-            {x:0.6899999380111694,y:2.130000114440918},
-            {x:0.04500001668930054,y:2.134999990463257},
-            {x:0.04500001668930054,y:2.2950000762939453}
+        {x:0.57833331823349,y:0.03500014916062355},
+            {x:0.6416665315628052,y:0.30166682600975037},
+            {x:0.9683334231376648,y:0.2983335256576538},
+            {x:0.9933333992958069,y:0.261666864156723},
+            {x:0.9883333444595337,y:0.11666681617498398}
         ]];
 
         var img = new Image();
-        img.src = 'images/v2/handlebars.svg';
+        img.src = 'images/v2/lower-leg.svg';
     bodyDef.userData = ud = this.config.polyCraft;
     ud.set('img', img);
 
     var _size = ud.get('size');
     var shape, size, dims;
     shape = [];
-    console.log('_size: '+_size.x + ', '+_size.y);
     size = {
         x: this.inches(_size.x),
         y: this.inches(_size.y)
     };
-    dims = { x: 48, y: 120  };
+    dims = { x: 142, y: 41  };
     //dims = { x: size.x * this.config.PTM, y: size.y * this.config.PTM };
     //dims = { x: size.x * this.config.PTM, y: size.y * this.config.PTM };
     console.log("size: "+size.x +", "+size.y);
@@ -606,7 +621,7 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
        for(var p=0; p<polygon.length; p++) {
 
           var scaledVec = new b2Vec2(size.x * polygon[p].x, -size.y * polygon[p].y); 
-          var cent = new b2Vec2(-0.12, 0.33); // center change is specific to configured shape
+          var cent = new b2Vec2(-0.38, 0.1); // center change is specific to configured shape
           scaledVec.Add(cent);
           
           vertices.push(scaledVec);

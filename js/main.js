@@ -2,6 +2,7 @@
         paths: {
             "jquery": ["http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min", 
                         "libs/jquery/dist/jquery.min"],
+            "jquery.customSelect": "libs/jquery.customSelect/jquery.customSelect.min",
             "underscore": "libs/underscore/underscore",
             "backbone": "libs/backbone/backbone",
             "box2dweb": "libs/box2dweb/Box2dWeb-2.1.a.3.min"
@@ -11,13 +12,19 @@
                 exports: "Box2D"
             },
             "backbone": {
-            deps: ["jquery", "underscore"],
-            exports: "Backbone"
-        }
-    },
+                deps: ["jquery", "underscore"],
+                exports: "Backbone"
+            },
+            "jquery.customSelect": {
+                deps: ["jquery"]
+            }
+        },
 });
 
-define(["require", "backbone", "box2dweb", "./wcrx", "./graphics", "./config"], function(require, Backbone, Box2D, WCRX, graphics, config) {
+
+define(["jquery", "backbone", "box2dweb", "./wcrx", "./graphics", "./config", "jquery.customSelect"], function($, Backbone, Box2D, WCRX, graphics, config) {
+
+    $('select').each(function(i, el) { $(el).customSelect(); });
 
      function getElementPosition(element) {
         var elem=element, tagname="", x=0, y=0;
