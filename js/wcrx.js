@@ -234,6 +234,10 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
                 { x: -X('upperLeg')/2, y: Y('upperLeg')/2 },
                 { x: -X('waist')/2, y: Y('waist')/2 });
 
+        var foot = getWeldJoint.call(this, bodies.lowerLeg, bodies.foot,
+                { x: X('lowerLeg')/2, y: Y('lowerLeg')/2 * 0.65 },
+                { x: -X('foot')/2, y: Y('foot')/2 });
+
 
         /*
         var shoulder = getRevJoint.call(this, bodies.upperArm, bodies.torso, 
@@ -268,11 +272,16 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         bodies.midsection.ApplyForce(sillyForce, new b2Vec2(0, 0));
 
 
-        var llx = parts.upperLeg.get('size').x;
-        var lly = parts.upperLeg.get('size').y/2;
-        var llPos = new b2Vec2(llx, lly);
+        var ulx = parts.upperLeg.get('size').x;
+        var uly = parts.upperLeg.get('size').y/2;
+        var llPos = new b2Vec2(ulx, uly);
         llPos.Add(startPos);
         bodies.lowerLeg.SetPosition(llPos);
+        var llx = parts.lowerLeg.get('size').x;
+        var lly = parts.lowerLeg.get('size').y/2;
+        var footPos = new b2Vec2(lly, llx);
+        footPos.Add(llPos);
+        bodies.foot.SetPosition(footPos);
 
         // individual will have a measured distance from seatback
         // where they make contact with seat bottom
@@ -534,7 +543,7 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
 
         this.world.DrawDebugData();
         this.world.ClearForces();
-        CB(this.world);
+        if(CB) CB(this.world);
     }
 
     WCRX.prototype.reset = function() {
@@ -561,12 +570,8 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
 
         this.initChair();
         // test to fix jolt
-        this.update(function(){});
-        this.update(function(){});
-        this.update(function(){});
-        this.update(function(){});
-        // caused serious problems.  This means we have a human construction problem
-        // in fact, toggling person *used* to be the stable technique
+        var self = this;
+        [1, 2, 3, 4].forEach(function(){self.update()});
         this.initPerson();
 
         this.SIG_destroyChair = false;
@@ -575,22 +580,18 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
 
         return;
         var polygons = [[
-        {x:0.6416665315628052,y:0.30166682600975037},
-        {x:0.57833331823349,y:0.03500014916062355},
-        {x:0.19833329319953918,y:0.006666809786111116},
-        {x:0.048333290964365005,y:0.03333348408341408},
-        {x:-5.9604644775390625E-8,y:0.08500014990568161},
-        {x:0,y:0.35593220591545105}
-        ],[
-        {x:0.57833331823349,y:0.03500014916062355},
-            {x:0.6416665315628052,y:0.30166682600975037},
-            {x:0.9683334231376648,y:0.2983335256576538},
-            {x:0.9933333992958069,y:0.261666864156723},
-            {x:0.9883333444595337,y:0.11666681617498398}
-        ]];
+        {x:0.42424237728118896,y:2.10606050491333},
+        {x:0.7333333492279053,y:2.7333333492279053},
+        {x:0.946969747543335,y:2.7121212482452393},
+        {x:0.9696969985961914,y:0.19696968793869019},
+        {x:0.8560604453086853,y:0.053030312061309814},
+        {x:0.5833332538604736,y:-0.0075757503509521484},
+        {x:0.04545462131500244,y:0.21212121844291687},
+        {x:0,y:1.1333333253860474}
+        ]]
 
         var img = new Image();
-        img.src = 'images/v2/lower-leg.svg';
+        img.src = 'images/v2/foot.svg';
     bodyDef.userData = ud = this.config.polyCraft;
     ud.set('img', img);
 
@@ -601,7 +602,7 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         x: this.inches(_size.x),
         y: this.inches(_size.y)
     };
-    dims = { x: 142, y: 41  };
+    dims = { x: 37, y: 105  };
     //dims = { x: size.x * this.config.PTM, y: size.y * this.config.PTM };
     //dims = { x: size.x * this.config.PTM, y: size.y * this.config.PTM };
     console.log("size: "+size.x +", "+size.y);
@@ -621,7 +622,7 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
        for(var p=0; p<polygon.length; p++) {
 
           var scaledVec = new b2Vec2(size.x * polygon[p].x, -size.y * polygon[p].y); 
-          var cent = new b2Vec2(-0.38, 0.1); // center change is specific to configured shape
+          var cent = new b2Vec2(-0.08, 0.28); // center change is specific to configured shape
           scaledVec.Add(cent);
           
           vertices.push(scaledVec);

@@ -94,6 +94,15 @@ define(["./scaledPolygons", "backbone"], function(pollyColl, Backbone){
                 pos: { z: 2 },
                 cat: HM_SOLID,
                 mask: personMask
+            }),
+            foot: new ImageData({
+                name: "foot",
+                type: "poly",
+                polygons: pollyColl.foot,
+                size: null,
+                pos: { z: 2 },
+                cat: HM_SOLID,
+                mask: personMask
             })
         }
     }
@@ -193,12 +202,12 @@ define(["./scaledPolygons", "backbone"], function(pollyColl, Backbone){
             lowerArmWidth: 4,
             upperArmLength: 11,
             upperArmWidth: 4.5,
-            torsoLength: 17,
-            torsoLength2: 10,
+            torsoLength: 25, // 26 total
             contactPoint: 2.0, // seat contact forward
             trunkDepth: 9,
             upperLegLength: 22,
             upperLegWidth: 6,
+            footLength: 9,
             lowerLegLength: 20,
             lowerLegWidth: 5
         },
@@ -222,8 +231,9 @@ define(["./scaledPolygons", "backbone"], function(pollyColl, Backbone){
                 { x: this.get("upperLegWidth"), y: this.get("upperLegWidth") });
 
 
-            var mh = this.get('torsoLength') * (6.8/17),
-                ch = this.get('torsoLength') - mh;
+            var aboveWaist = this.get("torsoLength") - this.get("upperLegWidth");
+            var mh = aboveWaist * (6.8/17), // experimental ratio
+                ch = aboveWaist - mh;
 
             pd.midsection.set("size", 
                 { r: mh/2 });
@@ -234,11 +244,16 @@ define(["./scaledPolygons", "backbone"], function(pollyColl, Backbone){
             var kRad = this.get("lowerLegWidth")/2; 
             pd.kneeJ.set("size", { r: kRad });
 
+            var footWidth = 4; // TODO ratio or input
+
             pd.upperLeg.set("size",   
                 { x: this.get("upperLegLength") - kRad, y: this.get("upperLegWidth") });
 
             pd.lowerLeg.set("size",   
-                { x: this.get("lowerLegLength") - kRad, y: this.get("lowerLegWidth") });
+                { x: this.get("lowerLegLength") - kRad - footWidth, y: this.get("lowerLegWidth") });
+
+            pd.foot.set("size",
+                { x: footWidth, y: this.get("footLength") }); 
         },
         initialize: function() {
             this.resetPerson();
@@ -260,7 +275,7 @@ define(["./scaledPolygons", "backbone"], function(pollyColl, Backbone){
         defaults: {
             wheelDiameter: 24,
             seatBackWidth: 0.4,
-            seatBackHeight: 10,
+            seatBackHeight: 13,
             axleDistance: 3.5,
             seatDepth: 13,
             foamHeight: 2
@@ -336,9 +351,9 @@ define(["./scaledPolygons", "backbone"], function(pollyColl, Backbone){
     };
 
     conf.polyCraft = new ImageData({
-                name: "lower-leg",
+                name: "foot",
                 type: "poly",
-                size: { x: 30, y: 22 },
+                size: { x: 7, y: 8 },
                 pos: { z: 10 },
                 cat: HM_SOLID,
                 mask: personMask
