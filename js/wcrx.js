@@ -59,7 +59,8 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
          fixDef.shape = new b2PolygonShape;
          fixDef.shape.SetAsBox(20, 2);
          bodyDef.position.Set(10, this.pixels(300) + 1.9);
-         var gfx = this.world.CreateBody(bodyDef).CreateFixture(fixDef);
+         this.ground = this.world.CreateBody(bodyDef);
+         var gfx = this.ground.CreateFixture(fixDef);
          gfx.SetFilterData(gmd);
     }; 
 
@@ -586,10 +587,9 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         bodyDef.position.Set(chairX+this.inches(15), chairY-this.inches(30));
 
         this.initChair();
-        // test to fix jolt
-        var self = this;
-        [1, 2, 3, 4].forEach(function(){self.update()});
+        for(var x=0; x<25; x++) { this.update(); } // stabilize chair
         this.initPerson();
+
 
         this.SIG_destroyChair = false;
         this.SIG_destroyPerson = false;
@@ -660,6 +660,37 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
 
         //////////////////////////////
     };
+
+
+    WCRX.prototype.getBodyAtPos = function(pos) {
+         
+        var aabb = new b2AABB();
+        aabb.lowerBound.Set(pos.x - 0.001, pos.y - 0.001);
+        aabb.upperBound.Set(pos.x + 0.001, pos.y + 0.001);
+         
+        var body = null;
+         
+        // Query the world for overlapping shapes.
+        function GetBodyCallback(fixture)
+        {
+            var shape = fixture.GetShape();
+             
+            if (fixture.GetBody().GetType() != b2Body.b2_staticBody) {
+                var inside = shape.TestPoint(fixture.GetBody().GetTransform(), pos);
+                 
+                if (inside) {
+                    body = fixture.GetBody();
+                    return false;
+                }
+            }
+             
+            return true;
+        }
+         
+        this.world.QueryAABB(GetBodyCallback, aabb);
+        return body;
+    }
+
 
     WCRX.prototype.destroy = function() {
         this.world.ClearForces();

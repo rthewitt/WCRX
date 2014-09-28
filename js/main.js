@@ -62,15 +62,17 @@ define(["jquery", "backbone", "box2dweb", "./wcrx", "./graphics", "./config", "j
 
         var canvas = document.getElementById(cvs);
         var context = canvas.getContext('2d');
-        //var canvasPosition = getElementPosition(canvas);
+       
 
         var draw = graphics.getDraw(context);
 
         var sim = { 
             wcrx: wcrx,
             context: context,
+            canvasPos: getElementPosition(canvas),
             draw: graphics.getDraw(context)
         };
+
         sims.push(sim);
 
         resetSim(sim);
@@ -134,6 +136,7 @@ define(["jquery", "backbone", "box2dweb", "./wcrx", "./graphics", "./config", "j
         wcrx.reset();
         graphics.setDebug(wcrx.world, sim.context);
         wcrx.token = window.setInterval(function() {
+        //wcrx.token = window.setTimeout(function() {
             wcrx.update(sim.draw);
         }, 1000 / 60);
     }
@@ -142,6 +145,9 @@ define(["jquery", "backbone", "box2dweb", "./wcrx", "./graphics", "./config", "j
 
 
     $(document).ready(function($) {
+
+        isMouseDown = false;
+
         $(":input").focus(function() {
             $("label[for='" + this.id + "']").addClass("labelfocus");
         }).blur(function() {
@@ -150,27 +156,47 @@ define(["jquery", "backbone", "box2dweb", "./wcrx", "./graphics", "./config", "j
  
 
 
-        document.addEventListener("mousedown", function(e) {
+        $('#canvas').mousedown(function() {
            isMouseDown = true;
-           handleMouseMove(e);
-           document.addEventListener("mousemove", handleMouseMove, true);
-        }, true);
+        });
         
-        document.addEventListener("mouseup", function() {
-           document.removeEventListener("mousemove", handleMouseMove, true);
+        $('#canvas').mouseup(function() {
+           if(sims[0].mouseJoint) {
+               sims[0].wcrx.world.DestroyJoint(sims[0].mouseJoint);
+               sims[0].mouseJoint = undefined;
+           }
            isMouseDown = false;
-           mouseX = undefined;
-           mouseY = undefined;
-        }, true);
+        });
 
-       
-        function handleMouseMove(e) {
-            /*
-           mouseX = (e.clientX - canvasPosition.x) / config.PTM;
-           mouseY = (e.clientY - canvasPosition.y) / config.PTM;
-           console.log('x: '+mouseX + ', y: '+mouseY);
-           */
-        }
+        $('#canvas').mousemove(function(e) {
+           var sim = sims[0];
+           mouseX = (e.clientX - sim.canvasPos.x) / config.PTM;
+           mouseY = (e.clientY - sim.canvasPos.y) / config.PTM;
+           //console.log('x: '+mouseX + ', y: '+mouseY);
+
+           var p = new Box2D.Common.Math.b2Vec2(mouseX, mouseY); // verify
+           var body = sim.wcrx.getBodyAtPos(p);
+           if(isMouseDown && !sim.mouseJoint) {
+               if(body) {
+                    var def = new Box2D.Dynamics.Joints.b2MouseJointDef();
+                    
+                    def.bodyA = sim.wcrx.ground;
+                    def.bodyB = body;
+                    def.target = p;
+
+                    def.collideConnected = true;
+                    def.maxForce = 1000 * body.GetMass();
+                    def.dampingRatio = 0;
+
+                    console.log('bodyA '+sim.wcrx.ground+'\nbodyB '+body);
+                    sim.mouseJoint = sim.wcrx.world.CreateJoint(def);
+                    body.SetAwake(true);
+                }
+            }
+            if(sim.mouseJoint) sim.mouseJoint.SetTarget(p);
+        });
+
+
         $("#btn-reset").click(resetAll);
         $('#btn-debug').click(function() {
             config.debug = !config.debug;
