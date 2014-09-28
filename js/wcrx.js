@@ -51,8 +51,8 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
          var bodyDef = new b2BodyDef;
 
          var gmd = new b2FilterData();
-         gmd.categoryBits = this.config.groundCat;
-         gmd.maskBits = this.config.groundMask;
+         gmd.categoryBits = this.config.bits.GROUND;
+         gmd.maskBits = this.config.masks.ground;
          
          //create ground
          bodyDef.type = b2Body.b2_staticBody;
@@ -389,6 +389,23 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         var footRest = getWeldJoint.call(this, bodies.LBar, bodies.footRest,
                 { x: X('LBar')/2, y: Y('LBar')/2 },
                 { x: X('footRest')/2, y: -Y('footRest')/2  * 0.5 }); // TODO distance determined by gap / angle
+
+        // add footrest barrier
+        var fixDef = new b2FixtureDef;
+        var shape = new b2PolygonShape;
+        var size = {
+            x: X('footRest'), // debug view
+            y: this.inches(0.1)
+        };
+        shape.SetAsOrientedBox(size.x / 2, size.y / 2, new b2Vec2(0, Y('footRest')/2), 0); // angle?
+        fixDef.shape = shape;
+        var footStop = bodies.footRest.CreateFixture(fixDef);
+        
+        var ffd = new b2FilterData();
+        ffd.categoryBits = this.config.bits.WC_BARRIER;
+        ffd.maskBits = this.config.bits.HM_SOLID;
+        footStop.SetFilterData(ffd);
+        // end footrest barrier
 
         // dynamic joints for control
         joints.axle = axle;

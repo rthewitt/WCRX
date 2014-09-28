@@ -339,15 +339,28 @@ define(["./scaledPolygons", "backbone"], function(pollyColl, Backbone){
         skeleton: true,
         debug: false,
 
-        groundCat: GROUND,
-        groundMask: 0xFFFF,
-
         PTM: 190.0, // pixels to "meters"
         ITM: 39.3701,
 
         getChair: getChair,
         ChairMeasures: ChairMeasures,
-        HumanMeasures: HumanMeasures
+        HumanMeasures: HumanMeasures,
+
+        bits: {
+            GROUND : 1,
+            HM_SOLID : 2,
+            HM_JOINT : 4,
+            WC_WHEEL : 8,
+            WC_BARRIER : 16,
+            WC_FRAME : 32
+        },
+
+        masks: {
+            seat: seatMask,
+            person: personMask,
+            ground: 0xFFFF
+        },
+
     };
 
     conf.polyCraft = new ImageData({
