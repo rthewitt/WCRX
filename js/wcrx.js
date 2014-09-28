@@ -132,7 +132,6 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
 
             var fixture;
             if(idata.get('massless') === true) {
-                console.log(idata.get('name')+' was massless');
                 var orig = fixDef.density;
                 fixDef.density = 0.01;
                 fixture = body.CreateFixture(fixDef);
@@ -204,6 +203,13 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
 
         var joints = this.humanParts.joints;
         // joints have gotten more complicated (additional bodies)
+
+        var shoulder = bodies.shoulderJ;
+        var Rs = person['shoulderJ'].get('size').r;
+
+        var s_1 = getWeldJoint.call(this, shoulder, bodies.chest,
+                { x: 0, y: 0 },
+                { x: -X('chest')/2 * 0.4, y: -Y('chest')/2 * 0.55 });
         
         var knee = bodies.kneeJ;
         var kr = person['kneeJ'].get('size').r;
@@ -250,16 +256,18 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
                 { x: -X('foot')/2, y: Y('foot')/2 });
 
 
+        /*
         var shoulder = getRevJoint.call(this, bodies.upperArm, bodies.chest, 
                 { x: -X('upperArm')/2, y: -Y('upperArm')/2 },
                 { x: -X('chest')/2, y: -(Y('chest')/2) });
+                */
 
         // dynamic joints for person control
         joints.hip = hip;
         joints.knee_1 = knee_1;
         joints.knee_2 = knee_2;
         joints.elbow = elbow;
-        joints.shoulder = shoulder;
+        //joints.shoulder = shoulder;
         joints.t1 = t1;
         joints.t2 = t2;
         parts.initted = true;
@@ -685,6 +693,28 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
 
     };
 
+    WCRX.prototype.snapshot = function() {
+        // W = [ ( seatWidth + axle delta ) - chestWidth ] / 2
+        var Ws = this.chairMeasures.get('seatWidth'),
+            AxDelta = 4, // TODO measure this
+            Cw = this.humanMeasures.get('chestWidth'),
+            W = (Ws + AxDelta - Cw ) / 2;
+
+        // H = shoulder y - wheelpoint y
+        var wheel = this.chairParts.wheel,
+            wheelB = this.chairPartBodies.wheel;
+
+        var Hs = this.humanPartBodies.shoulderJ.GetPosition().y,
+            Hw = wheelB.GetPosition().y - wheel.get('size').r,
+            H = Hw - Hs; // inverted Y coordinates
+
+        H = H * this.config.ITM;
+
+        var U = this.humanMeasures.get('upperArmLength'),
+            L = this.humanMeasures.get('lowerArmLength');
+
+        return [ W, H, U, L ];
+    };
 
     WCRX.prototype.getBodyAtPos = function(pos) {
          
@@ -722,7 +752,7 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
          
         this.world.QueryAABB(GetBodyCallback, aabb);
         return body;
-    }
+    };
 
 
     WCRX.prototype.destroy = function() {

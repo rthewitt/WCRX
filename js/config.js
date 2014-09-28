@@ -25,6 +25,14 @@ define(["./scaledPolygons", "backbone"], function(pollyColl, Backbone){
 
     function getPerson() {
         return {
+            shoulderJ: new ImageData({
+                name: "shoulder",
+                type: "circle",
+                size: null,
+                pos: { z: 2 },
+                cat: HM_JOINT,
+                mask: personMask
+            }),
             lowerArm: new ImageData({
                 name: "lower-arm",
                 type: "poly",
@@ -207,6 +215,7 @@ define(["./scaledPolygons", "backbone"], function(pollyColl, Backbone){
             upperArmWidth: 4.5,
             torsoLength: 25, // 26 total
             contactPoint: 2.0, // seat contact forward
+            chestWidth: 16,
             trunkDepth: 9,
             upperLegLength: 22,
             upperLegWidth: 6,
@@ -221,6 +230,9 @@ define(["./scaledPolygons", "backbone"], function(pollyColl, Backbone){
         },
         resize: function() {
             var pd = this.get("person");
+            
+            var sRad = this.get("upperArmWidth")/2;
+            pd.shoulderJ.set("size", { r: sRad }); 
 
             pd.upperArm.set("size",   
                 { x: this.get("upperArmWidth"), y: this.get("upperArmLength") });
@@ -276,6 +288,7 @@ define(["./scaledPolygons", "backbone"], function(pollyColl, Backbone){
         defaults: {
             wheelDiameter: 24,
             seatBackWidth: 0.4,
+            seatWidth: 15,
             seatBackHeight: 13,
             axleDistance: 3.5,
             seatDepth: 13,
@@ -326,6 +339,7 @@ define(["./scaledPolygons", "backbone"], function(pollyColl, Backbone){
             this.resetChair();
             this.on("change:wheelDiameter", this.resetChair);
             this.on("change:axleDistance", this.resetChair);
+            //this.on("change:seatWidth", this.resetChair); // no trigger yet, snapshot is separate funcitonality
             this.on("change:seatBackWidth", this.resetChair);
             this.on("change:seatBackHeight", this.resetChair);
             this.on("change:seatDepth", this.resetChair);

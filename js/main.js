@@ -217,8 +217,38 @@ define(["jquery", "backbone", "box2dweb", "./wcrx", "./graphics", "./config", "j
 
 
         $("#btn-reset").click(resetAll);
-        $('#btn-shapshot').click(function() {
-            sims[0].wcrx.snapshot();
+        $('#btn-snapshot').click(function() {
+            window.clearInterval(sims[0].wcrx.token);
+            delete sims[0].wcrx.token;
+            var variables = sims[0].wcrx.snapshot();
+
+            var W = variables[0],
+                H = variables[1],
+                U = variables[2],
+                L = variables[3];
+            var D = Math.sqrt(Math.pow(U, 2) + Math.pow(L, 2));
+
+            console.log('W = ' + W);
+            console.log('H = ' + H);
+            console.log('U = ' + U);
+            console.log('L = ' + L);
+            console.log('point to point distance: '+D);
+
+            var z = Math.atan(H/W);
+            
+            // law of cosines
+            var a = angle_u_d = Math.acos((-Math.pow(L, 2) + 
+                    Math.pow(U, 2) + Math.pow(D, 2)) / (2 * U * D))
+
+            var c = angle_elbow = Math.acos((-Math.pow(D, 2) + 
+                        Math.pow(U, 2) + Math.pow(L, 2)) / (2 * U * L))
+
+            var y = z - a;
+            var alpha = upperIntoAngle = Math.PI/2 - y;
+            var beta = lowerIntoAngle = Math.PI - alpha - c;
+            var Q = U * Math.cos(y);
+            var P = perspective = Q - W; // how far elbow just out of wheel plane
+
         });
         $('#btn-chair').click(function() {
             sims.forEach(function(sim) {
