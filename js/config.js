@@ -9,11 +9,13 @@ define(["./scaledPolygons", "backbone"], function(pollyColl, Backbone){
 
     var seatMask = WC_FRAME | HM_SOLID | HM_JOINT | GROUND;
     var personMask = HM_SOLID | WC_BARRIER | GROUND;
+    var armyMask = WC_WHEEL | GROUND;
 
     var ImageData = Backbone.Model.extend({
         defaults: {
             name: null,
             type: "box",
+            massless: false,
             opacity: null,
             size: { x: 0, y: 0 },
             cat: null,
@@ -23,26 +25,27 @@ define(["./scaledPolygons", "backbone"], function(pollyColl, Backbone){
 
     function getPerson() {
         return {
-                /*
             lowerArm: new ImageData({
                 name: "lower-arm",
-                type: "box",
-                opacity: 0.8,
+                type: "poly",
+                polygons: pollyColl.lowerArm,
+                //opacity: 0.8,
+                massless: true,
                 size: null,
                 pos: { z: 7 },
                 cat: HM_SOLID,
-                mask: personMask
+                mask: armyMask
             }),
             upperArm: new ImageData({
                 name: "upper-arm",
                 type: "box",
-                opacity: 0.7,
+                //opacity: 0.7,
+                massless: true,
                 size: null,
                 pos: { z: 7 },
                 cat: HM_SOLID,
-                mask: personMask
+                mask: armyMask
             }),
-            */
             waist: new ImageData({
                 name: "waist",
                 type: "poly",
@@ -219,13 +222,11 @@ define(["./scaledPolygons", "backbone"], function(pollyColl, Backbone){
         resize: function() {
             var pd = this.get("person");
 
-            /*
             pd.upperArm.set("size",   
-                { x: this.get("upperArmWidth") * 1.25, y: this.get("upperArmLength") });
+                { x: this.get("upperArmWidth"), y: this.get("upperArmLength") });
 
             pd.lowerArm.set("size",   
                 { x: this.get("lowerArmWidth"), y: this.get("lowerArmLength") });
-                */
 
             pd.waist.set("size",   
                 { x: this.get("upperLegWidth"), y: this.get("upperLegWidth") });
@@ -365,7 +366,7 @@ define(["./scaledPolygons", "backbone"], function(pollyColl, Backbone){
     };
 
     conf.polyCraft = new ImageData({
-                name: "foot",
+                name: "lower-arm",
                 type: "poly",
                 size: { x: 7, y: 8 },
                 pos: { z: 10 },

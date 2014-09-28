@@ -130,7 +130,14 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         function reify(shape) {
             fixDef.shape = shape;
 
-            var fixture = body.CreateFixture(fixDef);
+            var fixture;
+            if(idata.get('massless') === true) {
+                console.log(idata.get('name')+' was massless');
+                var orig = fixDef.density;
+                fixDef.density = 0.01;
+                fixture = body.CreateFixture(fixDef);
+                fixDef.density = orig;
+            } else fixture = body.CreateFixture(fixDef);
 
             fixture.SetFilterData(fdd);
             fixDef.shape = undefined;
@@ -210,11 +217,12 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
                 { x: X('upperLeg')/2, y: kr * 0.60 },
                 { x: 0, y: 0 });
 
-        /*
+        
         var elbow = getRevJoint.call(this, bodies.upperArm, bodies.lowerArm, 
-                { x: -X('upperArm')/2, y: Y('upperArm')/2 },
-                { x: -X('lowerArm')/2, y: -Y('lowerArm')/2 });
-                */
+                { x: 0, y: Y('upperArm')/2 },
+                { x: 0, y: -Y('lowerArm')/2 });
+                //{ x: -X('upperArm')/2, y: Y('upperArm')/2 },
+                //{ x: -X('lowerArm')/2, y: -Y('lowerArm')/2 });
 
 
         var mr = person['midsection'].get('size').r;
@@ -242,44 +250,49 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
                 { x: -X('foot')/2, y: Y('foot')/2 });
 
 
-        /*
-        var shoulder = getRevJoint.call(this, bodies.upperArm, bodies.torso, 
+        var shoulder = getRevJoint.call(this, bodies.upperArm, bodies.chest, 
                 { x: -X('upperArm')/2, y: -Y('upperArm')/2 },
-                { x: -X('torso')/2, y: -(Y('torso')/2)*0.4 });
-                */
+                { x: -X('chest')/2, y: -(Y('chest')/2) });
 
         // dynamic joints for person control
         joints.hip = hip;
         joints.knee_1 = knee_1;
         joints.knee_2 = knee_2;
-        //joints.elbow = elbow;
-        //joints.shoulder = shoulder;
+        joints.elbow = elbow;
+        joints.shoulder = shoulder;
         joints.t1 = t1;
         joints.t2 = t2;
         parts.initted = true;
 
         if(!this.chairParts.initted) return;
 
-        var startPos = this.chairPartBodies.wheel.GetPosition();
-        startPos.Add(new b2Vec2(0, -this.inches(20)));
-        bodies.waist.SetPosition(startPos);
+        var waistPos = this.chairPartBodies.wheel.GetPosition();
+        waistPos.Add(new b2Vec2(0, -this.inches(20)));
+        bodies.waist.SetPosition(waistPos);
         var rr = person['midsection'].get('size').r;
-        var newPos = new b2Vec2(-this.inches(0), -rr);
-        newPos.Add(startPos);
-        bodies.midsection.SetPosition(newPos);
-        var secondPos = new b2Vec2(-this.inches(0), -(rr+Y('chest')));
-        secondPos.Add(newPos);
-        bodies.chest.SetPosition(secondPos);
+        var midPos = new b2Vec2(-this.inches(0), -rr);
+        midPos.Add(waistPos);
+        bodies.midsection.SetPosition(midPos);
+        var chestPos = new b2Vec2(-this.inches(0), -(rr+Y('chest')));
+        chestPos.Add(midPos);
+        bodies.chest.SetPosition(chestPos);
 
         // TODO review this
         var sillyForce = new b2Vec2(-1, 1);
         bodies.midsection.ApplyForce(sillyForce, new b2Vec2(0, 0));
 
+        var uaPos = new b2Vec2(-this.inches(2), 0);
+        uaPos.Add(chestPos);
+        bodies.upperArm.SetPosition(uaPos);
+        var laPos = new b2Vec2(-this.inches(2), 0);
+        laPos.Add(midPos);
+        bodies.lowerArm.SetPosition(laPos);
+
 
         var ulx = parts.upperLeg.get('size').x;
         var uly = parts.upperLeg.get('size').y/2;
         var llPos = new b2Vec2(ulx, uly);
-        llPos.Add(startPos);
+        llPos.Add(waistPos);
         bodies.lowerLeg.SetPosition(llPos);
         var llx = parts.lowerLeg.get('size').x;
         var lly = parts.lowerLeg.get('size').y/2;
@@ -318,13 +331,10 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         joints.seatRev = seatRev;
         joints.seatSlide = seatSlide;
 
-        /*  
-        var wrist = bindWrist.call(this);
-        */
+        //var wrist = bindWrist.call(this);
     }
 
     // call with context
-    /*
     function bindWrist() {
         if(!this.chairParts.initted || !this.humanParts.initted) return;
         var wheel = this.chairParts.wheel, lowerArm = this.humanParts.lowerArm;
@@ -332,7 +342,6 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
                 { x: 0, y: lowerArm.get('size').y/2 },
                 { x: 0, y: -wheel.get('size').r }, true);
     }
-    */
 
     // fill just fill these arrays, same code
     function initC() {
@@ -611,25 +620,22 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         for(var x=0; x<25; x++) { this.update(); } // stabilize chair
         this.initPerson();
 
-
         this.SIG_destroyChair = false;
         this.SIG_destroyPerson = false;
         this.haltUpdate = false;
 
         return;
         var polygons = [[
-        {x:0.42424237728118896,y:2.10606050491333},
-        {x:0.7333333492279053,y:2.7333333492279053},
-        {x:0.946969747543335,y:2.7121212482452393},
-        {x:0.9696969985961914,y:0.19696968793869019},
-        {x:0.8560604453086853,y:0.053030312061309814},
-        {x:0.5833332538604736,y:-0.0075757503509521484},
-        {x:0.04545462131500244,y:0.21212121844291687},
-        {x:0,y:1.1333333253860474}
-        ]]
+        {x:2.9802322387695312E-8,y:1.3650000095367432},
+        {x:0.07000002264976501,y:1.7350000143051147},
+        {x:0.9249999523162842,y:1.7350000143051147},
+        {x:0.9949999451637268,y:1.3499999046325684},
+        {x:0.854999840259552,y:0.02000012993812561},
+        {x:0.1599999964237213,y:0.02000001072883606}
+        ]];
 
         var img = new Image();
-        img.src = 'images/v2/foot.svg';
+        img.src = 'images/v2/lower-arm.svg';
     bodyDef.userData = ud = this.config.polyCraft;
     ud.set('img', img);
 
@@ -640,17 +646,13 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         x: this.inches(_size.x),
         y: this.inches(_size.y)
     };
-    dims = { x: 37, y: 105  };
-    //dims = { x: size.x * this.config.PTM, y: size.y * this.config.PTM };
-    //dims = { x: size.x * this.config.PTM, y: size.y * this.config.PTM };
+    dims = { x: 39, y: 83  };
     console.log("size: "+size.x +", "+size.y);
     console.log("dims: "+dims.x +", "+dims.y);
     ud.set('dims', dims);
     ud.set('shape', shape);
-    //ud.set('size', size);
 
     var bb = this.world.CreateBody(bodyDef);
-    //bb.SetAngle(1.9*Math.PI);
     var npolygons = [];
     for(var px=0; px<polygons.length; px++) {
         var newVertexArray = [];
@@ -660,7 +662,7 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
        for(var p=0; p<polygon.length; p++) {
 
           var scaledVec = new b2Vec2(size.x * polygon[p].x, -size.y * polygon[p].y); 
-          var cent = new b2Vec2(-0.08, 0.28); // center change is specific to configured shape
+          var cent = new b2Vec2(-0.09, 0.18); // center change is specific to configured shape
           scaledVec.Add(cent);
           
           vertices.push(scaledVec);
@@ -677,9 +679,10 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
             bb.CreateFixture(fixDef);
     }
 
+    /////// OUTPUT ///////////////
     console.log(JSON.stringify(npolygons));
+    //////////////////////////////
 
-        //////////////////////////////
     };
 
 
