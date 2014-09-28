@@ -164,6 +164,13 @@ define(["jquery", "backbone", "box2dweb", "./wcrx", "./graphics", "./config", "j
            if(sims[0].mouseJoint) {
                sims[0].wcrx.world.DestroyJoint(sims[0].mouseJoint);
                sims[0].mouseJoint = undefined;
+               var seatSlide = sims[0].wcrx.humanParts.joints.seatSlide;
+               if(seatSlide && !seatSlide.IsMotorEnabled()) {
+                   console.log('restoring bond');
+                   seatSlide.EnableMotor(true);
+                   seatSlide.SetMaxMotorForce(500);
+                   seatSlide.SetMotorSpeed(0.0);
+               }
            }
            isMouseDown = false;
         });
@@ -178,6 +185,19 @@ define(["jquery", "backbone", "box2dweb", "./wcrx", "./graphics", "./config", "j
            var body = sim.wcrx.getBodyAtPos(p);
            if(isMouseDown && !sim.mouseJoint) {
                if(body) {
+                    if(body === sim.wcrx.humanPartBodies.upperLeg) {
+                        var seatRev = sim.wcrx.humanParts.joints.seatRev;
+                        var seatSlide = sim.wcrx.humanParts.joints.seatSlide;
+                        console.log('breaking bond...');
+                        if(seatRev) {
+                            sim.wcrx.world.DestroyJoint(sim.wcrx.humanParts.joints.seatRev);
+                            sim.wcrx.humanParts.joints.seatRev = undefined;
+                        }
+                        if(seatSlide && seatSlide.IsMotorEnabled()) {
+                            console.log('turning off motor');
+                            seatSlide.EnableMotor(false);
+                        }
+                    }
                     var def = new Box2D.Dynamics.Joints.b2MouseJointDef();
                     
                     def.bodyA = sim.wcrx.ground;
@@ -185,10 +205,9 @@ define(["jquery", "backbone", "box2dweb", "./wcrx", "./graphics", "./config", "j
                     def.target = p;
 
                     def.collideConnected = true;
-                    def.maxForce = 1000 * body.GetMass();
+                    def.maxForce = 100 * body.GetMass();
                     def.dampingRatio = 0;
 
-                    console.log('bodyA '+sim.wcrx.ground+'\nbodyB '+body);
                     sim.mouseJoint = sim.wcrx.world.CreateJoint(def);
                     body.SetAwake(true);
                 }

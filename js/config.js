@@ -339,7 +339,8 @@ define(["./scaledPolygons", "backbone"], function(pollyColl, Backbone){
         skeleton: true,
         debug: false,
 
-        PTM: 190.0, // pixels to "meters"
+        //PTM: 190.0, // pixels to "meters"
+        PTM: 230.0, // pixels to "meters"
         ITM: 39.3701,
 
         getChair: getChair,

@@ -38,6 +38,7 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
           b2CircleShape = Box2D.Collision.Shapes.b2CircleShape,
           b2MouseJointDef =  Box2D.Dynamics.Joints.b2MouseJointDef,
           b2RevoluteJointDef = Box2D.Dynamics.Joints.b2RevoluteJointDef,
+          b2PrismaticJointDef = Box2D.Dynamics.Joints.b2PrismaticJointDef,
           b2DistanceJointDef = Box2D.Dynamics.Joints.b2DistanceJointDef,
           b2WeldJointDef = Box2D.Dynamics.Joints.b2WeldJointDef;
 
@@ -57,8 +58,8 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
          //create ground
          bodyDef.type = b2Body.b2_staticBody;
          fixDef.shape = new b2PolygonShape;
-         fixDef.shape.SetAsBox(20, 2);
-         bodyDef.position.Set(10, this.pixels(300) + 1.9);
+         fixDef.shape.SetAsBox(this.pixels(500), this.pixels(20));
+         bodyDef.position.Set(0, this.pixels(300));
          this.ground = this.world.CreateBody(bodyDef);
          var gfx = this.ground.CreateFixture(fixDef);
          gfx.SetFilterData(gmd);
@@ -216,16 +217,17 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
                 */
 
 
+        var mr = person['midsection'].get('size').r;
         var t2 = getRevJoint.call(this, bodies.waist, bodies.midsection,
                 { x: 0, y: -Y('waist')/2 },
-                { x: 0, y: person['midsection'].get('size').r * (2/3) }, true);
+                { x: -mr * 2/3, y: mr * (1/3) }, true);
 
         var t1 = getRevJoint.call(this, bodies.chest, bodies.midsection,
                 { x: 0, y: Y('chest')/2 },
                 { x: 0, y: -person['midsection'].get('size').r * (2/3) }, true);
 
         // The order of these limits is the reverse of my assumption
-        t1.SetLimits(-1.9 * Math.PI, 0.2 * Math.PI);
+        t1.SetLimits(-0.3 * Math.PI, 0.1 * Math.PI);
         t1.EnableLimit(true);
         t2.SetLimits(-1.9 * Math.PI, 0.2 * Math.PI);
         t2.EnableLimit(true);
@@ -269,6 +271,7 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         secondPos.Add(newPos);
         bodies.chest.SetPosition(secondPos);
 
+        // TODO review this
         var sillyForce = new b2Vec2(-1, 1);
         bodies.midsection.ApplyForce(sillyForce, new b2Vec2(0, 0));
 
@@ -294,17 +297,28 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         var seatRev = getRevJoint.call(this, bodies.waist, this.chairPartBodies.foam,
                 { x: -X('waist')/2, y: Y('waist')/2 }, 
                 { x: -ss.x/2 + forward, y: -ss.y/2 }, true); 
+        
+        var ssld = new b2PrismaticJointDef();
+        ssld.bodyA = bodies.waist;
+        ssld.bodyB = this.chairPartBodies.foam;
+        ssld.collideConnected = false;
 
-        /*
-        // TODO here's that measurement
-        var seat = this.chairParts.foam;
-        var seatTarget = this.chairPartBodies.foam.GetPosition();
-        var sx = this.inches(X('waist')/2) + this.inches(7);
-        var sy = -this.inches(seat.get('size').y/2) - this.inches(Y('waist')) - this.inches(20);
-        seatTarget.Add(new b2Vec2(sx, sy));
-        console.log('target: '+seatTarget.x+', '+seatTarget.y);
-        bodies.waist.SetPosition(seatTarget);
-          
+        ssld.localAxisA.Set(1, 0); 
+        ssld.localAxisA.Normalize(); // normalize to unit vector!
+        ssld.localAnchorA.Set(-X('waist')/2, Y('waist')/2);
+        ssld.localAnchorB.Set(-ss.x/2 + forward, -ss.y/2);
+        ssld.lowerTranslation = -ss.x+forward + this.inches(3); // aesthetic inch
+        ssld.upperTranslation = ss.x;
+        ssld.enableLimit = true;
+
+        var seatSlide = this.world.CreateJoint(ssld);
+        seatSlide.EnableMotor(false);
+        seatSlide.SetMaxMotorForce(500);
+        seatSlide.SetMotorSpeed(0.0);
+        joints.seatRev = seatRev;
+        joints.seatSlide = seatSlide;
+
+        /*  
         var wrist = bindWrist.call(this);
         */
     }
@@ -353,8 +367,15 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         var axle = getRevJoint.call(this, bodies.wheel, bodies.raiseBar, 
                 { x: 0, y: 0 },
                 { x: -X('raiseBar')/2 * 0.55, y: Y('raiseBar')/2 * 0.88  });
-        axle.SetLimits(-0.3 * Math.PI, 0);
-        axle.EnableLimit(true);
+        axle.SetLimits(0 * Math.PI, 0 * Math.PI);
+        //axle.EnableLimit(true);
+        
+        var wjd = new b2WeldJointDef();
+        wjd.bodyA = bodies.wheel;
+        wjd.bodyB = this.ground;
+        wjd.localAnchorA.Set(0, this.chairParts['wheel'].get('size').r);
+        wjd.localAnchorB.Set(this.pixels(200), -this.pixels(20)); // canvas?
+        this.world.CreateJoint(wjd);
 
         var COG = this.inches(this.chairMeasures.get('axleDistance'));
         var vertPipeWidth = this.inches(1); 
@@ -669,17 +690,26 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         aabb.upperBound.Set(pos.x + 0.001, pos.y + 0.001);
          
         var body = null;
+        var self = this;
          
         // Query the world for overlapping shapes.
         function GetBodyCallback(fixture)
         {
             var shape = fixture.GetShape();
+            var dimChair = false;
              
             if (fixture.GetBody().GetType() != b2Body.b2_staticBody) {
                 var inside = shape.TestPoint(fixture.GetBody().GetTransform(), pos);
                  
                 if (inside) {
-                    body = fixture.GetBody();
+                    var b = fixture.GetBody();
+                    if(dimChair) {
+                        for(var cp in self.chairPartBodies) {
+                            if(b === self.chairPartBodies[cp]) 
+                                return true;
+                        }
+                    } 
+                    body = b;
                     return false;
                 }
             }
