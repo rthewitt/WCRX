@@ -217,8 +217,8 @@ define(["jquery", "backbone", "box2dweb", "./wcrx", "./graphics", "./config", "j
 
 
         $("#btn-reset").click(resetAll);
-        $('#btn-debug').click(function() {
-            config.debug = !config.debug;
+        $('#btn-shapshot').click(function() {
+            sims[0].wcrx.snapshot();
         });
         $('#btn-chair').click(function() {
             sims.forEach(function(sim) {
