@@ -1,6 +1,22 @@
 body {
     background-color: #02162c;
 }
+
+
+.skewed {
+    position: absolute;
+    top: 100px;
+    left: 225px;
+}
+.shifted-in {
+    position: absolute;
+    z-index: 14;
+    top: 100px;
+    left: 225px;
+    display: inline-block;
+//    transform: rotateZ(-30deg);
+}
+
 span.customSelect { 
     //font:12px sans-serif;
     font-size:15px;

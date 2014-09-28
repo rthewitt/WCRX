@@ -225,8 +225,14 @@ define(["jquery", "backbone", "box2dweb", "./wcrx", "./graphics", "./config", "j
             var W = variables[0],
                 H = variables[1],
                 U = variables[2],
-                L = variables[3];
-            var D = Math.sqrt(Math.pow(U, 2) + Math.pow(L, 2));
+                L = variables[3],
+                sPos = variables[4]; // temp
+
+            var Sy = Math.round(sPos.y * config.PTM + sims[0].canvasPos.y);
+            console.log('Sx '+(sPos.x*config.PTM)+' pos x: '+ sims[0].canvasPos.x);
+            var Sx = Math.round(sPos.x * config.PTM + sims[0].canvasPos.x - $('#canvas').attr('width'));
+
+            var D = Math.sqrt(Math.pow(W, 2) + Math.pow(H, 2));
 
             console.log('W = ' + W);
             console.log('H = ' + H);
@@ -248,8 +254,32 @@ define(["jquery", "backbone", "box2dweb", "./wcrx", "./graphics", "./config", "j
             var beta = lowerIntoAngle = Math.PI - alpha - c;
             var Q = U * Math.cos(y);
             var P = perspective = Q - W; // how far elbow just out of wheel plane
+            var E = Q * Math.atan(y);
+            E = E * config.PTM / config.ITM;
+            
+            var uHeight = U * config.PTM / config.ITM,
+                uWidth = sims[0].wcrx.humanMeasures.get('upperArmWidth') * config.PTM / config.ITM;
 
+            var lHeight = L * config.PTM / config.ITM,
+                lWidth = sims[0].wcrx.humanMeasures.get('lowerArmWidth') * config.PTM / config.ITM;
+
+            $('#wrapper').append('<img id="skew-upper" height="'+uHeight+'" width="'+uWidth+'" src="images/v2/upper-arm.svg" class="skewed" />');
+            $('#skew-upper').css({ top: Sy, left: Sx });
+            $('#skew-upper').css('transform', 'perspective('+0+'px) rotateZ(0deg) rotateX(-'+alpha+'rad)');
+
+            var uPos = $('#skew-upper').position(),
+                uStart = uPos.top,
+                uLeft = uPos.left;
+            //console.log('reported upper image start: '+uStart);
+
+            var elbowY = Math.floor(uStart+E),
+                elbowX = Math.floor(uLeft);
+
+            $('#wrapper').append('<img id="skew-lower" class="skewed" height="'+lHeight+'" width="'+lWidth+'" src="images/v2/lower-arm.svg" />');
+            $('#skew-lower').css({ top: elbowY, left: elbowX });
+            $('#skew-lower').css('transform', 'perspective('+0+'px) rotateZ(-60deg) rotateX(-'+beta+'rad)');
         });
+
         $('#btn-chair').click(function() {
             sims.forEach(function(sim) {
                 var wcrx = sim.wcrx;

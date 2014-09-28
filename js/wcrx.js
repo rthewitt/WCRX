@@ -176,8 +176,8 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         
         var humanFixDef = new b2FixtureDef(); 
         humanFixDef.density = 1.0;
-        humanFixDef.friction = 0.6;
-        humanFixDef.restitution = 0.5;
+        humanFixDef.friction = 0.9;
+        humanFixDef.restitution = 0.1;
 
         var bodyDef = new b2BodyDef();
         bodyDef.type = b2Body.b2_dynamicBody;
@@ -704,16 +704,16 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         var wheel = this.chairParts.wheel,
             wheelB = this.chairPartBodies.wheel;
 
-        var Hs = this.humanPartBodies.shoulderJ.GetPosition().y,
+        var sPos = this.humanPartBodies.shoulderJ.GetPosition(),
             Hw = wheelB.GetPosition().y - wheel.get('size').r,
-            H = Hw - Hs; // inverted Y coordinates
+            H = Hw - sPos.y; // inverted Y coordinates
 
         H = H * this.config.ITM;
 
         var U = this.humanMeasures.get('upperArmLength'),
             L = this.humanMeasures.get('lowerArmLength');
 
-        return [ W, H, U, L ];
+        return [ W, H, U, L, sPos ];
     };
 
     WCRX.prototype.getBodyAtPos = function(pos) {
