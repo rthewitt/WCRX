@@ -179,7 +179,8 @@ define(["jquery", "backbone", "box2dweb", "./wcrx", "./graphics", "./config", "j
            var sim = sims[0];
            mouseX = (e.clientX - sim.canvasPos.x) / config.PTM;
            mouseY = (e.clientY - sim.canvasPos.y) / config.PTM;
-           //console.log('x: '+mouseX + ', y: '+mouseY);
+           console.log('x: '+mouseX + ', y: '+mouseY);
+           //console.log('box2d x: '+ (e.clientX/config.PTM)+ ', box2d y: '+(e.clientY/config.PTM));
 
            var p = new Box2D.Common.Math.b2Vec2(mouseX, mouseY); // verify
            var body = sim.wcrx.getBodyAtPos(p);
@@ -224,23 +225,33 @@ define(["jquery", "backbone", "box2dweb", "./wcrx", "./graphics", "./config", "j
 
             var W = variables[0],
                 H = variables[1],
-                U = variables[2],
-                L = variables[3],
-                sPos = variables[4]; // temp
+                F = variables[2],
+                U = variables[3],
+                L = variables[4],
+                sPos = variables[5], // temp
+                sRad = variables[6], // temp
+                wPos = variables[7]; // temp
 
             var Sy = Math.round(sPos.y * config.PTM + sims[0].canvasPos.y);
+            console.log('box2d Sx '+sPos.x+' box2D Sy: '+ sPos.y);
             console.log('Sx '+(sPos.x*config.PTM)+' pos x: '+ sims[0].canvasPos.x);
-            var Sx = Math.round(sPos.x * config.PTM + sims[0].canvasPos.x - $('#canvas').attr('width'));
+            //var Sx = Math.round(sPos.x * config.PTM + sims[0].canvasPos.x - $('#canvas').attr('width'));
+            var Sx = Math.round(sPos.x * config.PTM + sims[0].canvasPos.x - sRad);
 
-            var D = Math.sqrt(Math.pow(W, 2) + Math.pow(H, 2));
+            var K = Math.sqrt(Math.pow(F, 2) + Math.pow(H, 2));
+            var D = Math.sqrt(Math.pow(K, 2) + Math.pow(W, 2));
 
             console.log('W = ' + W);
             console.log('H = ' + H);
+            console.log('F = ' + F);
             console.log('U = ' + U);
             console.log('L = ' + L);
             console.log('point to point distance: '+D);
 
-            var z = Math.atan(H/W);
+            var angle_fRot = Math.atan(H/F);
+            var angle_bRot = Math.atan(F/H);
+            console.log('front-rotation: '+(angle_fRot/Math.PI))
+            var z = Math.atan(K/W);
             
             // law of cosines
             var a = angle_u_d = Math.acos((-Math.pow(L, 2) + 
@@ -249,13 +260,18 @@ define(["jquery", "backbone", "box2dweb", "./wcrx", "./graphics", "./config", "j
             var c = angle_elbow = Math.acos((-Math.pow(D, 2) + 
                         Math.pow(U, 2) + Math.pow(L, 2)) / (2 * U * L))
 
-            var y = z - a;
-            var alpha = upperIntoAngle = Math.PI/2 - y;
+
+            var gamma = z - a;
+            var alpha = upperIntoAngle = Math.PI/2 - gamma;
             var beta = lowerIntoAngle = Math.PI - alpha - c;
-            var Q = U * Math.cos(y);
+            var Q = U * Math.cos(gamma);
             var P = perspective = Q - W; // how far elbow just out of wheel plane
-            var E = Q * Math.atan(y);
-            E = E * config.PTM / config.ITM;
+            var E = Q * Math.atan(gamma);
+            var pi = ' '+String.fromCharCode(parseInt('03a0', 16));
+            console.log('elbow angle total: ' + (c / Math.PI) + pi + ' radians');
+            console.log('alpha: ' + (alpha / Math.PI) +pi+' radians');
+            console.log('beta: ' + (beta  / Math.PI) +pi+' radians');
+            console.log('total: ' + ((alpha+beta+c) / Math.PI) +pi+' radians');
             
             var uHeight = U * config.PTM / config.ITM,
                 uWidth = sims[0].wcrx.humanMeasures.get('upperArmWidth') * config.PTM / config.ITM;
@@ -263,21 +279,33 @@ define(["jquery", "backbone", "box2dweb", "./wcrx", "./graphics", "./config", "j
             var lHeight = L * config.PTM / config.ITM,
                 lWidth = sims[0].wcrx.humanMeasures.get('lowerArmWidth') * config.PTM / config.ITM;
 
-            $('#wrapper').append('<img id="skew-upper" height="'+uHeight+'" width="'+uWidth+'" src="images/v2/upper-arm.svg" class="skewed" />');
-            $('#skew-upper').css({ top: Sy, left: Sx });
-            $('#skew-upper').css('transform', 'perspective('+0+'px) rotateZ(0deg) rotateX(-'+alpha+'rad)');
+            var uPersp = W * config.PTM / config.ITM;
+            $('body').append('<div style="position:absolute; top: '+Sy+'; left: '+Sx+';">'+
+                    '<img id="skew-upper" style="perspective: '+uPersp+'px;" height="'+uHeight+'" width="'+uWidth+'" src="images/v2/upper-arm.svg" class="skewed" />'+
+                    '<img id="skew-lower" style="perspective: 80px" class="skewed" height="'+lHeight+'" width="'+lWidth+'" src="images/v2/lower-arm.svg" />'+
+                    '</div>');
 
             var uPos = $('#skew-upper').position(),
                 uStart = uPos.top,
                 uLeft = uPos.left;
             //console.log('reported upper image start: '+uStart);
 
-            var elbowY = Math.floor(uStart+E),
+            var elbowY = Math.floor(E * config.PTM / config.ITM),
+            //var elbowY = Math.floor(uStart+(U * config.PTM / config.ITM)),
                 elbowX = Math.floor(uLeft);
 
-            $('#wrapper').append('<img id="skew-lower" class="skewed" height="'+lHeight+'" width="'+lWidth+'" src="images/v2/lower-arm.svg" />');
-            $('#skew-lower').css({ top: elbowY, left: elbowX });
-            $('#skew-lower').css('transform', 'perspective('+0+'px) rotateZ(-60deg) rotateX(-'+beta+'rad)');
+            $('#skew-upper').css({ 'transform-origin': '50% 0%' });
+            //$('#skew-upper').css('transform', 'rotateZ('+ -angle_bRot +'rad) rotateX('+(0.5*Math.PI-alpha)+'rad)');
+            //$('#skew-upper').css('transform', 'rotateY(-'+Math.atan(W/F)+'rad) rotateZ('+ -angle_bRot +'rad) rotateX('+(alpha)+'rad)');
+
+            // keep this
+            $('#skew-upper').css('transform', 'rotateY(-'+Math.atan(W/F)+'rad) rotateZ('+(alpha)+'rad)');
+
+            $('#skew-lower').css({ 'transform-origin': '50% 0%', top: elbowY, left: 0 });
+            //$('#skew-lower').css({ 'transform-origin': '50% 100%', top: wPos.y-L, left: wPos.x });
+            //$('#skew-lower').css('transform', 'rotateY(-90deg) rotateZ('+ -angle_fRot +'rad) rotateX('+ -beta +'rad)');
+            $('#skew-lower').css('transform', 'rotateZ('+ -beta +'rad)');
+
         });
 
         $('#btn-chair').click(function() {

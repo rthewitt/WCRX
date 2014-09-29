@@ -5,8 +5,7 @@ body {
 
 .skewed {
     position: absolute;
-    top: 100px;
-    left: 225px;
+    display: inline-block;
 }
 .shifted-in {
     position: absolute;

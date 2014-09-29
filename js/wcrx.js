@@ -704,16 +704,23 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         var wheel = this.chairParts.wheel,
             wheelB = this.chairPartBodies.wheel;
 
-        var sPos = this.humanPartBodies.shoulderJ.GetPosition(),
-            Hw = wheelB.GetPosition().y - wheel.get('size').r,
+        var shoulder = this.humanParts.shoulderJ,
+            shoulderB = this.humanPartBodies.shoulderJ,
+            sPos = shoulderB.GetPosition(),
+            sRad = shoulder.get('size').r * this.config.PTM,
+            wheelPos = wheelB.GetPosition(),
+            Hw = wheelPos.y - wheel.get('size').r,
             H = Hw - sPos.y; // inverted Y coordinates
 
         H = H * this.config.ITM;
 
+        // F = wheel x - shoulder x
+        var F = wheelPos.x - sPos.x;
+
         var U = this.humanMeasures.get('upperArmLength'),
             L = this.humanMeasures.get('lowerArmLength');
 
-        return [ W, H, U, L, sPos ];
+        return [ W, H, F, U, L, sPos, sRad, wheelPos ];
     };
 
     WCRX.prototype.getBodyAtPos = function(pos) {
