@@ -224,11 +224,10 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
                 { x: 0, y: 0 });
 
         
+        /*
         var elbow = getRevJoint.call(this, bodies.upperArm, bodies.lowerArm, 
                 { x: 0, y: Y('upperArm')/2 },
-                { x: 0, y: -Y('lowerArm')/2 });
-                //{ x: -X('upperArm')/2, y: Y('upperArm')/2 },
-                //{ x: -X('lowerArm')/2, y: -Y('lowerArm')/2 });
+                { x: 0, y: -Y('lowerArm')/2 }); */
 
 
         var mr = person['midsection'].get('size').r;
@@ -263,13 +262,13 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
                 */
 
         // dynamic joints for person control
+        joints.shoulder = shoulder;
+        //joints.elbow = elbow;
+        joints.t1 = t1;
+        joints.t2 = t2;
         joints.hip = hip;
         joints.knee_1 = knee_1;
         joints.knee_2 = knee_2;
-        joints.elbow = elbow;
-        //joints.shoulder = shoulder;
-        joints.t1 = t1;
-        joints.t2 = t2;
         parts.initted = true;
 
         if(!this.chairParts.initted) return;
@@ -289,12 +288,14 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         var sillyForce = new b2Vec2(-1, 1);
         bodies.midsection.ApplyForce(sillyForce, new b2Vec2(0, 0));
 
+        /*
         var uaPos = new b2Vec2(-this.inches(2), 0);
         uaPos.Add(chestPos);
         bodies.upperArm.SetPosition(uaPos);
         var laPos = new b2Vec2(-this.inches(2), 0);
         laPos.Add(midPos);
         bodies.lowerArm.SetPosition(laPos);
+        */
 
 
         var ulx = parts.upperLeg.get('size').x;
@@ -499,80 +500,12 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         this.SIG_destroyPerson = false;
     }
 
-    // move this to human-chair constraints
+    // constraints moved while testing
     function enforceChairConstraints() {
-            var axle = this.chairParts.joints.axle;
-            //console.log('axle angle: '+axle.GetJointAngle()/Math.PI);
-        //this.chairPartBodies.frontConnector.ApplyForce(new b2Vec2(0, -1), new b2Vec2(0, 0));
     }
     
-    // TODO some of these can use joint SetLimits during creation
+    // constraints moved while testing
     function enforcePersonConstraints() {
-        var gain = 20.0;
-
-        /****** ADD THIS BACK IN SORT OF
-        var hip = this.humanParts.joints.hip;
-        var angleError = hip.GetJointAngle() - (0.0 * Math.PI); // change
-        //if(this.chairParts.initted || angleError > 0.4 * Math.PI || angleError < -0.8 * Math.PI) {
-        if((this.chairParts.initted && 
-                    ( angleError < -0.2 * Math.PI || angleError > 0.3 * Math.PI)) 
-                || angleError > 0.4 * Math.PI || angleError < -0.8 * Math.PI) {
-                    gain = 5.0;
-            hip.SetMotorSpeed(-gain * angleError);
-            hip.SetMaxMotorTorque(20);
-                    gain = 20.0;
-        } else hip.SetMaxMotorTorque(0);
-
-        // keep knee from bending backwards
-        var knee = this.humanParts.joints.knee;
-        var angleError = knee.GetJointAngle();
-        if(angleError < 0 || angleError > 0.9 * Math.PI) {
-        knee.SetMotorSpeed(-gain * angleError);
-        knee.SetMaxMotorTorque(20);
-        } else knee.SetMaxMotorTorque(0);
-
-        // keep arm from bending backwards
-        var elbow = this.humanParts.joints.elbow;
-        var angleError = elbow.GetJointAngle();
-        if(angleError > 0) {
-        elbow.SetMotorSpeed(-gain * angleError);
-        elbow.SetMaxMotorTorque(20);
-        } else elbow.SetMaxMotorTorque(0);
-        ******/
-
-        // give the illusion of conscious balance
-        if(this.chairParts.initted) {
-
-            /* Broken and jittery
-            var axle = this.chairParts.joints.axle;
-            var angleError = axle.GetJointAngle() - (0.0 * Math.PI); // change
-            var gain = 20.0;
-            axle.SetMotorSpeed(-gain * angleError);
-            axle.SetMaxMotorTorque(20);
-            */
-            /* gentle rocking, test later
-            var lowerArm = this.humanPartBodies.lowerArm;
-            lowerArm.ApplyForce(new b2Vec2(0.1, 0), new b2Vec2(0, 0));
-            */
-
-            // Latest attempt, not needed every update, just wanted to tip.  We can set angle on bodypart instead
-            //this.humanPartBodies.chest.ApplyForce(new b2Vec2(-0.2, 0), new b2Vec2(0, 0));
-
-            //var XXXseat = this.chairParts.seatBack;
-            /*
-            var XXXseat = this.chairParts.foam;
-            var intoSeat = new b2DistanceJointDef();
-            intoSeat.bodyA = this.humanPartBodies.upperLeg;
-            intoSeat.bodyB = this.chairPartBodies.seatBack;
-            intoSeat.collideConnected = true;
-            intoSeat.anchorA = new b2Vec2(-this.humanParts.upperLeg.size.x/2, this.humanParts.upperLeg.size.y/2);
-            intoSeat.anchorB = new b2Vec2(0, XXXseat.size.y/2);
-            intoSeat.length = this.inches(10);
-            intoSeat.dampingRation = 0.1;
-            intoSeat.frequencyHz = 15;
-            this.world.CreateJoint(intoSeat);
-            */
-        }
     }
 
 
@@ -602,18 +535,76 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         if(CB) CB(this.world);
     }
 
+    // polygon import tool - still somewhat manual
+    WCRX.prototype.initPolygonModeling = function() {
+
+        var polygons = [[
+            {x:2.9802322387695312E-8,y:1.3650000095367432},
+            {x:0.07000002264976501,y:1.7350000143051147},
+            {x:0.9249999523162842,y:1.7350000143051147},
+            {x:0.9949999451637268,y:1.3499999046325684},
+            {x:0.854999840259552,y:0.02000012993812561},
+            {x:0.1599999964237213,y:0.02000001072883606}
+        ]];
+
+        var img = new Image();
+        img.src = 'images/v2/lower-arm.svg';
+        bodyDef.userData = ud = this.config.polyCraft;
+        ud.set('img', img);
+
+        var _size = ud.get('size');
+        var shape, size, dims;
+        shape = [];
+        size = {
+            x: this.inches(_size.x),
+            y: this.inches(_size.y)
+        };
+        dims = { x: 39, y: 83  };
+        console.log("size: "+size.x +", "+size.y);
+        console.log("dims: "+dims.x +", "+dims.y);
+        ud.set('dims', dims);
+        ud.set('shape', shape);
+
+        var bb = this.world.CreateBody(bodyDef);
+        var npolygons = [];
+        for(var px=0; px<polygons.length; px++) {
+            var newVertexArray = [];
+            var polygon = polygons[px];
+            var vertices = [];
+            var poly;
+            for(var p=0; p<polygon.length; p++) {
+
+              var scaledVec = new b2Vec2(size.x * polygon[p].x, -size.y * polygon[p].y); 
+              var cent = new b2Vec2(-0.09, 0.18); // center change is specific to configured shape
+              scaledVec.Add(cent);
+              
+              vertices.push(scaledVec);
+               
+              // now output the "normalized" vector for future use
+              //var normalized = new b2Vec2(scaledVec.x/size.x, scaledVec.y/size.y);
+              var normalized = new b2Vec2(scaledVec.x/this.pixels(dims.x), scaledVec.y/this.pixels(dims.y));
+              newVertexArray.push(normalized);
+            }
+            npolygons.push(newVertexArray);
+            poly = new b2PolygonShape();
+            poly.SetAsVector(vertices, vertices.length);
+            fixDef.shape = poly;
+            bb.CreateFixture(fixDef);
+        }
+
+        /////// OUTPUT ///////////////
+        console.log(JSON.stringify(npolygons));
+        //////////////////////////////
+    };
+
     WCRX.prototype.reset = function() {
         if(!!this.world) this.destroy();
 
         this.world = new b2World(
             new b2Vec2(0, 10), // gravity 
-            //new b2Vec2(0, 0), // no gravity
             true //allow sleep
         );
         createGround.call(this); 
-
-
-        ////////// REMOVE ME /////////
         
         var fixDef = new b2FixtureDef();
         fixDef.density = 1.0;
@@ -632,65 +623,7 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         this.SIG_destroyPerson = false;
         this.haltUpdate = false;
 
-        return;
-        var polygons = [[
-        {x:2.9802322387695312E-8,y:1.3650000095367432},
-        {x:0.07000002264976501,y:1.7350000143051147},
-        {x:0.9249999523162842,y:1.7350000143051147},
-        {x:0.9949999451637268,y:1.3499999046325684},
-        {x:0.854999840259552,y:0.02000012993812561},
-        {x:0.1599999964237213,y:0.02000001072883606}
-        ]];
-
-        var img = new Image();
-        img.src = 'images/v2/lower-arm.svg';
-    bodyDef.userData = ud = this.config.polyCraft;
-    ud.set('img', img);
-
-    var _size = ud.get('size');
-    var shape, size, dims;
-    shape = [];
-    size = {
-        x: this.inches(_size.x),
-        y: this.inches(_size.y)
-    };
-    dims = { x: 39, y: 83  };
-    console.log("size: "+size.x +", "+size.y);
-    console.log("dims: "+dims.x +", "+dims.y);
-    ud.set('dims', dims);
-    ud.set('shape', shape);
-
-    var bb = this.world.CreateBody(bodyDef);
-    var npolygons = [];
-    for(var px=0; px<polygons.length; px++) {
-        var newVertexArray = [];
-       var polygon = polygons[px];
-       var vertices = [];
-        var poly;
-       for(var p=0; p<polygon.length; p++) {
-
-          var scaledVec = new b2Vec2(size.x * polygon[p].x, -size.y * polygon[p].y); 
-          var cent = new b2Vec2(-0.09, 0.18); // center change is specific to configured shape
-          scaledVec.Add(cent);
-          
-          vertices.push(scaledVec);
-           
-          // now output the "normalized" vector for future use
-          //var normalized = new b2Vec2(scaledVec.x/size.x, scaledVec.y/size.y);
-          var normalized = new b2Vec2(scaledVec.x/this.pixels(dims.x), scaledVec.y/this.pixels(dims.y));
-          newVertexArray.push(normalized);
-        }
-            npolygons.push(newVertexArray);
-            poly = new b2PolygonShape();
-            poly.SetAsVector(vertices, vertices.length);
-            fixDef.shape = poly;
-            bb.CreateFixture(fixDef);
-    }
-
-    /////// OUTPUT ///////////////
-    console.log(JSON.stringify(npolygons));
-    //////////////////////////////
-
+        //initPolygonModeling();
     };
 
     WCRX.prototype.snapshot = function() {
@@ -796,11 +729,6 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
     WCRX.prototype.initPerson = initP;
     WCRX.prototype.initChair = function() { 
         initC.call(this);
-        /****** TEMP REMOVE
-        if(!!this.humanParts.initted) {
-            var wrist = bindWrist.call(this);
-        }
-        *******/
     };
     WCRX.prototype.init = function(conf) {
         this.config = conf;

@@ -1,27 +1,28 @@
-    require.config({
-        paths: {
-            "jquery": ["http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min", 
-                        "libs/jquery/dist/jquery.min"],
-            "jquery.customSelect": "libs/jquery.customSelect/jquery.customSelect.min",
-            "underscore": "libs/underscore/underscore",
-            "backbone": "libs/backbone/backbone",
-            "box2dweb": "libs/box2dweb/Box2dWeb-2.1.a.3.min"
+require.config({
+    paths: {
+        "jquery": ["http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min", 
+                    "libs/jquery/dist/jquery.min"],
+        "jquery.customSelect": "libs/jquery.customSelect/jquery.customSelect.min",
+        "underscore": "libs/underscore/underscore",
+        "backbone": "libs/backbone/backbone",
+        "box2dweb": "libs/box2dweb/Box2dWeb-2.1.a.3.min"
+    },
+    shim: {
+        "box2dweb": {
+            exports: "Box2D"
         },
-        shim: {
-            "box2dweb": {
-                exports: "Box2D"
-            },
-            "backbone": {
-                deps: ["jquery", "underscore"],
-                exports: "Backbone"
-            },
-            "jquery.customSelect": {
-                deps: ["jquery"]
-            }
+        "backbone": {
+            deps: ["jquery", "underscore"],
+            exports: "Backbone"
         },
+        "jquery.customSelect": {
+            deps: ["jquery"]
+        }
+    },
 });
 
 
+// jquery extensions act as decorators and are thus discarded
 define(["jquery", "backbone", "box2dweb", "./wcrx", "./graphics", "./config", "jquery.customSelect"], function($, Backbone, Box2D, WCRX, graphics, config) {
 
     $('select').each(function(i, el) { $(el).customSelect(); });
@@ -233,9 +234,6 @@ define(["jquery", "backbone", "box2dweb", "./wcrx", "./graphics", "./config", "j
                 wPos = variables[7]; // temp
 
             var Sy = Math.round(sPos.y * config.PTM + sims[0].canvasPos.y);
-            console.log('box2d Sx '+sPos.x+' box2D Sy: '+ sPos.y);
-            console.log('Sx '+(sPos.x*config.PTM)+' pos x: '+ sims[0].canvasPos.x);
-            //var Sx = Math.round(sPos.x * config.PTM + sims[0].canvasPos.x - $('#canvas').attr('width'));
             var Sx = Math.round(sPos.x * config.PTM + sims[0].canvasPos.x - sRad);
 
             var K = Math.sqrt(Math.pow(F, 2) + Math.pow(H, 2));
@@ -250,7 +248,6 @@ define(["jquery", "backbone", "box2dweb", "./wcrx", "./graphics", "./config", "j
 
             var angle_fRot = Math.atan(H/F);
             var angle_bRot = Math.atan(F/H);
-            console.log('front-rotation: '+(angle_fRot/Math.PI))
             var z = Math.atan(K/W);
             
             // law of cosines
@@ -260,18 +257,12 @@ define(["jquery", "backbone", "box2dweb", "./wcrx", "./graphics", "./config", "j
             var c = angle_elbow = Math.acos((-Math.pow(D, 2) + 
                         Math.pow(U, 2) + Math.pow(L, 2)) / (2 * U * L))
 
-
             var gamma = z - a;
             var alpha = upperIntoAngle = Math.PI/2 - gamma;
             var beta = lowerIntoAngle = Math.PI - alpha - c;
             var Q = U * Math.cos(gamma);
             var P = perspective = Q - W; // how far elbow just out of wheel plane
             var E = Q * Math.atan(gamma);
-            var pi = ' '+String.fromCharCode(parseInt('03a0', 16));
-            console.log('elbow angle total: ' + (c / Math.PI) + pi + ' radians');
-            console.log('alpha: ' + (alpha / Math.PI) +pi+' radians');
-            console.log('beta: ' + (beta  / Math.PI) +pi+' radians');
-            console.log('total: ' + ((alpha+beta+c) / Math.PI) +pi+' radians');
             
             var uHeight = U * config.PTM / config.ITM,
                 uWidth = sims[0].wcrx.humanMeasures.get('upperArmWidth') * config.PTM / config.ITM;
@@ -282,30 +273,15 @@ define(["jquery", "backbone", "box2dweb", "./wcrx", "./graphics", "./config", "j
             var uPersp = W * config.PTM / config.ITM;
             $('body').append('<div style="position:absolute; top: '+Sy+'; left: '+Sx+';">'+
                     '<img id="skew-upper" style="perspective: '+uPersp+'px;" height="'+uHeight+'" width="'+uWidth+'" src="images/v2/upper-arm.svg" class="skewed" />'+
-                    '<img id="skew-lower" style="perspective: 80px" class="skewed" height="'+lHeight+'" width="'+lWidth+'" src="images/v2/lower-arm.svg" />'+
+                    '<img id="skew-lower" style="perspective: 0px" class="skewed" height="'+lHeight+'" width="'+lWidth+'" src="images/v2/lower-arm.svg" />'+
                     '</div>');
 
-            var uPos = $('#skew-upper').position(),
-                uStart = uPos.top,
-                uLeft = uPos.left;
-            //console.log('reported upper image start: '+uStart);
-
-            var elbowY = Math.floor(E * config.PTM / config.ITM),
-            //var elbowY = Math.floor(uStart+(U * config.PTM / config.ITM)),
-                elbowX = Math.floor(uLeft);
-
             $('#skew-upper').css({ 'transform-origin': '50% 0%' });
-            //$('#skew-upper').css('transform', 'rotateZ('+ -angle_bRot +'rad) rotateX('+(0.5*Math.PI-alpha)+'rad)');
-            //$('#skew-upper').css('transform', 'rotateY(-'+Math.atan(W/F)+'rad) rotateZ('+ -angle_bRot +'rad) rotateX('+(alpha)+'rad)');
-
-            // keep this
             $('#skew-upper').css('transform', 'rotateY(-'+Math.atan(W/F)+'rad) rotateZ('+(alpha)+'rad)');
 
-            $('#skew-lower').css({ 'transform-origin': '50% 0%', top: elbowY, left: 0 });
-            //$('#skew-lower').css({ 'transform-origin': '50% 100%', top: wPos.y-L, left: wPos.x });
-            //$('#skew-lower').css('transform', 'rotateY(-90deg) rotateZ('+ -angle_fRot +'rad) rotateX('+ -beta +'rad)');
+            var elbowY = Math.floor(E * config.PTM / config.ITM);
+            $('#skew-lower').css({ 'transform-origin': '50% 0%', top: elbowY });
             $('#skew-lower').css('transform', 'rotateZ('+ -beta +'rad)');
-
         });
 
         $('#btn-chair').click(function() {
