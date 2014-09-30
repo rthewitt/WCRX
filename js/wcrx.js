@@ -58,8 +58,8 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
          //create ground
          bodyDef.type = b2Body.b2_staticBody;
          fixDef.shape = new b2PolygonShape;
-         fixDef.shape.SetAsBox(this.pixels(500), this.pixels(20));
-         bodyDef.position.Set(0, this.pixels(300));
+         fixDef.shape.SetAsBox(this.pixels(850), this.pixels(40));
+         bodyDef.position.Set(0, this.pixels(500));
          this.ground = this.world.CreateBody(bodyDef);
          var gfx = this.ground.CreateFixture(fixDef);
          gfx.SetFilterData(gmd);
@@ -262,13 +262,14 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
                 */
 
         // dynamic joints for person control
-        joints.shoulder = shoulder;
+        joints.shoulder = s_1;
         //joints.elbow = elbow;
         joints.t1 = t1;
         joints.t2 = t2;
         joints.hip = hip;
         joints.knee_1 = knee_1;
         joints.knee_2 = knee_2;
+        joints.foot = foot;
         parts.initted = true;
 
         if(!this.chairParts.initted) return;
@@ -392,7 +393,7 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         wjd.bodyA = bodies.wheel;
         wjd.bodyB = this.ground;
         wjd.localAnchorA.Set(0, this.chairParts['wheel'].get('size').r);
-        wjd.localAnchorB.Set(this.pixels(200), -this.pixels(20)); // canvas?
+        wjd.localAnchorB.Set(this.pixels(400), -this.pixels(40)); // canvas?
         this.world.CreateJoint(wjd);
 
         var COG = this.inches(this.chairMeasures.get('axleDistance'));
@@ -469,6 +470,20 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
 
     function _destroyChair() {
         console.log('destroying chair');
+
+        // detach human
+        /*
+        var hJoints = this.humanParts.joints;
+        if(hJoints.seatRev) {
+            hJoints.seatRev = undefined;
+            this.world.DestroyJoint(hJoints.seatRev);
+        }
+        if(hJoints.seatSlide) {
+            hJoints.seatSlide = undefined;
+            this.world.DestroyJoint(hJoints.seatSlide);
+        }
+        */
+
         for(var j in this.chairParts.joints) {
             var jj = this.chairParts.joints[j];
             this.world.DestroyJoint(jj);

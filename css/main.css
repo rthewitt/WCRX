@@ -1,8 +1,6 @@
 body {
-    background-color: #02162c;
+    background-color: #5a8ac0;
 }
-
-
 .skewed {
     position: absolute;
     display: inline-block;
@@ -50,8 +48,9 @@ span.customSelectFocus {
 }
 .mxrx {
     display: inline-block;
-    margin-top: 50px;
+    margin: 40px;
     padding-top: 0px;
+    border: solid 3px #1b3e64;
     padding-bottom: 10px;
     background-color: #5a8ac0;
     width: 15%;
@@ -60,7 +59,8 @@ span.customSelectFocus {
     text-align: center;
 }
 .button-holder input {
-    margin-bottom: 10;
+    //margin-top: 150px;
+    margin-bottom: 10px;
 }
 .mxrx label {
     margin-top: 8px;
@@ -99,29 +99,31 @@ span.customSelectFocus {
     background-color: #173a61;
     //padding: 0 5;
 }
-.i-app {
-    padding: 0 8;
-    background-color: #5a8ac0;
-    min-height: 600px;
-    height: 100%
+.t-wrap {
+    background-color: #173a61;
+    padding-bottom: 8px;
 }
-.o-app {
+.app-title {
     padding: 0 5;
 }
-.o-app h2 p {
+.app-title h2 p {
     display: inline-block;
     margin: 0 0;
 }
-.o-app h2 p::first-letter {
+.app-title h2 p::first-letter {
     font-weight: bold;
 }
-.o-app h2 {
+.app-title h2 {
     margin: 0px;
     font-family: arial;
     font-style: italic;
     font-size: 32px;
     font-weight: normal;
     color: #5a8ac0;
+}
+.i-app {
+    background-color: #5a8ac0;
+    min-height: 640px;
 }
 h3 {
     margin: 0px;
@@ -153,7 +155,8 @@ h3 {
     font-size: 15px;
     font-weight: bold;
     font-style: normal;
-    height: 35px;
+    height: 55px;
+    width: 13%;
     line-height: 35px;
     margin: 5px;
 }
@@ -169,9 +172,10 @@ canvas {
 #container {
     position: absolute;
     margin: auto;
+    min-width: 820px;
     top: 0;
     right: 0;
     left: 0;
-    width: 45%;
-    background-color: #173a61;
+    width: 100%;
+    height:100%;
 }

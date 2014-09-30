@@ -46,13 +46,9 @@ define(["jquery", "backbone", "box2dweb", "./wcrx", "./graphics", "./config", "j
         return { x: x, y: y };
      }
 
-
-
-
     graphics.init(config);
-    var canvases = ['canvas', 'canvas2'];
+    var canvases = ['canvas'];
     var sims = [];
-    window.sims = sims; // TODO remove
 
     canvases.forEach(function(cvs) {
         var cmx = new config.ChairMeasures({ tempId: cvs });
