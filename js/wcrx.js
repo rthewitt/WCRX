@@ -646,7 +646,9 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         var Ws = this.chairMeasures.get('seatWidth'),
             AxDelta = 4, // TODO measure this
             Cw = this.humanMeasures.get('chestWidth'),
-            W = (Ws + AxDelta - Cw ) / 2;
+            W = (parseInt(Ws) + AxDelta - parseInt(Cw) ) / 2;
+
+        console.log('width: '+Ws);
 
         // H = shoulder y - wheelpoint y
         var wheel = this.chairParts.wheel,
