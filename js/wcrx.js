@@ -779,8 +779,17 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         this.world.QueryAABB(GetBodyCallback, aabb);
         return body;
     };
+    // TODO remove string array notation from person/chair
+    WCRX.prototype.calcGroundClearance = function() {
+        var ly = this.chairParts.wheel.get('size').r;
+        var groundPt = this.chairPartBodies.wheel.GetWorldPoint(
+                new b2Vec2(0, ly));
 
-
+        var frs = this.chairParts.footRest.get('size');
+        var frLocal = new b2Vec2(frs.x/2, frs.y/2);
+        var frPt = this.chairPartBodies.footRest.GetWorldPoint(frLocal);
+        return ((groundPt.y - frPt.y) * this.config.ITM).toFixed(2); 
+    };
     WCRX.prototype.destroy = function() {
         this.world.ClearForces();
         for(b = this.world.GetBodyList(); b; b = b.GetNext()) {

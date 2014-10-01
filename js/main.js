@@ -126,6 +126,7 @@ define(["jquery", "backbone", "box2dweb", "./wcrx", "./graphics", "./config", "j
 
     function resetSim(sim) {
         var wcrx = sim.wcrx;
+        $('#ground-clr').val('');
         var snapshotDiv = $('#armies');
         if(snapshotDiv.length) snapshotDiv.remove();
         if(!!wcrx.token) {
@@ -174,6 +175,7 @@ define(["jquery", "backbone", "box2dweb", "./wcrx", "./graphics", "./config", "j
                if(!frWeld) {
                    frWeld = sims[0].wcrx.weldFootRest();
                    sims[0].wcrx.chairParts.joints.footRest = frWeld;
+                   $('#ground-clr').val(sims[0].wcrx.calcGroundClearance());
                }
            }
            isMouseDown = false;
