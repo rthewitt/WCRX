@@ -697,6 +697,7 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         this.initChair();
         for(var x=0; x<25; x++) { this.update(); } // stabilize chair
         this.initPerson();
+        for(var x=0; x<25; x++) { this.update(); } // stabilize chair
 
         this.SIG_destroyChair = false;
         this.SIG_destroyPerson = false;
