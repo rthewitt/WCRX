@@ -126,6 +126,8 @@ define(["jquery", "backbone", "box2dweb", "./wcrx", "./graphics", "./config", "j
 
     function resetSim(sim) {
         var wcrx = sim.wcrx;
+        var snapshotDiv = $('#armies');
+        if(snapshotDiv.length) snapshotDiv.remove();
         if(!!wcrx.token) {
             window.clearInterval(wcrx.token);
             delete wcrx.token;
@@ -168,6 +170,11 @@ define(["jquery", "backbone", "box2dweb", "./wcrx", "./graphics", "./config", "j
                    seatSlide.SetMaxMotorForce(500);
                    seatSlide.SetMotorSpeed(0.0);
                }
+               var frWeld = sims[0].wcrx.chairParts.joints.footRest;
+               if(!frWeld) {
+                   frWeld = sims[0].wcrx.weldFootRest();
+                   sims[0].wcrx.chairParts.joints.footRest = frWeld;
+               }
            }
            isMouseDown = false;
         });
@@ -179,22 +186,30 @@ define(["jquery", "backbone", "box2dweb", "./wcrx", "./graphics", "./config", "j
            console.log('x: '+mouseX + ', y: '+mouseY);
            //console.log('box2d x: '+ (e.clientX/config.PTM)+ ', box2d y: '+(e.clientY/config.PTM));
 
-           var p = new Box2D.Common.Math.b2Vec2(mouseX, mouseY); // verify
+           var p = new Box2D.Common.Math.b2Vec2(mouseX, mouseY);
            var body = sim.wcrx.getBodyAtPos(p);
+           var hParts = sim.wcrx.humanParts,
+               cParts = sim.wcrx.chairParts;
            if(isMouseDown && !sim.mouseJoint) {
                if(body) {
                     if(body === sim.wcrx.humanPartBodies.upperLeg) {
-                        var seatRev = sim.wcrx.humanParts.joints.seatRev;
-                        var seatSlide = sim.wcrx.humanParts.joints.seatSlide;
+                        var seatRev = hParts.joints.seatRev;
+                        var seatSlide = hParts.joints.seatSlide;
                         console.log('breaking bond...');
                         if(seatRev) {
-                            sim.wcrx.world.DestroyJoint(sim.wcrx.humanParts.joints.seatRev);
-                            sim.wcrx.humanParts.joints.seatRev = undefined;
+                            hParts.joints.seatRev = undefined;
+                            sim.wcrx.world.DestroyJoint(seatRev);
                         }
                         if(seatSlide && seatSlide.IsMotorEnabled()) {
                             console.log('turning off motor');
                             seatSlide.EnableMotor(false);
                         }
+                    } else if(body === sim.wcrx.chairPartBodies.footRest) {
+                        var frWeld = cParts.joints.footRest;
+                        if(frWeld) {
+                            cParts.joints.footRest = undefined;
+                            sim.wcrx.world.DestroyJoint(frWeld);
+                        } 
                     }
                     var def = new Box2D.Dynamics.Joints.b2MouseJointDef();
                     
@@ -257,7 +272,7 @@ define(["jquery", "backbone", "box2dweb", "./wcrx", "./graphics", "./config", "j
             var alpha = upperIntoAngle = Math.PI/2 - gamma;
             var beta = lowerIntoAngle = Math.PI - alpha - c;
             var Q = U * Math.cos(gamma);
-            var P = perspective = Q - W; // how far elbow just out of wheel plane
+            var P = perspective = Q - W; // how far elbow juts out of wheel plane
             var E = Q * Math.atan(gamma);
             
             var uHeight = U * config.PTM / config.ITM,
@@ -267,7 +282,7 @@ define(["jquery", "backbone", "box2dweb", "./wcrx", "./graphics", "./config", "j
                 lWidth = sims[0].wcrx.humanMeasures.get('lowerArmWidth') * config.PTM / config.ITM;
 
             var uPersp = W * config.PTM / config.ITM;
-            $('body').append('<div style="position:absolute; top: '+Sy+'; left: '+Sx+';">'+
+            $('body').append('<div id="armies" style="position:absolute; top: '+Sy+'; left: '+Sx+';">'+
                     '<img id="skew-upper" style="perspective: '+uPersp+'px;" height="'+uHeight+'" width="'+uWidth+'" src="images/v2/upper-arm.svg" class="skewed" />'+
                     '<img id="skew-lower" style="perspective: 0px" class="skewed" height="'+lHeight+'" width="'+lWidth+'" src="images/v2/lower-arm.svg" />'+
                     '</div>');

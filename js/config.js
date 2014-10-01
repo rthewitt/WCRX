@@ -25,6 +25,26 @@ define(["./scaledPolygons", "backbone"], function(pollyColl, Backbone){
 
     function getPerson() {
         return {
+            head: new ImageData({
+                name: "head",
+                type: "poly",
+                polygons: pollyColl.head,
+                massless: true,
+                size: null,
+                pos: { z: 2 },
+                cat: HM_SOLID,
+                mask: armyMask
+            }),
+            neck: new ImageData({
+                name: "neck",
+                type: "box",
+                //opacity: 0.8,
+                massless: true,
+                size: null,
+                pos: { z: 0 },
+                cat: HM_JOINT,
+                mask: personMask
+            }),
             shoulderJ: new ImageData({
                 name: "shoulder",
                 type: "circle",
@@ -59,6 +79,7 @@ define(["./scaledPolygons", "backbone"], function(pollyColl, Backbone){
             waist: new ImageData({
                 name: "waist",
                 type: "poly",
+                //hidden: true,
                 polygons: pollyColl.waist,
                 size: null,
                 pos: { z: 1 },
@@ -258,13 +279,21 @@ define(["./scaledPolygons", "backbone"], function(pollyColl, Backbone){
             pd.chest.set("size",   
                 { x: this.get("trunkDepth"), y: ch });
 
+            pd.head.set("size",
+                { x: 9, y: 7 * 3/2 });
+
+            // FIXME
+            pd.neck.set("size",
+                { x: this.get("trunkDepth")/2.5, y: 6 });
+
             var kRad = this.get("lowerLegWidth")/2; 
             pd.kneeJ.set("size", { r: kRad });
 
             var footWidth = 4; // TODO ratio or input
 
+            var legOffsetFix = 1;
             pd.upperLeg.set("size",   
-                { x: this.get("upperLegLength") - kRad, y: this.get("upperLegWidth") });
+                { x: this.get("upperLegLength") - kRad - legOffsetFix, y: this.get("upperLegWidth") });
 
             pd.lowerLeg.set("size",   
                 { x: this.get("lowerLegLength") - kRad - footWidth, y: this.get("lowerLegWidth") });
@@ -343,7 +372,7 @@ define(["./scaledPolygons", "backbone"], function(pollyColl, Backbone){
             this.resetChair();
             this.on("change:wheelDiameter", this.resetChair);
             this.on("change:axleDistance", this.resetChair);
-            //this.on("change:seatWidth", this.resetChair); // no trigger yet, snapshot is separate funcitonality
+            //this.on("change:seatWidth", this.resetChair); // no trigger yet, snapshot is separate functionality
             this.on("change:seatBackWidth", this.resetChair);
             this.on("change:seatBackHeight", this.resetChair);
             this.on("change:seatDepth", this.resetChair);
@@ -384,9 +413,9 @@ define(["./scaledPolygons", "backbone"], function(pollyColl, Backbone){
     };
 
     conf.polyCraft = new ImageData({
-                name: "lower-arm",
+                name: "head",
                 type: "poly",
-                size: { x: 7, y: 8 },
+                size: { x: 12, y: 10 },
                 pos: { z: 10 },
                 cat: HM_SOLID,
                 mask: personMask

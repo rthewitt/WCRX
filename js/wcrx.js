@@ -201,9 +201,22 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
             return person[name].get('size').y;
         }
 
-        var joints = this.humanParts.joints;
         // joints have gotten more complicated (additional bodies)
+        var joints = this.humanParts.joints;
 
+        var neck_1 = getRevJoint.call(this, bodies.neck, bodies.head,
+                { x: X('neck')/2 * 0.4, y: -Y('neck')/2 * 0.4 },
+                { x: -X('head')/2 * 0.15, y: Y('head')/2 * 0.5 });
+        neck_1.SetLimits(0 * Math.PI, 0 * Math.PI);
+        neck_1.EnableLimit(true);
+        
+        var neck_2 = getRevJoint.call(this, bodies.neck, bodies.chest,
+                { x: X('neck')/2 * 0.4, y: Y('neck')/2 * 0.4 },
+                { x: 0, y: -Y('chest')/2 });
+        neck_2.SetLimits(0 * Math.PI, 0 * Math.PI);
+        neck_2.EnableLimit(true);
+
+        // this notation confuses reader
         var shoulder = bodies.shoulderJ;
         var Rs = person['shoulderJ'].get('size').r;
 
@@ -217,13 +230,15 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         var knee_1 = getRevJoint.call(this, knee, bodies.lowerLeg, 
                 { x: 0, y: 0 },
                 { x: -X('lowerLeg')/2, y: 0 });
+        knee_1.SetLimits(0, Math.PI);
+        knee_1.EnableLimit(true);
 
         // should be fixture
         var knee_2 = getWeldJoint.call(this, bodies.upperLeg, knee,
                 { x: X('upperLeg')/2, y: kr * 0.60 },
                 { x: 0, y: 0 });
 
-        
+
         /*
         var elbow = getRevJoint.call(this, bodies.upperArm, bodies.lowerArm, 
                 { x: 0, y: Y('upperArm')/2 },
@@ -247,8 +262,9 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         
 
         var hip = getRevJoint.call(this, bodies.upperLeg, bodies.waist, 
-                { x: -X('upperLeg')/2, y: Y('upperLeg')/2 },
-                { x: -X('waist')/2, y: Y('waist')/2 });
+                { x: -X('upperLeg')/2 + X('waist')/2 - this.inches(1), y: Y('upperLeg')/2 - Y('waist')/2 },
+                { x: 0, y: 0 });
+                //{ x: -X('waist')/2 * 0.5, y: Y('waist')/2 });
 
         var foot = getWeldJoint.call(this, bodies.lowerLeg, bodies.foot,
                 { x: X('lowerLeg')/2, y: Y('lowerLeg')/2 * 0.65 },
@@ -263,6 +279,8 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
 
         // dynamic joints for person control
         joints.shoulder = s_1;
+        joints.neck_1 = neck_1;
+        joints.neck_2 = neck_2;
         //joints.elbow = elbow;
         joints.t1 = t1;
         joints.t2 = t2;
@@ -271,6 +289,7 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         joints.knee_2 = knee_2;
         joints.foot = foot;
         parts.initted = true;
+
 
         if(!this.chairParts.initted) return;
 
@@ -353,6 +372,31 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
                 { x: 0, y: -wheel.get('size').r }, true);
     }
 
+    WCRX.prototype.weldFootRest = function() {
+        var wheelChair = this.chairMeasures.get('wheelChair');
+        function X(name) {
+            return wheelChair[name].get('size').x;
+        }
+
+        function Y(name) {
+            return wheelChair[name].get('size').y;
+        }
+        var bodies = this.chairPartBodies;
+        var wjd = new b2WeldJointDef();
+        var localFRest = new b2Vec2( X('footRest')/2, -Y('footRest')/2);
+        var globalPoint = bodies.footRest.GetWorldPoint(localFRest);
+        console.log('frest: '+localFRest.x+', '+localFRest.y);
+        console.log('global: '+globalPoint.x+', '+globalPoint.y);
+        var localFrame = bodies.LBar.GetLocalPoint(globalPoint);
+        console.log('frame: '+localFrame.x+', '+localFrame.y);
+
+        wjd.bodyA = bodies.LBar;
+        wjd.bodyB = bodies.footRest;
+        wjd.localAnchorA.Set(localFrame.x, localFrame.y);
+        wjd.localAnchorB.Set(localFRest.x, localFRest.y);
+        return this.world.CreateJoint(wjd);
+    }
+
     // fill just fill these arrays, same code
     function initC() {
         
@@ -427,9 +471,24 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
                 { x: X('LBar')/2 * 0.7, y: Y('LBar')/2 },
                 { x: 0, y: -Y('frontConnector')/2 * 0.8 });
 
+
+        var fryj = new b2PrismaticJointDef();
+        fryj.bodyA = bodies.footRest;
+        fryj.bodyB = bodies.LBar;
+        fryj.collideConnected = false;
+
+        fryj.localAxisA.Set(0.05, 1); 
+        fryj.localAxisA.Normalize(); // normalize to unit vector!
+        fryj.localAnchorA.Set(X('footRest')/2, -Y('footRest')/2);
+        fryj.localAnchorB.Set(X('LBar')/2, Y('LBar')/2 - (Y('LBar')*0.03));
+        fryj.upperTranslation = Y('footRest')*0.9;
+        fryj.lowerTranslation = Y('LBar')*0.03;
+        fryj.enableLimit = true;
+        var footRestSlide = this.world.CreateJoint(fryj);
+
         var footRest = getWeldJoint.call(this, bodies.LBar, bodies.footRest,
                 { x: X('LBar')/2, y: Y('LBar')/2 },
-                { x: X('footRest')/2, y: -Y('footRest')/2  * 0.5 }); // TODO distance determined by gap / angle
+                { x: X('footRest')/2, y: -Y('footRest')/2 });
 
         // add footrest barrier
         var fixDef = new b2FixtureDef;
@@ -452,13 +511,13 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         joints.axle = axle;
         joints.slider = slider;
         joints.frontAxle = frontAxle;
-        // remove?
         joints.backWeld = backWeld;
         joints.frameWeld = frameWeld;
         joints.seatWeld = seatWeld;
         joints.handleBarPos = handleBarPos;
         joints.frontWeld = frontWeld;
         joints.footRest = footRest;
+        joints.footRestSlide = footRestSlide;
 
         for(var bod in bodies) {
             var ud = bodies[bod].GetUserData();
@@ -551,19 +610,29 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
     }
 
     // polygon import tool - still somewhat manual
-    WCRX.prototype.initPolygonModeling = function() {
+    WCRX.prototype.initPolygonModeling = function(fixDef, bodyDef) {
 
         var polygons = [[
-            {x:2.9802322387695312E-8,y:1.3650000095367432},
-            {x:0.07000002264976501,y:1.7350000143051147},
-            {x:0.9249999523162842,y:1.7350000143051147},
-            {x:0.9949999451637268,y:1.3499999046325684},
-            {x:0.854999840259552,y:0.02000012993812561},
-            {x:0.1599999964237213,y:0.02000001072883606}
+        {x:0.47058823704719543,y:0.29411768913269043},
+        {x:1.0024999380111694,y:0.4074999988079071},
+        {x:0.8774999380111694,y:0.02000001072883606},
+        {x:0.5950000286102295,y:0.03249996900558472}
+        ],[
+        {x:1.0024999380111694,y:0.4074999988079071},
+            {x:0.2647058963775635,y:1.1176470518112183},
+            {x:0.4399999976158142,y:1.149999976158142},
+            {x:0.752500057220459,y:1.1099998950958252},
+            {x:0.9324999451637268,y:0.949999988079071}
+        ],[
+        {x:0.2647058963775635,y:1.1176470518112183},
+            {x:1.0024999380111694,y:0.4074999988079071},
+            {x:0.47058823704719543,y:0.29411768913269043},
+            {x:0.11764705926179886,y:0.38235294818878174},
+            {x:0.05882352963089943,y:0.9411764740943909}
         ]];
 
         var img = new Image();
-        img.src = 'images/v2/lower-arm.svg';
+        img.src = 'images/v2/head.svg';
         bodyDef.userData = ud = this.config.polyCraft;
         ud.set('img', img);
 
@@ -574,7 +643,7 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
             x: this.inches(_size.x),
             y: this.inches(_size.y)
         };
-        dims = { x: 39, y: 83  };
+        dims = { x: 95, y: 94  };
         console.log("size: "+size.x +", "+size.y);
         console.log("dims: "+dims.x +", "+dims.y);
         ud.set('dims', dims);
@@ -590,7 +659,7 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
             for(var p=0; p<polygon.length; p++) {
 
               var scaledVec = new b2Vec2(size.x * polygon[p].x, -size.y * polygon[p].y); 
-              var cent = new b2Vec2(-0.09, 0.18); // center change is specific to configured shape
+              var cent = new b2Vec2(-0.16, 0.14); // center change is specific to configured shape
               scaledVec.Add(cent);
               
               vertices.push(scaledVec);
@@ -638,7 +707,7 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         this.SIG_destroyPerson = false;
         this.haltUpdate = false;
 
-        //initPolygonModeling();
+        //this.initPolygonModeling(fixDef, bodyDef);
     };
 
     WCRX.prototype.snapshot = function() {

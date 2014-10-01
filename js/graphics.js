@@ -10,6 +10,7 @@ define(["box2dweb"], function(Box2d) {
         if(!config.skeleton) context.clearRect(0, 0, context.canvas.width, context.canvas.height);
 
         function drawPart(entity, imgData, isFixture) {
+            if(imgData.get('hidden')) return;
             context.save();
             var pos = !isFixture ? entity.GetPosition() : new Box2D.Common.Math.b2Vec2.b2Vec2(0, 0);
 
