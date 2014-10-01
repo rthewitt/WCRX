@@ -233,6 +233,8 @@ define(["jquery", "backbone", "box2dweb", "./wcrx", "./graphics", "./config", "j
 
         $("#btn-reset").click(resetAll);
         $('#btn-snapshot').click(function() {
+            if($('#armies').length) return;
+
             window.clearInterval(sims[0].wcrx.token);
             delete sims[0].wcrx.token;
             var variables = sims[0].wcrx.snapshot();
