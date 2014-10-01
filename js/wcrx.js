@@ -239,10 +239,9 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
                 { x: 0, y: 0 });
 
 
-        /*
         var elbow = getRevJoint.call(this, bodies.upperArm, bodies.lowerArm, 
                 { x: 0, y: Y('upperArm')/2 },
-                { x: 0, y: -Y('lowerArm')/2 }); */
+                { x: 0, y: -Y('lowerArm')/2 }); 
 
 
         var mr = person['midsection'].get('size').r;
@@ -271,17 +270,15 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
                 { x: -X('foot')/2, y: Y('foot')/2 });
 
 
-        /*
-        var shoulder = getRevJoint.call(this, bodies.upperArm, bodies.chest, 
-                { x: -X('upperArm')/2, y: -Y('upperArm')/2 },
-                { x: -X('chest')/2, y: -(Y('chest')/2) });
-                */
+        var shoulder = getRevJoint.call(this, bodies.upperArm, bodies.shoulderJ, 
+                { x: 0, y: -Y('upperArm')/2 },
+                { x: 0, y: 0 });
 
         // dynamic joints for person control
         joints.shoulder = s_1;
         joints.neck_1 = neck_1;
         joints.neck_2 = neck_2;
-        //joints.elbow = elbow;
+        joints.elbow = elbow;
         joints.t1 = t1;
         joints.t2 = t2;
         joints.hip = hip;
@@ -308,14 +305,12 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         var sillyForce = new b2Vec2(-1, 1);
         bodies.midsection.ApplyForce(sillyForce, new b2Vec2(0, 0));
 
-        /*
         var uaPos = new b2Vec2(-this.inches(2), 0);
         uaPos.Add(chestPos);
         bodies.upperArm.SetPosition(uaPos);
         var laPos = new b2Vec2(-this.inches(2), 0);
         laPos.Add(midPos);
         bodies.lowerArm.SetPosition(laPos);
-        */
 
 
         var ulx = parts.upperLeg.get('size').x;
@@ -360,7 +355,7 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         joints.seatRev = seatRev;
         joints.seatSlide = seatSlide;
 
-        //var wrist = bindWrist.call(this);
+        var wrist = bindWrist.call(this);
     }
 
     // call with context

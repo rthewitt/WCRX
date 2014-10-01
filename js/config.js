@@ -53,7 +53,6 @@ define(["./scaledPolygons", "backbone"], function(pollyColl, Backbone){
                 cat: HM_JOINT,
                 mask: personMask
             }),
-            /*
             lowerArm: new ImageData({
                 name: "lower-arm",
                 type: "poly",
@@ -75,7 +74,6 @@ define(["./scaledPolygons", "backbone"], function(pollyColl, Backbone){
                 cat: HM_SOLID,
                 mask: armyMask
             }),
-            */
             waist: new ImageData({
                 name: "waist",
                 type: "poly",
@@ -257,13 +255,11 @@ define(["./scaledPolygons", "backbone"], function(pollyColl, Backbone){
             var sRad = this.get("upperArmWidth")/2;
             pd.shoulderJ.set("size", { r: sRad }); 
 
-            /*
             pd.upperArm.set("size",   
                 { x: this.get("upperArmWidth"), y: this.get("upperArmLength") });
 
             pd.lowerArm.set("size",   
                 { x: this.get("lowerArmWidth"), y: this.get("lowerArmLength") });
-            */
 
             pd.waist.set("size",   
                 { x: this.get("upperLegWidth"), y: this.get("upperLegWidth") });
