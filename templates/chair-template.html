@@ -1,0 +1,69 @@
+<div id="chair-measure" class="mxrx">
+    <form id="chairForm">
+        <div class="tmp-internal"><h3>Chair Controls</h3></div>
+        <label for="seat-back-height">Seat Back Height</label>
+        <input type="text" id="seat-back-height" name="seatBackHeight" value="13" />
+        <label for="seat-depth">Seat Depth</label>
+        <select id="seat-depth" name="seatDepth">
+            <option value="12">12"</option>
+            <option value="13" selected>13"</option>
+            <option value="14">14"</option>
+            <option value="15">15"</option>
+            <option value="16">16"</option>
+            <option value="17">17"</option>
+            <option value="18">18"</option>
+            <option value="19">19"</option>
+            <option value="20" disabled >20"</option>
+        </select>
+        <label for="foam-height">Foam Height</label>
+        <select id="foam-height" name="foamHeight">
+            <option value="0.4">No Cushion</option>
+            <option value="2" selected>2" Cushion</option>
+        </select>
+        <label for="seat-back">Seat Back</label>
+        <select id="seat-back" name="seatBackWidth">
+            <option value="0.4" selected>No Cushion</option>
+            <option value="2">2" Cushion</option>
+        </select>
+        <label for="wheel-diameter">Wheel Diameter</label>
+        <select id="wheel-diameter" name="wheelDiameter">
+            <option value="20">20"</option>
+            <option value="22">22"</option>
+            <option value="24" selected>24"</option>
+            <option value="25">25"</option>
+            <option value="26">26"</option>
+        </select>
+        <!-- This is actually COG -->
+        <label for="axle-distance">Center Of Gravity</label>
+        <select id="axle-distance" name="axleDistance">
+            <option value="0.0" disabled>0"</option>
+            <option value="0.5" disabled>0.5"</option>
+            <option value="1.0">1"</option>
+            <option value="1.5">1.5"</option>
+            <option value="2.0">2"</option>
+            <option value="2.5">2.5"</option>
+            <option value="3.0">3"</option>
+            <option value="3.5" selected>3.5"</option>
+            <option value="4.0">4"</option>
+        </select>
+        <label for="ground-clr">Ground Clearance</label>
+        <input type="text" id="ground-clr" name="groundClr" value="" readonly />
+        <label for="seat-width">Seating Surface Width</label>
+        <select id="seat-width" name="seatWidth">
+            <option value="12">12"</option>
+            <option value="13">13"</option>
+            <option value="14">14"</option>
+            <option value="15" selected>15"</option>
+            <option value="16">16"</option>
+            <option value="17">17"</option>
+            <option value="18">18"</option>
+            <option value="19">19"</option>
+            <option value="20" disabled >20"</option>
+        </select>
+        <label for="foot-rest-width">Foot Rest Width</label>
+        <input type="text" id="foot-rest-width" name="footRestWidth" value="TODO" disabled />
+    </form>
+</div>
+<div id="wrapper" class="i-app">
+    <canvas id="canvas" width="800" height="500" style="background-color:#5a8ac0;" ></canvas>
+</div>

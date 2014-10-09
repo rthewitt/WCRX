@@ -5,7 +5,9 @@ require.config({
         "jquery.customSelect": "libs/jquery.customSelect/jquery.customSelect.min",
         "underscore": "libs/underscore/underscore",
         "backbone": "libs/backbone/backbone",
-        "box2dweb": "libs/box2dweb/Box2dWeb-2.1.a.3.min"
+        "box2dweb": "libs/box2dweb/Box2dWeb-2.1.a.3.min",
+        "humanTemplate": "../templates/human-template.html",
+        "chairTemplate": "../templates/chair-template.html"
     },
     shim: {
         "box2dweb": {
@@ -23,7 +25,17 @@ require.config({
 
 
 // jquery extensions act as decorators and are thus discarded
-define(["jquery", "backbone", "box2dweb", "./wcrx", "./graphics", "./config", "jquery.customSelect"], function($, Backbone, Box2D, WCRX, graphics, config) {
+define(["require", "jquery", "backbone", "box2dweb", "./wcrx", "./graphics", "./config", "jquery.customSelect"], function(require, $, Backbone, Box2D, WCRX, graphics, config) {
+
+    var templateC = '';
+    var templateH = '';
+
+    require(['text!chairTemplate', 'text!humanTemplate'], function(ct, ht) {
+        var template = _.template(ct);
+        templateC = template({ someVal: 'silly' });
+        template = _.template(ht);
+        templateH = template();
+    });
 
     $('select').each(function(i, el) { $(el).customSelect(); });
 
@@ -75,6 +87,34 @@ define(["jquery", "backbone", "box2dweb", "./wcrx", "./graphics", "./config", "j
         resetSim(sim);
     });
 
+    var RegionManager = (function(Backbone, $) {
+        var currentView;
+        var el = "#dynamic";
+        var region = {};
+
+        var closeView = function(view) {
+            if(view && view.close) {
+                view.close();
+            }
+        };
+
+        var openView = function(view) {
+            view.render();
+            if(view.onShow) {
+                view.onShow();
+            }
+        };
+
+        region.show = function(view) {
+            closeView(currentView);
+            currentView = view;
+            openView(currentView);
+        };
+
+        return region;
+    })(Backbone, $);
+
+
     var Person = Backbone.Model.extend({
         defaults: config.person,
         initialize: function() {
@@ -86,8 +126,8 @@ define(["jquery", "backbone", "box2dweb", "./wcrx", "./graphics", "./config", "j
     });
     var person = new Person;
 
-    var personControls = Backbone.View.extend({
-        el: "#humanForm",
+    var PersonControls = Backbone.View.extend({
+        el: "#human-template",
         model: sims[0].wcrx.humanMeasures,
         events: {
             "change input":"changed",
@@ -96,33 +136,52 @@ define(["jquery", "backbone", "box2dweb", "./wcrx", "./graphics", "./config", "j
         initialize: function() {
             _.bindAll(this, "changed");
         },
+        close: function() {
+            this.remove();
+            this.unbind();
+        },
+        render: function() {
+            $('#dynamic').html(templateH);
+        },
         changed: function(evt) {
             var changed = evt.currentTarget;
             var value = $(evt.currentTarget).val();
             var mx = this.model.set(changed.name, value);
             resetSim(sims[0]);
+        },
+        onShow: function() {
+            $(this.el).show();
         }
     });
-    new personControls;
 
-    var chairControls = Backbone.View.extend({
-        el: "#chairForm",
+    var ChairControls = Backbone.View.extend({
+        el: "#chair-template",
         model: sims[0].wcrx.chairMeasures,
         events: {
             "change input":"changed",
             "change select":"changed"
         },
         initialize: function() {
+            console.log('initting chair');
             _.bindAll(this, "changed");
+        },
+        close: function() {
+            this.remove();
+            this.unbind();
+        },
+        render: function() {
+            $('#dynamic').html(templateC);
         },
         changed: function(evt) {
             var changed = evt.currentTarget;
             var value = $(evt.currentTarget).val();
             var mx = this.model.set(changed.name, value);
             resetSim(sims[0]);
+        },
+        onShow: function() {
+            $(this.el).show();
         }
     });
-    new chairControls;
 
     function resetSim(sim) {
         var wcrx = sim.wcrx;
@@ -230,8 +289,13 @@ define(["jquery", "backbone", "box2dweb", "./wcrx", "./graphics", "./config", "j
             if(sim.mouseJoint) sim.mouseJoint.SetTarget(p);
         });
 
-
-        $("#btn-reset").click(resetAll);
+        $('#btn-reset').click(resetAll);
+        $('#btn-pmx').click(function() {
+            RegionManager.show(new PersonControls);
+        });
+        $('#btn-cmx').click(function() {
+            RegionManager.show(new ChairControls);
+        });
         $('#btn-snapshot').click(function() {
             if($('#armies').length) return;
 

@@ -5,113 +5,28 @@
         <link rel="stylesheet" type="text/css" href="css/main.css" />
    </head>
    <body>
-   <div id="temp-controls">
-   </div>
    <div id="container">
        <div class="t-wrap">
           <div class="app-title"><h2><p>Wheelchair</p> <p>Rx</p></h2></div>
        </div>
-         <div id="human-measure" class="mxrx">
-             <div class="tmp-internal"><h3>Human Controls</h3></div>
-             <form id="humanForm">
-                 <label for="upper-arm-length">Upper Arm Length</label>
-                 <input type="text" id="upper-arm-length" name="upperArmLength" value="11" />
-                 <label for="lower-arm-length">Forearm Length</label>
-                 <input type="text" id="lower-arm-length" name="lowerArmLength" value="11" />
-                 <label for="torso-length">Torso Length</label>
-                 <input type="text" id="torso-length" name="torsoLength" value="25" />
-                 <label for="trunk-depth">Trunk Depth</label>
-                 <input type="text" id="trunk-depth" name="trunkDepth" value="9" />
-                 <label for="contact-point">Forward Contact</label>
-                 <input type="text" id="contact-point" name="contactPoint" value="2" />
-                 <label for="thigh-depth">Thigh Depth</label>
-                 <input type="text" id="upper-leg-length" name="upperLegLength" value="22" />
-                 <label for="lower-leg-length">Lower Leg Length</label>
-                 <input type="text" id="lower-leg-length" name="lowerLegLength" value="20" />
-                 <label for="chest-width">Chest Width</label>
-                 <input type="text" id="chest-width" name="chestWidth" value="16" />
-                 <label for="hip-width">Hip Width</label>
-                 <input type="text" id="hip-width" name="hipWidth" value="DISABLED" disabled />
-             </form>
-         </div>
-         <div id="chair-measure" class="mxrx">
-             <form id="chairForm">
-                 <div class="tmp-internal"><h3>Chair Controls</h3></div>
-                 <label for="seat-back-height">Seat Back Height</label>
-                 <input type="text" id="seat-back-height" name="seatBackHeight" value="13" />
-                 <label for="seat-depth">Seat Depth</label>
-                 <select id="seat-depth" name="seatDepth">
-                     <option value="12">12"</option>
-                     <option value="13" selected>13"</option>
-                     <option value="14">14"</option>
-                     <option value="15">15"</option>
-                     <option value="16">16"</option>
-                     <option value="17">17"</option>
-                     <option value="18">18"</option>
-                     <option value="19">19"</option>
-                     <option value="20" disabled >20"</option>
-                 </select>
-                 <label for="foam-height">Foam Height</label>
-                 <select id="foam-height" name="foamHeight">
-                     <option value="0.4">No Cushion</option>
-                     <option value="2" selected>2" Cushion</option>
-                 </select>
-                 <label for="seat-back">Seat Back</label>
-                 <select id="seat-back" name="seatBackWidth">
-                     <option value="0.4" selected>No Cushion</option>
-                     <option value="2">2" Cushion</option>
-                 </select>
-                 <label for="wheel-diameter">Wheel Diameter</label>
-                 <select id="wheel-diameter" name="wheelDiameter">
-                     <option value="20">20"</option>
-                     <option value="22">22"</option>
-                     <option value="24" selected>24"</option>
-                     <option value="25">25"</option>
-                     <option value="26">26"</option>
-                 </select>
-                 <!-- This is actually COG -->
-                 <label for="axle-distance">Center Of Gravity</label>
-                 <select id="axle-distance" name="axleDistance">
-                     <option value="0.0" disabled>0"</option>
-                     <option value="0.5" disabled>0.5"</option>
-                     <option value="1.0">1"</option>
-                     <option value="1.5">1.5"</option>
-                     <option value="2.0">2"</option>
-                     <option value="2.5">2.5"</option>
-                     <option value="3.0">3"</option>
-                     <option value="3.5" selected>3.5"</option>
-                     <option value="4.0">4"</option>
-                 </select>
-                 <label for="ground-clr">Ground Clearance</label>
-                 <input type="text" id="ground-clr" name="groundClr" value="" readonly />
-                 <label for="seat-width">Seating Surface Width</label>
-                 <select id="seat-width" name="seatWidth">
-                     <option value="12">12"</option>
-                     <option value="13">13"</option>
-                     <option value="14">14"</option>
-                     <option value="15" selected>15"</option>
-                     <option value="16">16"</option>
-                     <option value="17">17"</option>
-                     <option value="18">18"</option>
-                     <option value="19">19"</option>
-                     <option value="20" disabled >20"</option>
-                 </select>
-                 <label for="foot-rest-width">Foot Rest Width</label>
-                 <input type="text" id="foot-rest-width" name="footRestWidth" value="TODO" disabled />
-             </form>
-         </div>
+       <div id="dynamic">
          <div id="wrapper" class="i-app">
-             <!--<h3>Side measures</h3>-->
              <canvas id="canvas" width="800" height="500" style="background-color:#5a8ac0;" ></canvas>
          </div>
-             <div class="button-holder">
-                 <input id="btn-reset" class="btn-box" type="button"  value="Reset" />
-                 <input id="btn-images" class="btn-box" type="button"  value="Images" />
-                 <input id="btn-skeleton" class="btn-box" type="button"  value="Skeleton" />
-                 <input id="btn-person" class="btn-box" type="button"  value="Person" />
-                 <input id="btn-chair" class="btn-box" type="button"  value="Chair" />
-                 <input id="btn-snapshot" class="btn-box" type="button"  value="Snapshot" />
-             </div>
+      </div>
+     <div class="button-holder">
+         <input id="btn-images" class="btn-box" type="button"  value="Images" />
+         <input id="btn-skeleton" class="btn-box" type="button"  value="Skeleton" />
+         <input id="btn-person" class="btn-box" type="button"  value="Person" />
+         <input id="btn-chair" class="btn-box" type="button"  value="Chair" />
+         <input id="btn-snapshot" class="btn-box" type="button"  value="Snapshot" />
+         <input id="btn-reset" class="btn-box" type="button"  value="Reset" />
+     </div>
+     <div class="button-holder">
+         <input id="btn-pmx" class="btn-box" type="button"  value="Show Person" />
+         <input id="btn-cmx" class="btn-box" type="button"  value="Show Chair" />
+         <input id="btn-rx" class="btn-box" type="button"  value="Prescription" />
+     </div>
    </div>
    </body>
 </html>
