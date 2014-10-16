@@ -1,23 +1,4 @@
-define(["box2dweb", "underscore"], function(Box2D, _) {
-
-    var WCRX = function(chairMeasures, humanMeasures) { 
-        this.chairMeasures = chairMeasures;
-        this.humanMeasures = humanMeasures;
-        this.chairParts = {
-            joints: {},
-            initted: false
-        }; 
-        this.humanParts = {
-            joints: {},
-            initted: false
-        }; 
-        this.chairPartBodies = {}; 
-        this.humanPartBodies = {};
-        // signals for time-step
-        this.SIG_destroyChair = false;
-        this.SIG_destroyPerson = false;
-        this.haltUpdate = false;
-    };
+define(["backbone", "box2dweb", "underscore"], function(Backbone, Box2D, _) {
 
     //////// REMOVE ///////
     var chairX,
@@ -42,6 +23,8 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
           b2DistanceJointDef = Box2D.Dynamics.Joints.b2DistanceJointDef,
           b2WeldJointDef = Box2D.Dynamics.Joints.b2WeldJointDef;
 
+    function Physics() {}
+
 
     function createGround() {
          var fixDef = new b2FixtureDef;
@@ -58,7 +41,7 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
          //create ground
          bodyDef.type = b2Body.b2_staticBody;
          fixDef.shape = new b2PolygonShape;
-         fixDef.shape.SetAsBox(this.pixels(850), this.pixels(40));
+         fixDef.shape.SetAsBox(this.pixels(500), this.pixels(40));
          bodyDef.position.Set(0, this.pixels(500));
          this.ground = this.world.CreateBody(bodyDef);
          var gfx = this.ground.CreateFixture(fixDef);
@@ -89,12 +72,13 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         switch(idata.get('type')) {
             case 'circle':
                 shape = new b2CircleShape(this.inches(_size.r)); 
-                //size = { r: this.inches(_size.r) };
                 size = { r: this.inches(_size.r) };
                 dims = { x: 2 * size.r * PTM, y: 2 * size.r * PTM };
-                //console.log('_size: '+JSON.stringify(_size));
-                //console.log('size: '+JSON.stringify(size));
-                //console.log(dims);
+                /*
+                console.log('_size: '+JSON.stringify(_size));
+                console.log('size: '+JSON.stringify(size));
+                console.log(dims);
+                */
                 break;
             case 'poly':
                 shape = [];
@@ -103,6 +87,10 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
                     y: this.inches(_size.y)
                 };
                 dims = { x: size.x * PTM, y: size.y * PTM };
+                console.log('vertices for '+idata.get('name'));
+                console.log('_size: '+JSON.stringify(_size));
+                console.log('size: '+JSON.stringify(size));
+                console.log(dims);
                 setScaledPolygons(shape, idata.get('polygons'), size);
                 break;
             case 'box':
@@ -367,7 +355,7 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
                 { x: 0, y: -wheel.get('size').r }, true);
     }
 
-    WCRX.prototype.weldFootRest = function() {
+    Physics.prototype.weldFootRest = function() {
         var wheelChair = this.chairMeasures.get('wheelChair');
         function X(name) {
             return wheelChair[name].get('size').x;
@@ -432,7 +420,7 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         wjd.bodyA = bodies.wheel;
         wjd.bodyB = this.ground;
         wjd.localAnchorA.Set(0, this.chairParts['wheel'].get('size').r);
-        wjd.localAnchorB.Set(this.pixels(400), -this.pixels(40)); // canvas?
+        wjd.localAnchorB.Set(this.pixels(225), -this.pixels(40)); // canvas?
         this.world.CreateJoint(wjd);
 
         var COG = this.inches(this.chairMeasures.get('axleDistance'));
@@ -481,8 +469,29 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         fryj.enableLimit = true;
         var footRestSlide = this.world.CreateJoint(fryj);
 
+        var clr = this.chairMeasures.get('groundClr');
+        clr = this.inches(clr);
+        console.log('clr: '+clr);
+        var weldY;
+        if(clr > 0) {
+            //var frs = parts.footRest.get('size');
+            var frameLocal = new b2Vec2(X('LBar')/2, 0.70 * Y('LBar')/2);
+            var framePt = bodies.LBar.GetWorldPoint(frameLocal);
+            var ly = parts.wheel.get('size').r;
+            var groundPoint = bodies.wheel.GetWorldPoint(
+                new b2Vec2(0, ly));
+            frameClearance = groundPoint.y-framePt.y;
+            console.log('frame clearance: '+frameClearance);
+            var heightFromGround = clr + Y('footRest');
+            var slideDelta = heightFromGround - frameClearance;
+            console.log('slide delta: '+slideDelta);
+            // weld point
+            weldY = Y('LBar')/2 - slideDelta;
+            console.log('weldY: '+weldY);
+        } else weldY = Y('LBar')/2;
+
         var footRest = getWeldJoint.call(this, bodies.LBar, bodies.footRest,
-                { x: X('LBar')/2, y: Y('LBar')/2 },
+                { x: X('LBar')/2, y: weldY },
                 { x: X('footRest')/2, y: -Y('footRest')/2 });
 
         // add footrest barrier
@@ -578,7 +587,7 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
     }
 
 
-    WCRX.prototype.update = function(CB) {
+    Physics.prototype.update = function(CB) {
         if(this.haltUpdate) return;
 
         if(this.chairParts.initted)
@@ -605,7 +614,7 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
     }
 
     // polygon import tool - still somewhat manual
-    WCRX.prototype.initPolygonModeling = function(fixDef, bodyDef) {
+    Physics.prototype.initPolygonModeling = function(fixDef, bodyDef) {
 
         var polygons = [[
         {x:0.47058823704719543,y:0.29411768913269043},
@@ -676,7 +685,7 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         //////////////////////////////
     };
 
-    WCRX.prototype.reset = function() {
+    Physics.prototype.reset = function() {
         if(!!this.world) this.destroy();
 
         this.world = new b2World(
@@ -699,6 +708,8 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         this.initPerson();
         for(var x=0; x<25; x++) { this.update(); } // stabilize chair
 
+        this.setDynamic();
+
         this.SIG_destroyChair = false;
         this.SIG_destroyPerson = false;
         this.haltUpdate = false;
@@ -706,14 +717,17 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         //this.initPolygonModeling(fixDef, bodyDef);
     };
 
-    WCRX.prototype.snapshot = function() {
+    // calculated values: ground clearance, dump, etc
+    Physics.prototype.setDynamic = function() {
+        this.chairMeasures.set('groundClr', parseFloat(this.calcGroundClearance()));
+    };
+
+    Physics.prototype.snapshot = function() {
         // W = [ ( seatWidth + axle delta ) - chestWidth ] / 2
         var Ws = this.chairMeasures.get('seatWidth'),
             AxDelta = 4, // TODO measure this
             Cw = this.humanMeasures.get('chestWidth'),
             W = (parseInt(Ws) + AxDelta - parseInt(Cw) ) / 2;
-
-        console.log('width: '+Ws);
 
         // H = shoulder y - wheelpoint y
         var wheel = this.chairParts.wheel,
@@ -738,7 +752,7 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         return [ W, H, F, U, L, sPos, sRad, wheelPos ];
     };
 
-    WCRX.prototype.getBodyAtPos = function(pos) {
+    Physics.prototype.getBodyAtPos = function(pos) {
          
         var aabb = new b2AABB();
         aabb.lowerBound.Set(pos.x - 0.001, pos.y - 0.001);
@@ -776,7 +790,7 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         return body;
     };
     // TODO remove string array notation from person/chair
-    WCRX.prototype.calcGroundClearance = function() {
+    Physics.prototype.calcGroundClearance = function() {
         var ly = this.chairParts.wheel.get('size').r;
         var groundPt = this.chairPartBodies.wheel.GetWorldPoint(
                 new b2Vec2(0, ly));
@@ -786,49 +800,73 @@ define(["box2dweb", "underscore"], function(Box2D, _) {
         var frPt = this.chairPartBodies.footRest.GetWorldPoint(frLocal);
         return ((groundPt.y - frPt.y) * this.config.ITM).toFixed(2); 
     };
-    WCRX.prototype.destroy = function() {
+    
+    Physics.prototype.destroy = function() {
         this.world.ClearForces();
         for(b = this.world.GetBodyList(); b; b = b.GetNext()) {
             this.world.DestroyBody(b);
         }
-        this.chairMeasures.resetChair();
-        this.humanMeasures.resetPerson();
     };
 
-    WCRX.prototype.destroyChair = function() {
+    Physics.prototype.destroyChair = function() {
         this.SIG_destroyChair = true;
     };
-    WCRX.prototype.destroyPerson = function() {
+    
+    Physics.prototype.destroyPerson = function() {
         this.SIG_destroyPerson = true;
     };
-    WCRX.prototype.Person = function(pdef) {
+    
+    Physics.prototype.Person = function(pdef) {
         for(var bp in pdef) {
             this[px] = pdef;
         }
     };
-    WCRX.prototype.Chair = function(cdef) {
+    
+    Physics.prototype.Chair = function(cdef) {
         for(var cx in cdef) {
             this[cx] = cdef;
         }
     };
-    WCRX.prototype.inches = function(numInches) {
+    
+    Physics.prototype.inches = function(numInches) {
         return numInches / this.config.ITM;
     };
-    WCRX.prototype.pixels = function(numPixels) {
+    
+    Physics.prototype.pixels = function(numPixels) {
         return numPixels / this.config.PTM;
     };
-    WCRX.prototype.initPerson = initP;
-    WCRX.prototype.initChair = function() { 
+    
+    Physics.prototype.initPerson = initP;
+    
+    Physics.prototype.initChair = function() { 
         initC.call(this);
     };
-    WCRX.prototype.init = function(conf) {
+    
+    Physics.prototype.init = function(conf, chairMeasures, humanMeasures) {
         this.config = conf;
 
         // TEMPORARY /////////////////
-        chairX = this.pixels(200);
+        chairX = this.pixels(125);
         chairY = this.pixels(300)-0.1-this.inches(3);
         ///////////////////
+        
+        this.chairMeasures = chairMeasures;
+        this.humanMeasures = humanMeasures;
+        this.chairParts = {
+            joints: {},
+            initted: false
+        }; 
+        this.humanParts = {
+            joints: {},
+            initted: false
+        }; 
+        this.chairPartBodies = {}; 
+        this.humanPartBodies = {};
+        // signals for time-step
+        this.SIG_destroyChair = false;
+        this.SIG_destroyPerson = false;
+        this.haltUpdate = false;
     };
 
-    return WCRX;
+    return Physics;
 });

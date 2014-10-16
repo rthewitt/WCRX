@@ -23,77 +23,59 @@ require.config({
     },
 });
 
+define([ 
+            "jquery",
+            "backbone",
+            "box2dweb",
+            "models/image-data",
+            "models/chair-model",
+            "models/person-model",
+            "views/side-view",
+            "views/front-view",
+            "views/chair-measure-view",
+            "views/person-measure-view",
+            "./config",
+            // discard jquery decorators
+            "jquery.customSelect"
+        ], function($, Backbone, Box2D, ImageData, ChairModel, PersonModel, SideView, FrontView, ChairControls, PersonControls, config) {
 
-// jquery extensions act as decorators and are thus discarded
-define(["require", "jquery", "backbone", "box2dweb", "./wcrx", "./graphics", "./config", "jquery.customSelect"], function(require, $, Backbone, Box2D, WCRX, graphics, config) {
 
-    var templateC = '';
-    var templateH = '';
 
-    require(['text!chairTemplate', 'text!humanTemplate'], function(ct, ht) {
-        var template = _.template(ct);
-        templateC = template({ someVal: 'silly' });
-        template = _.template(ht);
-        templateH = template();
-    });
 
-    $('select').each(function(i, el) { $(el).customSelect(); });
+    var dispatcher = _.clone(Backbone.Events);
 
-     function getElementPosition(element) {
-        var elem=element, tagname="", x=0, y=0;
-       
-        while((typeof(elem) == "object") && (typeof(elem.tagName) != "undefined")) {
-           y += elem.offsetTop;
-           x += elem.offsetLeft;
-           tagname = elem.tagName.toUpperCase();
+    function getImgData(defs, relPath) {
+        var imgPath = config.imgPathRoot;
+        if(relPath) imgPath += relPath+'/';
 
-           if(tagname == "BODY")
-              elem=0;
-
-           if(typeof(elem) == "object") {
-              if(typeof(elem.offsetParent) == "object")
-                 elem = elem.offsetParent;
-           }
+        var ret = {};
+        for(var pd in defs) {
+            var part = defs[pd];
+            part.img = new Image();
+            part.img.src = imgPath + part.name + '.svg';
+            ret[pd] = new ImageData(part);
         }
-        return { x: x, y: y };
-     }
+        return ret;
+    }
 
-    graphics.init(config);
-    var canvases = ['canvas'];
-    var sims = [];
 
-    canvases.forEach(function(cvs) {
-        var cmx = new config.ChairMeasures({ tempId: cvs });
-        var hmx = new config.HumanMeasures({ tempId: cvs });
+    var cs = getImgData(config.chairData);
+//    var cf = getImgData(config.chairFront, 'front');
+    var wcModel = new ChairModel({ wheelChair: cs }, { dispatcher: dispatcher });
 
-        var wcrx = new WCRX(cmx, hmx); 
-        wcrx.init(config);
+    var ps = getImgData(config.personData);
+    var pf = getImgData(config.personFront, 'front');
+    var pModel = new PersonModel({ person: ps, front: pf }, { dispatcher: dispatcher });
 
-        var canvas = document.getElementById(cvs);
-        var context = canvas.getContext('2d');
-       
 
-        var draw = graphics.getDraw(context);
-
-        var sim = { 
-            wcrx: wcrx,
-            context: context,
-            canvasPos: getElementPosition(canvas),
-            draw: graphics.getDraw(context)
-        };
-
-        sims.push(sim);
-
-        resetSim(sim);
-    });
 
     var RegionManager = (function(Backbone, $) {
         var currentView;
-        var el = "#dynamic";
         var region = {};
 
         var closeView = function(view) {
             if(view && view.close) {
+                console.log('closing');
                 view.close();
             }
         };
@@ -115,95 +97,43 @@ define(["require", "jquery", "backbone", "box2dweb", "./wcrx", "./graphics", "./
     })(Backbone, $);
 
 
-    var Person = Backbone.Model.extend({
-        defaults: config.person,
-        initialize: function() {
-            this.on("change:lowerLegLength", function(model) {
-                var lll = model.get("lowerLegLength");
-                console.log('TODO: '+lll);
-            });
-        }
-    });
-    var person = new Person;
+    var shared = { 
+        dispatcher: dispatcher,
+        personModel: pModel,
+        chairModel: wcModel,
+        conf: config
+    };
 
-    var PersonControls = Backbone.View.extend({
-        el: "#human-template",
-        model: sims[0].wcrx.humanMeasures,
-        events: {
-            "change input":"changed",
-            "change select":"changed"
-        },
-        initialize: function() {
-            _.bindAll(this, "changed");
-        },
-        close: function() {
-            this.remove();
-            this.unbind();
-        },
-        render: function() {
-            $('#dynamic').html(templateH);
-        },
-        changed: function(evt) {
-            var changed = evt.currentTarget;
-            var value = $(evt.currentTarget).val();
-            var mx = this.model.set(changed.name, value);
-            resetSim(sims[0]);
-        },
-        onShow: function() {
-            $(this.el).show();
-        }
+    var personControls = new PersonControls(shared);
+
+    var chairControls = new ChairControls(shared);
+
+    RegionManager.show(chairControls);
+
+    shared.height = 500;
+    //shared.width = 450;
+    shared.width = 850;
+
+    var sideView = new SideView(shared);
+    sideView.render();
+    var frontView = new FrontView(shared);
+
+    dispatcher.on('modified:chair', function() {
+        console.log('recieved chair event...')
+        personControls.resize();
+        sideView.reset();
     });
 
-    var ChairControls = Backbone.View.extend({
-        el: "#chair-template",
-        model: sims[0].wcrx.chairMeasures,
-        events: {
-            "change input":"changed",
-            "change select":"changed"
-        },
-        initialize: function() {
-            console.log('initting chair');
-            _.bindAll(this, "changed");
-        },
-        close: function() {
-            this.remove();
-            this.unbind();
-        },
-        render: function() {
-            $('#dynamic').html(templateC);
-        },
-        changed: function(evt) {
-            var changed = evt.currentTarget;
-            var value = $(evt.currentTarget).val();
-            var mx = this.model.set(changed.name, value);
-            resetSim(sims[0]);
-        },
-        onShow: function() {
-            $(this.el).show();
-        }
+    dispatcher.on('modified:person', function() {
+        console.log('recieved person event...')
+        chairControls.resize();
+        sideView.reset();
     });
-
-    function resetSim(sim) {
-        var wcrx = sim.wcrx;
-        $('#ground-clr').val('');
-        var snapshotDiv = $('#armies');
-        if(snapshotDiv.length) snapshotDiv.remove();
-        if(!!wcrx.token) {
-            window.clearInterval(wcrx.token);
-            delete wcrx.token;
-        }
-        wcrx.reset();
-        graphics.setDebug(wcrx.world, sim.context);
-        wcrx.token = window.setInterval(function() {
-        //wcrx.token = window.setTimeout(function() {
-            wcrx.update(sim.draw);
-        }, 1000 / 60);
-    }
-
-    function resetAll() { sims.forEach(resetSim); };
-
 
     $(document).ready(function($) {
+
+        /*
+        sim.canvasPos = getElementPosition(sim.canvas);
 
         isMouseDown = false;
 
@@ -219,89 +149,23 @@ define(["require", "jquery", "backbone", "box2dweb", "./wcrx", "./graphics", "./
            isMouseDown = true;
         });
         
-        $('#canvas').mouseup(function() {
-           if(sims[0].mouseJoint) {
-               sims[0].wcrx.world.DestroyJoint(sims[0].mouseJoint);
-               sims[0].mouseJoint = undefined;
-               var seatSlide = sims[0].wcrx.humanParts.joints.seatSlide;
-               if(seatSlide && !seatSlide.IsMotorEnabled()) {
-                   console.log('restoring bond');
-                   seatSlide.EnableMotor(true);
-                   seatSlide.SetMaxMotorForce(500);
-                   seatSlide.SetMotorSpeed(0.0);
-               }
-               var frWeld = sims[0].wcrx.chairParts.joints.footRest;
-               if(!frWeld) {
-                   frWeld = sims[0].wcrx.weldFootRest();
-                   sims[0].wcrx.chairParts.joints.footRest = frWeld;
-                   $('#ground-clr').val(sims[0].wcrx.calcGroundClearance());
-               }
-           }
-           isMouseDown = false;
-        });
 
-        $('#canvas').mousemove(function(e) {
-           var sim = sims[0];
-           mouseX = (e.clientX - sim.canvasPos.x) / config.PTM;
-           mouseY = (e.clientY - sim.canvasPos.y) / config.PTM;
-           console.log('x: '+mouseX + ', y: '+mouseY);
-           //console.log('box2d x: '+ (e.clientX/config.PTM)+ ', box2d y: '+(e.clientY/config.PTM));
 
-           var p = new Box2D.Common.Math.b2Vec2(mouseX, mouseY);
-           var body = sim.wcrx.getBodyAtPos(p);
-           var hParts = sim.wcrx.humanParts,
-               cParts = sim.wcrx.chairParts;
-           if(isMouseDown && !sim.mouseJoint) {
-               if(body) {
-                    if(body === sim.wcrx.humanPartBodies.upperLeg) {
-                        var seatRev = hParts.joints.seatRev;
-                        var seatSlide = hParts.joints.seatSlide;
-                        console.log('breaking bond...');
-                        if(seatRev) {
-                            hParts.joints.seatRev = undefined;
-                            sim.wcrx.world.DestroyJoint(seatRev);
-                        }
-                        if(seatSlide && seatSlide.IsMotorEnabled()) {
-                            console.log('turning off motor');
-                            seatSlide.EnableMotor(false);
-                        }
-                    } else if(body === sim.wcrx.chairPartBodies.footRest) {
-                        var frWeld = cParts.joints.footRest;
-                        if(frWeld) {
-                            cParts.joints.footRest = undefined;
-                            sim.wcrx.world.DestroyJoint(frWeld);
-                        } 
-                    }
-                    var def = new Box2D.Dynamics.Joints.b2MouseJointDef();
-                    
-                    def.bodyA = sim.wcrx.ground;
-                    def.bodyB = body;
-                    def.target = p;
-
-                    def.collideConnected = true;
-                    def.maxForce = 100 * body.GetMass();
-                    def.dampingRatio = 0;
-
-                    sim.mouseJoint = sim.wcrx.world.CreateJoint(def);
-                    body.SetAwake(true);
-                }
-            }
-            if(sim.mouseJoint) sim.mouseJoint.SetTarget(p);
-        });
-
-        $('#btn-reset').click(resetAll);
+        $('#btn-reset').click(sim.resetSim);
+        */
         $('#btn-pmx').click(function() {
-            RegionManager.show(new PersonControls);
+            RegionManager.show(personControls);
         });
         $('#btn-cmx').click(function() {
-            RegionManager.show(new ChairControls);
+            RegionManager.show(chairControls);
         });
+        /*
         $('#btn-snapshot').click(function() {
             if($('#armies').length) return;
 
-            window.clearInterval(sims[0].wcrx.token);
-            delete sims[0].wcrx.token;
-            var variables = sims[0].wcrx.snapshot();
+            window.clearInterval(sim.physics.token);
+            delete sim.physics.token;
+            var variables = sim.physics.snapshot();
 
             var W = variables[0],
                 H = variables[1],
@@ -312,8 +176,8 @@ define(["require", "jquery", "backbone", "box2dweb", "./wcrx", "./graphics", "./
                 sRad = variables[6], // temp
                 wPos = variables[7]; // temp
 
-            var Sy = Math.round(sPos.y * config.PTM + sims[0].canvasPos.y);
-            var Sx = Math.round(sPos.x * config.PTM + sims[0].canvasPos.x - sRad);
+            var Sy = Math.round(sPos.y * config.PTM + sim.canvasPos.y);
+            var Sx = Math.round(sPos.x * config.PTM + sim.canvasPos.x - sRad);
 
             var K = Math.sqrt(Math.pow(F, 2) + Math.pow(H, 2));
             var D = Math.sqrt(Math.pow(K, 2) + Math.pow(W, 2));
@@ -344,10 +208,10 @@ define(["require", "jquery", "backbone", "box2dweb", "./wcrx", "./graphics", "./
             var E = Q * Math.atan(gamma);
             
             var uHeight = U * config.PTM / config.ITM,
-                uWidth = sims[0].wcrx.humanMeasures.get('upperArmWidth') * config.PTM / config.ITM;
+                uWidth = sim.physics.humanMeasures.get('upperArmWidth') * config.PTM / config.ITM;
 
             var lHeight = L * config.PTM / config.ITM,
-                lWidth = sims[0].wcrx.humanMeasures.get('lowerArmWidth') * config.PTM / config.ITM;
+                lWidth = sim.physics.humanMeasures.get('lowerArmWidth') * config.PTM / config.ITM;
 
             var uPersp = W * config.PTM / config.ITM;
             $('body').append('<div id="armies" style="position:absolute; top: '+Sy+'; left: '+Sx+';">'+
@@ -364,22 +228,18 @@ define(["require", "jquery", "backbone", "box2dweb", "./wcrx", "./graphics", "./
         });
 
         $('#btn-chair').click(function() {
-            sims.forEach(function(sim) {
-                var wcrx = sim.wcrx;
-                if(!wcrx.chairParts.initted) {
-                    wcrx.chairMeasures.resetChair();
-                    wcrx.initChair();
-                } else wcrx.destroyChair();
-            });
+            var physics = sim.physics;
+            if(!physics.chairParts.initted) {
+                physics.chairMeasures.resetChair();
+                physics.initChair();
+            } else physics.destroyChair();
         });
         $('#btn-person').click(function() {
-            sims.forEach(function(sim) {
-                var wcrx = sim.wcrx;
-                if(!wcrx.humanParts.initted) {
-                    wcrx.humanMeasures.resetPerson();
-                    wcrx.initPerson();
-                } else wcrx.destroyPerson();
-            });
+            var physics = sim.physics;
+            if(!physics.humanParts.initted) {
+                physics.humanMeasures.resetPerson();
+                physics.initPerson();
+            } else physics.destroyPerson();
         });
         $('#btn-skeleton').click(function() {
             config.skeleton = !config.skeleton;
@@ -387,5 +247,8 @@ define(["require", "jquery", "backbone", "box2dweb", "./wcrx", "./graphics", "./
         $('#btn-images').click(function() {
             config.showImages = !config.showImages;
         });
+
+
+        */
     });
 });

@@ -38,11 +38,11 @@ span.customSelectFocus {
 #temp-controls {
     width: 100%
 }
-#human-measure {
+#human-side, #chair-side {
     float:left;
     margin-left: 20px;
 }
-#chair-measure {
+#human-front, #chair-front {
     float: right;
     margin-right: 20px;
 }
@@ -124,6 +124,11 @@ span.customSelectFocus {
 .i-app {
     background-color: #5a8ac0;
     min-height: 640px;
+    text-align: center;
+}
+.c-wrap {
+    margin-left: auto;
+    margin-right: auto;
 }
 h3 {
     margin: 0px;
@@ -164,10 +169,9 @@ h3 {
     background-color: #173a61;
 }
 canvas {
-    display: block;
-    left: 0;
-    right: 0;
+    display: inline-block;
     margin: 15px auto;
+    background-color:#5a8ac0;
 }
 #container {
     position: absolute;

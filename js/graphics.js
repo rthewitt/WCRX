@@ -6,6 +6,14 @@ define(["box2dweb"], function(Box2d) {
     var config;
     var PTM, ITM;
 
+    function drawSimple(context, imgdColl) {
+        for(imgd in imgdColl) {
+            var imgData = imgdColl[imgd];
+            context.drawImage(imgData.get('img'), 0, 0, 
+                imgData.get('dims').x, imgData.get('dims').y);
+        }
+    }
+
     function drawWorld(context, world) {
         if(!config.skeleton) context.clearRect(0, 0, context.canvas.width, context.canvas.height);
 
@@ -24,6 +32,7 @@ define(["box2dweb"], function(Box2d) {
             var opc = imgData.get('opacity');
             if(!!opc) context.globalAlpha = opc;
             context.drawImage(imgData.get('img'), 0, 0, imgData.get('dims').x, imgData.get('dims').y);
+
             context.restore();
 
             context.save();
@@ -82,6 +91,11 @@ define(["box2dweb"], function(Box2d) {
         getDraw: function(ctx){
             return function(world) {
                 drawWorld(ctx, world);
+            };
+        },
+        getDrawSimple: function(ctx){
+            return function(imgdColl) {
+                drawSimple(ctx, imgdColl);
             };
         },
         init: function(conf, ctx){
