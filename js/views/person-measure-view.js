@@ -20,6 +20,13 @@ define(["jquery", "underscore", "backbone", "text!humanTemplate"], function($, _
             this.$('select').each(function(i, elem) { 
                 $(elem).customSelect(); 
             });
+
+            var self = this;
+            this.$(":input").focus(function() {
+                self.$("label[for='" + this.id + "']").addClass("labelfocus");
+            }).blur(function() {
+                self.$("label").removeClass("labelfocus");
+            });
         },
         render: function() {
             var ct = _.template(templateH);
@@ -27,7 +34,6 @@ define(["jquery", "underscore", "backbone", "text!humanTemplate"], function($, _
             this.decorate();
         },
         changed: function(evt) {
-            console.log('changing person measure view');
             var changed = evt.currentTarget;
             var value = $(evt.currentTarget).val();
             var mx = this.model.set(changed.name, parseFloat(value));
@@ -39,7 +45,6 @@ define(["jquery", "underscore", "backbone", "text!humanTemplate"], function($, _
          * Controller Logic
          ********************/
         resize: function() {
-            console.log('resizing, but WHY?');
             var ps = this.model.get('person'),
                 upperArmWidth = this.model.get('upperArmWidth'),
                 upperArmLength = this.model.get('upperArmLength'),

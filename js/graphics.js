@@ -1,10 +1,7 @@
-define(["box2dweb"], function(Box2d) {
+define(['box2dweb', 'config'], function(Box2d, config) {
 
     var b2Body = Box2D.Dynamics.b2Body,
         b2DebugDraw = Box2D.Dynamics.b2DebugDraw;
-
-    var config;
-    var PTM, ITM;
 
     function drawSimple(context, imgdColl) {
         for(imgd in imgdColl) {
@@ -16,6 +13,8 @@ define(["box2dweb"], function(Box2d) {
 
     function drawWorld(context, world) {
         if(!config.skeleton) context.clearRect(0, 0, context.canvas.width, context.canvas.height);
+
+        var PTM = config.PTM;
 
         function drawPart(entity, imgData, isFixture) {
             if(imgData.get('hidden')) return;
@@ -97,11 +96,6 @@ define(["box2dweb"], function(Box2d) {
             return function(imgdColl) {
                 drawSimple(ctx, imgdColl);
             };
-        },
-        init: function(conf, ctx){
-            config = conf;
-            PTM = config.PTM;
-            ITM = config.ITM;
         },
         setDebug: function(world, context) {
             //setup debug draw

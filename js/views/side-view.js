@@ -1,22 +1,27 @@
-define(['jquery', 'underscore', 'backbone', '../graphics', '../phys', '../dom-util'], function($, _, Backbone, graphics, Physics, domUtil) {
+define(['jquery', 'underscore', 'backbone', '../graphics', '../phys', '../dom-util', 'text!armTemplate'], 
+
+        function($, _, Backbone, graphics, Physics, domUtil, armTemplate) {
 
     var isMouseDown;
 
     var PSV = Backbone.View.extend({
+
         el: '#canvas-center',
+
         initialize: function(options) {
             _.bindAll(this, "reset");
             _.bindAll(this, "onMouseMove");
             _.bindAll(this, "onMouseUp");
+
+            this.listenTo(options.dispatcher, 'snapshot', this.snapshot);
+            this.listenTo(options.dispatcher, 'reset', this.reset);
             
-            var physics = new Physics();
-            graphics.init(options.conf);
-            physics.init(options.conf, options.chairModel, options.personModel);
+            var physics = new Physics(options.chairModel, options.personModel);
 
             this.options = options;
             this.physics = physics;
-            console.log('side initialized');
         },
+
         // cleanup
         remove: function() { 
             this.haltPhysics();
@@ -26,9 +31,8 @@ define(['jquery', 'underscore', 'backbone', '../graphics', '../phys', '../dom-ut
             this.$('canvas-side').off('mouseup mousedown mousemove');
             Backbone.View.prototype.remove.apply(this, arguments);
         },
-        reset: function() {
-            console.log('should be resetting...');
 
+        reset: function() {
             var physics = this.physics;
             this.haltPhysics();
 
@@ -46,6 +50,7 @@ define(['jquery', 'underscore', 'backbone', '../graphics', '../phys', '../dom-ut
                 physics.update(draw);
             }, 1000 / 60);
         },
+
         render: function() {
             var sideCvs = document.createElement('canvas');
             sideCvs.id = 'canvas-side';
@@ -65,6 +70,7 @@ define(['jquery', 'underscore', 'backbone', '../graphics', '../phys', '../dom-ut
             this.canvasPos = domUtil.getElementPos(sideCvs);
             this.reset();
         },
+
         haltPhysics: function() {
             var physics = this.physics;
             if(!!physics.token) {
@@ -72,6 +78,50 @@ define(['jquery', 'underscore', 'backbone', '../graphics', '../phys', '../dom-ut
                 delete physics.token;
             }
         },
+
+        snapshot: function() {
+            this.haltPhysics();
+            var variables = this.physics.snapshot(this.canvasPos);
+
+            var at = _.template(armTemplate);
+            $('body').append(at(variables));
+
+            var E = variables.E,
+                F = variables.F,
+                W = variables.W,
+                alpha = variables.alpha,
+                beta = variables.beta;
+
+            $('#skew-upper').css({ 'transform-origin': '50% 0%' });
+            $('#skew-upper').css('transform', 'rotateY(-'+Math.atan(W/F)+'rad) rotateZ('+(alpha)+'rad)');
+
+            var elbowY = Math.floor(E * this.options.conf.PTM / this.options.conf.ITM);
+            $('#skew-lower').css({ 'transform-origin': '50% 0%', top: elbowY });
+            $('#skew-lower').css('transform', 'rotateZ('+ -beta +'rad)');
+        },
+
+        hasPerson: function() {
+            return this.physics.humanParts.initted;
+        },
+
+        hasChair: function() {
+            return this.physics.chairParts.initted;
+        },
+
+        togglePerson: function() {
+            var physics = this.physics;
+            if(!this.hasPerson()) {
+                physics.initPerson(true);
+            } else physics.destroyPerson();
+        },
+
+        toggleChair: function() {
+            var physics = this.physics;
+            if(!this.hasChair()) {
+                physics.initChair(true);
+            } else physics.destroyChair();
+        },
+
         onMouseMove: function(e) {
             var physics = this.physics;
             mouseX = (e.clientX - this.canvasPos.x) / this.options.conf.PTM;
@@ -82,6 +132,7 @@ define(['jquery', 'underscore', 'backbone', '../graphics', '../phys', '../dom-ut
 
             physics.handleMouseDrag(mouseX, mouseY);
         },
+
         onMouseUp: function() {
             var physics = this.physics;
             if(physics.mouseJoint) 
