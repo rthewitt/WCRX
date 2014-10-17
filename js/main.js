@@ -145,9 +145,6 @@ define([
  
 
 
-        $('#canvas').mousedown(function() {
-           isMouseDown = true;
-        });
         
 
 

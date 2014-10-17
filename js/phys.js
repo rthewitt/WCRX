@@ -377,7 +377,8 @@ define(["backbone", "box2dweb", "underscore"], function(Backbone, Box2D, _) {
         wjd.bodyB = bodies.footRest;
         wjd.localAnchorA.Set(localFrame.x, localFrame.y);
         wjd.localAnchorB.Set(localFRest.x, localFRest.y);
-        return this.world.CreateJoint(wjd);
+        var frWeld = this.world.CreateJoint(wjd);
+        this.chairParts.joints.footRest = frWeld;
     }
 
     // fill just fill these arrays, same code
@@ -752,7 +753,8 @@ define(["backbone", "box2dweb", "underscore"], function(Backbone, Box2D, _) {
         return [ W, H, F, U, L, sPos, sRad, wheelPos ];
     };
 
-    Physics.prototype.getBodyAtPos = function(pos) {
+    Physics.prototype.getBodyAtPos = function(Px, Py) {
+        var pos = new b2Vec2(Px, Py);
          
         var aabb = new b2AABB();
         aabb.lowerBound.Set(pos.x - 0.001, pos.y - 0.001);
@@ -805,6 +807,75 @@ define(["backbone", "box2dweb", "underscore"], function(Backbone, Box2D, _) {
         this.world.ClearForces();
         for(b = this.world.GetBodyList(); b; b = b.GetNext()) {
             this.world.DestroyBody(b);
+        }
+    };
+
+    function createMouseJoint(world, body, ground, pos) {
+        var def = new Box2D.Dynamics.Joints.b2MouseJointDef();
+        
+        def.bodyA = ground;
+        def.bodyB = body;
+        def.target = pos;
+
+        def.collideConnected = true;
+        def.maxForce = 100 * body.GetMass();
+        def.dampingRatio = 0;
+
+        body.SetAwake(true);
+        return world.CreateJoint(def);
+    }
+
+    Physics.prototype.setupMouseJoint = function(Px, Py) {
+        var body = this.getBodyAtPos(mouseX, mouseY);
+        if(!body) return;
+
+        var pos = new b2Vec2(Px, Py);
+
+        var hParts = this.humanParts,
+            cParts = this.chairParts;
+        this.mouseJoint = createMouseJoint(this.world, body, this.ground, pos);
+
+        if(body === this.humanPartBodies.upperLeg) {
+            var seatRev = hParts.joints.seatRev;
+            var seatSlide = hParts.joints.seatSlide;
+            console.log('breaking bond...');
+            if(seatRev) {
+                hParts.joints.seatRev = undefined;
+                this.world.DestroyJoint(seatRev);
+            }
+            if(seatSlide && seatSlide.IsMotorEnabled()) {
+                console.log('turning off motor');
+                seatSlide.EnableMotor(false);
+            }
+        } else if(body === this.chairPartBodies.footRest) {
+            var frWeld = cParts.joints.footRest;
+            if(frWeld) {
+                cParts.joints.footRest = undefined;
+                this.world.DestroyJoint(frWeld);
+            } 
+        }
+    };
+
+    Physics.prototype.isFootRestWelded = function() {
+        return !!this.chairParts.joints.footRest;
+    };
+
+    Physics.prototype.destroyMouseJoint = function() {
+        this.world.DestroyJoint(this.mouseJoint);
+        this.mouseJoint = undefined;
+        var seatSlide = this.humanParts.joints.seatSlide;
+        if(seatSlide && !seatSlide.IsMotorEnabled()) {
+            console.log('restoring bond');
+            seatSlide.EnableMotor(true);
+            seatSlide.SetMaxMotorForce(500);
+            seatSlide.SetMotorSpeed(0.0);
+        }
+    };
+
+    Physics.prototype.handleMouseDrag = function(mouseX, mouseY) {
+        if(this.mouseJoint) {
+            var pos = new b2Vec2(mouseX, mouseY);
+            this.mouseJoint.SetTarget(pos);
         }
     };
 
