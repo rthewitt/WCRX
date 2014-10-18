@@ -1,7 +1,8 @@
-define(['jquery', 'underscore', 'backbone', '../graphics', '../phys', '../dom-util', 'text!armTemplate'], 
+define(['jquery', 'underscore', 'backbone', '../graphics', '../phys', '../util/dom-util', 'text!armTemplate'], 
 
         function($, _, Backbone, graphics, Physics, domUtil, armTemplate) {
 
+    // this will break, "static" // FIXME
     var isMouseDown;
 
     var PSV = Backbone.View.extend({

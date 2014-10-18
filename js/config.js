@@ -21,7 +21,6 @@ define(['./scaled-polygons', 'backbone'], function(pollyColl, Backbone){
             type: 'poly',
             polygons: pollyColl.head,
             massless: true,
-            size: null,
             pos: { z: 2 },
             cat: HM_SOLID,
             mask: armyMask
@@ -31,7 +30,6 @@ define(['./scaled-polygons', 'backbone'], function(pollyColl, Backbone){
             type: 'box',
             //opacity: 0.8,
             massless: true,
-            size: null,
             pos: { z: 0 },
             cat: HM_JOINT,
             mask: personMask
@@ -39,7 +37,6 @@ define(['./scaled-polygons', 'backbone'], function(pollyColl, Backbone){
         shoulderJ: {
             name: 'shoulder',
             type: 'circle',
-            size: null,
             pos: { z: 2 },
             cat: HM_JOINT,
             mask: personMask
@@ -50,7 +47,6 @@ define(['./scaled-polygons', 'backbone'], function(pollyColl, Backbone){
             polygons: pollyColl.lowerArm,
             //opacity: 0.8,
             massless: true,
-            size: null,
             pos: { z: 7 },
             cat: HM_SOLID,
             mask: armyMask
@@ -60,7 +56,6 @@ define(['./scaled-polygons', 'backbone'], function(pollyColl, Backbone){
             type: 'box',
             //opacity: 0.7,
             massless: true,
-            size: null,
             pos: { z: 7 },
             cat: HM_SOLID,
             mask: armyMask
@@ -70,7 +65,6 @@ define(['./scaled-polygons', 'backbone'], function(pollyColl, Backbone){
             type: 'poly',
             //hidden: true,
             polygons: pollyColl.waist,
-            size: null,
             pos: { z: 1 },
             cat: HM_SOLID,
             mask: personMask
@@ -78,7 +72,6 @@ define(['./scaled-polygons', 'backbone'], function(pollyColl, Backbone){
         midsection: {
             name: 'midsection',
             type: 'circle',
-            size: null,
             pos: { z: 0 },
             cat: HM_JOINT,
             mask: personMask
@@ -87,7 +80,6 @@ define(['./scaled-polygons', 'backbone'], function(pollyColl, Backbone){
             name: 'chest',
             type: 'poly',
             polygons: pollyColl.chest,
-            size: null,
             pos: { z: 1 },
             cat: HM_SOLID,
             mask: personMask
@@ -95,7 +87,6 @@ define(['./scaled-polygons', 'backbone'], function(pollyColl, Backbone){
         kneeJ: {
             name: 'knee',
             type: 'circle',
-            size: null,
             pos: { z: 0 },
             cat: HM_JOINT,
             mask: personMask
@@ -104,7 +95,6 @@ define(['./scaled-polygons', 'backbone'], function(pollyColl, Backbone){
             name: 'upper-leg',
             type: 'poly',
             polygons: pollyColl.upperLeg,
-            size: null,
             pos: { z: 3 },
             cat: HM_SOLID,
             mask: personMask
@@ -113,7 +103,6 @@ define(['./scaled-polygons', 'backbone'], function(pollyColl, Backbone){
             name: 'lower-leg',
             type: 'poly',
             polygons: pollyColl.lowerLeg,
-            size: null,
             pos: { z: 2 },
             cat: HM_SOLID,
             mask: personMask
@@ -122,7 +111,6 @@ define(['./scaled-polygons', 'backbone'], function(pollyColl, Backbone){
             name: 'foot',
             type: 'poly',
             polygons: pollyColl.foot,
-            size: null,
             pos: { z: 2 },
             cat: HM_SOLID,
             mask: personMask
@@ -161,7 +149,6 @@ define(['./scaled-polygons', 'backbone'], function(pollyColl, Backbone){
         seatBack: {
             name: 'seat-back',
             type: 'box',
-            size: null,
             pos: { z: 3 },
             cat: WC_BARRIER,
             mask: seatMask
@@ -169,7 +156,6 @@ define(['./scaled-polygons', 'backbone'], function(pollyColl, Backbone){
         foam: {
             name: 'seat-bottom',
             type: 'box',
-            size: null,
             pos: { z: 3 },
             cat: WC_BARRIER,
             mask: seatMask
@@ -178,7 +164,6 @@ define(['./scaled-polygons', 'backbone'], function(pollyColl, Backbone){
             name: 'handlebars',
             type: 'poly',
             polygons: pollyColl.handlebars,
-            size: null,
             pos: { z: 3 },
             cat: WC_FRAME,
             mask: GROUND
@@ -186,7 +171,6 @@ define(['./scaled-polygons', 'backbone'], function(pollyColl, Backbone){
         wheel: {
             name: 'wheel',
             type: 'circle',
-            size: null,
             pos: { z: 6 }, 
             cat: WC_WHEEL,
             mask: GROUND
@@ -194,7 +178,6 @@ define(['./scaled-polygons', 'backbone'], function(pollyColl, Backbone){
         supportWheel: {
             name: 'support-wheel',
             type: 'circle',
-            size: null,
             pos: { z: 4 },
             cat: WC_WHEEL,
             mask: GROUND
@@ -202,7 +185,6 @@ define(['./scaled-polygons', 'backbone'], function(pollyColl, Backbone){
         frameConnector: {
             name: 'frame-connector',
             type: 'box',
-            size: null,
             pos: { z: 5 },
             cat: WC_FRAME,
             mask: GROUND
@@ -210,7 +192,6 @@ define(['./scaled-polygons', 'backbone'], function(pollyColl, Backbone){
         frontConnector: {
             name: 'support-wheel-connector',
             type: 'box',
-            size: null,
             pos: { z: 5 },
             cat: WC_FRAME,
             mask: GROUND
@@ -218,7 +199,6 @@ define(['./scaled-polygons', 'backbone'], function(pollyColl, Backbone){
         raiseBar: {
             name: 'raise-bar',
             type: 'box',
-            size: null,
             pos: { z: 5 },
             cat: WC_FRAME,
             mask: GROUND
@@ -227,7 +207,6 @@ define(['./scaled-polygons', 'backbone'], function(pollyColl, Backbone){
             name: 'L-beam',
             type: 'poly',
             polygons: pollyColl.LBar,
-            size: null,
             pos: { z: 4 },
             cat: WC_FRAME,
             mask: GROUND
@@ -235,7 +214,6 @@ define(['./scaled-polygons', 'backbone'], function(pollyColl, Backbone){
         footRest: {
             name: 'foot-rest',
             type: 'box',
-            size: null,
             pos: { z: 3 },
             cat: WC_FRAME,
             mask: GROUND 

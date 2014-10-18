@@ -6,8 +6,8 @@ define(['box2dweb', 'config'], function(Box2d, config) {
     function drawSimple(context, imgdColl) {
         for(imgd in imgdColl) {
             var imgData = imgdColl[imgd];
-            context.drawImage(imgData.get('img'), 0, 0, 
-                imgData.get('dims').x, imgData.get('dims').y);
+            context.drawImage(imgData.img, 0, 0, 
+                imgData.dims.x, imgData.dims.y);
         }
     }
 
@@ -17,20 +17,20 @@ define(['box2dweb', 'config'], function(Box2d, config) {
         var PTM = config.PTM;
 
         function drawPart(entity, imgData, isFixture) {
-            if(imgData.get('hidden')) return;
+            if(imgData.hidden) return;
             context.save();
             var pos = !isFixture ? entity.GetPosition() : new Box2D.Common.Math.b2Vec2.b2Vec2(0, 0);
 
             context.translate(pos.x * PTM, pos.y * PTM);
-            context.rotate(imgData.get('rotAngle')); 
+            context.rotate(imgData.rotAngle); 
 
             if(!isFixture) context.rotate(entity.GetAngle());
 
-            context.translate(-imgData.get('dims').x/2, -imgData.get('dims').y/2);
+            context.translate(-imgData.dims.x/2, -imgData.dims.y/2);
 
-            var opc = imgData.get('opacity');
+            var opc = imgData.opacity;
             if(!!opc) context.globalAlpha = opc;
-            context.drawImage(imgData.get('img'), 0, 0, imgData.get('dims').x, imgData.get('dims').y);
+            context.drawImage(imgData.img, 0, 0, imgData.dims.x, imgData.dims.y);
 
             context.restore();
 
@@ -62,8 +62,8 @@ define(['box2dweb', 'config'], function(Box2d, config) {
         zList.sort(function(a, b){ 
             var aud = a.GetUserData();
             var bud = b.GetUserData();
-            var az = !!aud ? aud.get('pos').z : 0;
-            var bz = !!bud ? bud.get('pos').z : 0;
+            var az = !!aud ? aud.pos.z : 0;
+            var bz = !!bud ? bud.pos.z : 0;
             return az - bz;
         });
 

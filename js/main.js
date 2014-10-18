@@ -39,28 +39,21 @@ require([ 'jquery', 'backbone',
         ], function($, Backbone, ImageData, ChairModel, PersonModel, SideView,
             FrontView, ChairControls, PersonControls, RegionManager, config) { 
 
-                function getImgData(defs, relPath) {
-                    var imgPath = config.imgPathRoot;
-                    if(relPath) imgPath += relPath+'/';
-
-                    var ret = {};
-                    for(var pd in defs) {
-                        var part = defs[pd];
-                        part.img = new Image();
-                        part.img.src = imgPath + part.name + '.svg';
-                        ret[pd] = new ImageData(part);
-                    }
-                    return ret;
-                }
 
                 var dispatcher = _.clone(Backbone.Events);
-                var cs = getImgData(config.chairData);
                 //var cf = getImgData(config.chairFront, 'front');
-                var wcModel = new ChairModel({ wheelChair: cs }, { dispatcher: dispatcher });
+                var wcModel = new ChairModel({}, { 
+                    dispatcher: dispatcher,
+                    chairDef: config.chairData,
+                    imgRoot: config.imgPathRoot 
+                });
 
-                var ps = getImgData(config.personData);
-                var pf = getImgData(config.personFront, 'front');
-                var pModel = new PersonModel({ person: ps, front: pf }, { dispatcher: dispatcher });
+                //var pf = getImgData(config.personFront, 'front');
+                var pModel = new PersonModel({}, { 
+                    dispatcher: dispatcher,
+                    personDef: config.personData,
+                    imgRoot: config.imgPathRoot 
+                });
 
                 var shared = { 
                     dispatcher: dispatcher,
@@ -79,18 +72,8 @@ require([ 'jquery', 'backbone',
                 RegionManager.show(chairControls);
                 sideView.render();
 
-
-                dispatcher.on('modified:chair', function() {
-                    console.log('recieved chair event...')
-                    personControls.resize();
-                    sideView.reset();
-                });
-
-                dispatcher.on('modified:person', function() {
-                    console.log('recieved person event...')
-                    chairControls.resize();
-                    sideView.reset();
-                });
+                dispatcher.on('modified:chair', sideView.reset);
+                dispatcher.on('modified:person', sideView.reset);
 
                 $(document).ready(function($) {
 
@@ -111,15 +94,9 @@ require([ 'jquery', 'backbone',
                         RegionManager.show(chairControls);
                     });
                     $('#btn-chair').click(function() {
-                        if(sideView.hasChair()) {
-                            chairControls.resize();
-                        }
                         sideView.toggleChair();
                     });
                     $('#btn-person').click(function() {
-                        if(sideView.hasPerson()) {
-                            personControls.resize();
-                        }
                         sideView.togglePerson();
                     });
                     $('#btn-skeleton').click(function() {

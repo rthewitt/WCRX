@@ -82,56 +82,44 @@ define(['backbone', 'box2dweb', 'underscore', 'config'], function(Backbone, Box2
 
 
     function getBodyPart(idata, fixDef, bodyDef, isFixture) {
-        var img = new Image();
-        img.src = 'images/v2/'+idata.get('name')+'.svg';
-        idata.set('img', img);
 
-        var _size = idata.get('size');
-        var shape, size, dims;
-        var PTM = config.PTM, ITM = config.ITM;
-        switch(idata.get('type')) {
+        var size = idata.size,
+            shape,
+            dims;
+
+        var PTM = config.PTM; // this should be moved
+        switch(idata.type) {
             case 'circle':
-                shape = new b2CircleShape(this.inches(_size.r)); 
-                size = { r: this.inches(_size.r) };
+                //shape = new b2CircleShape(this.inches(size.r)); 
+                shape = new b2CircleShape(size.r); 
                 dims = { x: 2 * size.r * PTM, y: 2 * size.r * PTM };
                 /*
-                console.log('_size: '+JSON.stringify(_size));
                 console.log('size: '+JSON.stringify(size));
                 console.log(dims);
                 */
                 break;
             case 'poly':
                 shape = [];
-                size = {
-                    x: this.inches(_size.x),
-                    y: this.inches(_size.y)
-                };
                 dims = { x: size.x * PTM, y: size.y * PTM };
                 /*
-                console.log('vertices for '+idata.get('name'));
-                console.log('_size: '+JSON.stringify(_size));
+                console.log('vertices for '+idata.name);
                 console.log('size: '+JSON.stringify(size));
                 console.log(dims);
                 */
-                setScaledPolygons(shape, idata.get('polygons'), size);
+                setScaledPolygons(shape, idata.polygons, size);
                 break;
             case 'box':
                 shape = new b2PolygonShape;
-                size = {
-                    x: this.inches(_size.x),
-                    y: this.inches(_size.y)
-                };
                 dims = { x: size.x * PTM, y: size.y * PTM };
                 shape.SetAsOrientedBox(size.x / 2, size.y / 2, new b2Vec2(0, 0), 0);
                 break;
         }
-        idata.set('dims', dims);
-        idata.set('shape', shape);
-        idata.set('size', size);
+        idata.dims = dims;
+        idata.shape = shape;
 
         var fdd = new b2FilterData();
-        fdd.categoryBits = idata.get('cat');
-        fdd.maskBits = idata.get('mask');
+        fdd.categoryBits = idata.cat;
+        fdd.maskBits = idata.mask;
 
         bodyDef.userData = idata;
         var body = this.world.CreateBody(bodyDef);
@@ -141,7 +129,7 @@ define(['backbone', 'box2dweb', 'underscore', 'config'], function(Backbone, Box2
             fixDef.shape = shape;
 
             var fixture;
-            if(idata.get('massless') === true) {
+            if(idata.massless === true) {
                 var orig = fixDef.density;
                 fixDef.density = 0.01;
                 fixture = body.CreateFixture(fixDef);
@@ -204,11 +192,11 @@ define(['backbone', 'box2dweb', 'underscore', 'config'], function(Backbone, Box2
         }
 
         function X(name) {
-            return person[name].get('size').x;
+            return person[name].size.x;
         }
 
         function Y(name) {
-            return person[name].get('size').y;
+            return person[name].size.y;
         }
 
         // joints have gotten more complicated (additional bodies)
@@ -228,14 +216,14 @@ define(['backbone', 'box2dweb', 'underscore', 'config'], function(Backbone, Box2
 
         // this notation confuses reader
         var shoulder = bodies.shoulderJ;
-        var Rs = person['shoulderJ'].get('size').r;
+        var Rs = person['shoulderJ'].size.r;
 
         var s_1 = getWeldJoint.call(this, shoulder, bodies.chest,
                 { x: 0, y: 0 },
                 { x: -X('chest')/2 * 0.4, y: -Y('chest')/2 * 0.55 });
         
         var knee = bodies.kneeJ;
-        var kr = person['kneeJ'].get('size').r;
+        var kr = person['kneeJ'].size.r;
 
         var knee_1 = getRevJoint.call(this, knee, bodies.lowerLeg, 
                 { x: 0, y: 0 },
@@ -254,14 +242,14 @@ define(['backbone', 'box2dweb', 'underscore', 'config'], function(Backbone, Box2
                 { x: 0, y: -Y('lowerArm')/2 }); 
 
 
-        var mr = person['midsection'].get('size').r;
+        var mr = person['midsection'].size.r;
         var t2 = getRevJoint.call(this, bodies.waist, bodies.midsection,
                 { x: 0, y: -Y('waist')/2 },
                 { x: -mr * 2/3, y: mr * (1/3) }, true);
 
         var t1 = getRevJoint.call(this, bodies.chest, bodies.midsection,
                 { x: 0, y: Y('chest')/2 },
-                { x: 0, y: -person['midsection'].get('size').r * (2/3) }, true);
+                { x: 0, y: -person['midsection'].size.r * (2/3) }, true);
 
         // The order of these limits is the reverse of my assumption
         t1.SetLimits(-0.3 * Math.PI, 0.1 * Math.PI);
@@ -306,7 +294,7 @@ define(['backbone', 'box2dweb', 'underscore', 'config'], function(Backbone, Box2
         var waistPos = this.chairPartBodies.wheel.GetPosition();
         waistPos.Add(new b2Vec2(0, -this.inches(20)));
         bodies.waist.SetPosition(waistPos);
-        var rr = person['midsection'].get('size').r;
+        var rr = person['midsection'].size.r;
         var midPos = new b2Vec2(-this.inches(0), -rr);
         midPos.Add(waistPos);
         bodies.midsection.SetPosition(midPos);
@@ -315,6 +303,7 @@ define(['backbone', 'box2dweb', 'underscore', 'config'], function(Backbone, Box2
         bodies.chest.SetPosition(chestPos);
 
         // TODO review this
+        // oddly enough this is helping the arm positioning
         var sillyForce = new b2Vec2(-1, 1);
         bodies.midsection.ApplyForce(sillyForce, new b2Vec2(0, 0));
 
@@ -326,13 +315,13 @@ define(['backbone', 'box2dweb', 'underscore', 'config'], function(Backbone, Box2
         bodies.lowerArm.SetPosition(laPos);
 
 
-        var ulx = parts.upperLeg.get('size').x;
-        var uly = parts.upperLeg.get('size').y/2;
+        var ulx = parts.upperLeg.size.x;
+        var uly = parts.upperLeg.size.y/2;
         var llPos = new b2Vec2(ulx, uly);
         llPos.Add(waistPos);
         bodies.lowerLeg.SetPosition(llPos);
-        var llx = parts.lowerLeg.get('size').x;
-        var lly = parts.lowerLeg.get('size').y/2;
+        var llx = parts.lowerLeg.size.x;
+        var lly = parts.lowerLeg.size.y/2;
         var footPos = new b2Vec2(lly, llx);
         footPos.Add(llPos);
         bodies.foot.SetPosition(footPos);
@@ -340,10 +329,10 @@ define(['backbone', 'box2dweb', 'underscore', 'config'], function(Backbone, Box2
         // individual will have a measured distance from seatback
         // where they make contact with seat bottom
         var seat = this.chairParts.foam;
-        var extra = this.chairParts.seatBack.get('size').x;
+        var extra = this.chairParts.seatBack.size.x;
         var delta = this.humanMeasures.get('contactPoint');
         var forward = this.inches(delta) + extra;
-        var ss = seat.get('size')
+        var ss = seat.size
         var seatRev = getRevJoint.call(this, bodies.waist, this.chairPartBodies.foam,
                 { x: -X('waist')/2, y: Y('waist')/2 }, 
                 { x: -ss.x/2 + forward, y: -ss.y/2 }, true); 
@@ -369,6 +358,7 @@ define(['backbone', 'box2dweb', 'underscore', 'config'], function(Backbone, Box2
         joints.seatSlide = seatSlide;
 
         var wrist = bindWrist.call(this);
+        this.humanParts.joints.wrist = wrist;
 
         if(stabilize) this.stabilize(25);
     }
@@ -378,18 +368,18 @@ define(['backbone', 'box2dweb', 'underscore', 'config'], function(Backbone, Box2
         if(!this.chairParts.initted || !this.humanParts.initted) return;
         var wheel = this.chairParts.wheel, lowerArm = this.humanParts.lowerArm;
         return getRevJoint.call(this, this.humanPartBodies.lowerArm, this.chairPartBodies.wheel, 
-                { x: 0, y: lowerArm.get('size').y/2 },
-                { x: 0, y: -wheel.get('size').r }, true);
+                { x: 0, y: lowerArm.size.y/2 },
+                { x: 0, y: -wheel.size.r }, true);
     }
 
     Physics.prototype.weldFootRest = function() {
         var wheelChair = this.chairMeasures.get('wheelChair');
         function X(name) {
-            return wheelChair[name].get('size').x;
+            return wheelChair[name].size.x;
         }
 
         function Y(name) {
-            return wheelChair[name].get('size').y;
+            return wheelChair[name].size.y;
         }
         var bodies = this.chairPartBodies;
         var wjd = new b2WeldJointDef();
@@ -430,11 +420,11 @@ define(['backbone', 'box2dweb', 'underscore', 'config'], function(Backbone, Box2
         }
 
         function X(name) {
-            return wheelChair[name].get('size').x;
+            return wheelChair[name].size.x;
         }
 
         function Y(name) {
-            return wheelChair[name].get('size').y;
+            return wheelChair[name].size.y;
         }
 
         var joints = this.chairParts.joints;
@@ -447,7 +437,7 @@ define(['backbone', 'box2dweb', 'underscore', 'config'], function(Backbone, Box2
         var wjd = new b2WeldJointDef();
         wjd.bodyA = bodies.wheel;
         wjd.bodyB = this.ground;
-        wjd.localAnchorA.Set(0, this.chairParts['wheel'].get('size').r);
+        wjd.localAnchorA.Set(0, this.chairParts['wheel'].size.r);
         wjd.localAnchorB.Set(this.pixels(225), -this.pixels(40)); // canvas?
         this.world.CreateJoint(wjd);
 
@@ -502,10 +492,10 @@ define(['backbone', 'box2dweb', 'underscore', 'config'], function(Backbone, Box2
         console.log('clr: '+clr);
         var weldY;
         if(clr > 0) {
-            //var frs = parts.footRest.get('size');
+            //var frs = parts.footRest.size;
             var frameLocal = new b2Vec2(X('LBar')/2, 0.70 * Y('LBar')/2);
             var framePt = bodies.LBar.GetWorldPoint(frameLocal);
-            var ly = parts.wheel.get('size').r;
+            var ly = parts.wheel.size.r;
             var groundPoint = bodies.wheel.GetWorldPoint(
                 new b2Vec2(0, ly));
             frameClearance = groundPoint.y-framePt.y;
@@ -568,12 +558,16 @@ define(['backbone', 'box2dweb', 'underscore', 'config'], function(Backbone, Box2
         /*
         var hJoints = this.humanParts.joints;
         if(hJoints.seatRev) {
-            hJoints.seatRev = undefined;
             this.world.DestroyJoint(hJoints.seatRev);
+            hJoints.seatRev = undefined;
         }
         if(hJoints.seatSlide) {
-            hJoints.seatSlide = undefined;
             this.world.DestroyJoint(hJoints.seatSlide);
+            hJoints.seatSlide = undefined;
+        }
+        if(hJoints.wrist) {
+            this.world.DestroyJoint(hJoints.wrist);
+            hJoints.wrist = undefined;
         }
         */
 
@@ -607,22 +601,8 @@ define(['backbone', 'box2dweb', 'underscore', 'config'], function(Backbone, Box2
         this.SIG_destroyPerson = false;
     }
 
-    // constraints moved while testing
-    function enforceChairConstraints() {
-    }
-    
-    // constraints moved while testing
-    function enforcePersonConstraints() {
-    }
-
-
     Physics.prototype.update = function(CB) {
         if(this.haltUpdate) return;
-
-        if(this.chairParts.initted)
-            enforceChairConstraints.call(this);
-        if(this.humanParts.initted)   
-            enforcePersonConstraints.call(this);
 
         this.world.Step(1.0 / 60, 10, 10);
 
@@ -669,7 +649,7 @@ define(['backbone', 'box2dweb', 'underscore', 'config'], function(Backbone, Box2
         bodyDef.userData = ud = config.polyCraft;
         ud.set('img', img);
 
-        var _size = ud.get('size');
+        var _size = ud.size;
         var shape, size, dims;
         shape = [];
         size = {
@@ -771,9 +751,9 @@ define(['backbone', 'box2dweb', 'underscore', 'config'], function(Backbone, Box2
         var shoulder = this.humanParts.shoulderJ,
             shoulderB = this.humanPartBodies.shoulderJ,
             sPos = shoulderB.GetPosition(),
-            sRad = shoulder.get('size').r * config.PTM,
+            sRad = shoulder.size.r * config.PTM,
             wheelPos = wheelB.GetPosition(),
-            Hw = wheelPos.y - wheel.get('size').r,
+            Hw = wheelPos.y - wheel.size.r,
             H = Hw - sPos.y; // inverted Y coordinates
 
         H = H * config.ITM;
@@ -875,13 +855,14 @@ define(['backbone', 'box2dweb', 'underscore', 'config'], function(Backbone, Box2
         this.world.QueryAABB(GetBodyCallback, aabb);
         return body;
     };
+
     // TODO remove string array notation from person/chair
     Physics.prototype.calcGroundClearance = function() {
-        var ly = this.chairParts.wheel.get('size').r;
+        var ly = this.chairParts.wheel.size.r;
         var groundPt = this.chairPartBodies.wheel.GetWorldPoint(
                 new b2Vec2(0, ly));
 
-        var frs = this.chairParts.footRest.get('size');
+        var frs = this.chairParts.footRest.size;
         var frLocal = new b2Vec2(frs.x/2, frs.y/2);
         var frPt = this.chairPartBodies.footRest.GetWorldPoint(frLocal);
         return ((groundPt.y - frPt.y) * config.ITM).toFixed(2); 
@@ -971,6 +952,7 @@ define(['backbone', 'box2dweb', 'underscore', 'config'], function(Backbone, Box2
         this.SIG_destroyPerson = true;
     };
     
+    // name these to be intuitive
     Physics.prototype.inches = function(numInches) {
         return numInches / config.ITM;
     };

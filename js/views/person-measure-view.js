@@ -1,21 +1,26 @@
 define(["jquery", "underscore", "backbone", "text!humanTemplate"], function($, _, Backbone, templateH) {
 
     var PMV = Backbone.View.extend({
+
         el: "#person-measures",
+
         events: {
             "change input":"changed",
             "change select":"changed"
         },
+
         initialize: function(options) {
             this.dispatcher = options.dispatcher;
             this.model = options.personModel;
             _.bindAll(this, "changed");
-            this.resize();
+            this.model.resize();
         },
+        
         close: function() {
             this.$el.empty();
             this.unbind();
         },
+
         decorate: function() {
             this.$('select').each(function(i, elem) { 
                 $(elem).customSelect(); 
@@ -28,63 +33,24 @@ define(["jquery", "underscore", "backbone", "text!humanTemplate"], function($, _
                 self.$("label").removeClass("labelfocus");
             });
         },
+
         render: function() {
             var ct = _.template(templateH);
             this.$el.html(ct(this.model.attributes));
             this.decorate();
         },
+
         changed: function(evt) {
             var changed = evt.currentTarget;
             var value = $(evt.currentTarget).val();
             var mx = this.model.set(changed.name, parseFloat(value));
-            this.resize();
+            this.model.resize();
             this.dispatcher.trigger('modified:person');
         },
 
-        /*******************
-         * Controller Logic
-         ********************/
-        resize: function() {
-            var ps = this.model.get('person'),
-                upperArmWidth = this.model.get('upperArmWidth'),
-                upperArmLength = this.model.get('upperArmLength'),
-                lowerArmWidth = this.model.get('lowerArmWidth'),
-                lowerArmLength = this.model.get('lowerArmLength'),
-                upperLegWidth = this.model.get('upperLegWidth'),
-                upperLegLength = this.model.get('upperLegLength'),
-                lowerLegWidth = this.model.get('lowerLegWidth'), 
-                lowerLegLength = this.model.get('lowerLegLength'), 
-                torsoLength = this.model.get('torsoLength'),
-                trunkDepth = this.model.get('trunkDepth'),
-                footLength = this.model.get('footLength'),
-                footWidth = this.model.get('footWidth');
-
-            var sRad = upperArmWidth/2;
-
-            var aboveWaist = torsoLength - upperLegWidth,
-                mh = aboveWaist * (6.8/17), // experimental ratio
-                ch = aboveWaist - mh;
-
-            var kRad = lowerLegWidth/2; 
-
-            ps.shoulderJ.set('size', { r: sRad }); 
-            ps.upperArm.set('size', { x: upperArmWidth, y: upperArmLength });
-            ps.lowerArm.set('size', { x: lowerArmWidth, y: lowerArmLength });
-            ps.waist.set('size', { x: upperLegWidth, y: upperLegWidth });
-            ps.midsection.set('size', { r: mh/2 });
-            ps.chest.set('size', { x: trunkDepth, y: ch });
-            ps.head.set('size', { x: 9, y: 7 * 3/2 });
-            ps.neck.set('size', { x: trunkDepth / 2.5, y: 6 }); // FIXME
-            ps.kneeJ.set('size', { r: kRad });
-            ps.foot.set('size', { x: footWidth, y: footLength }); 
-
-            var hack = 1;
-            ps.upperLeg.set('size',
-                    { x: upperLegLength - kRad - hack, y: upperLegWidth });
-            ps.lowerLeg.set('size',
-                    { x: lowerLegLength - kRad - footWidth, y: lowerLegWidth });
-        },
-        // move this into separate controller
+        
+        // TODO move this into separate controller
+          
         setPositions: function(pBodies) {
             // TODO use chair seat, person moves vertically
             var pd = this.model.get('person');
@@ -101,6 +67,7 @@ define(["jquery", "underscore", "backbone", "text!humanTemplate"], function($, _
             }
             */
         },
+
         // TODO move into front controller
         resizeFront: function() {
             var pf = this.model.get('front'),
