@@ -170,6 +170,38 @@ define(['backbone', 'box2dweb', 'underscore', 'config'], function(Backbone, Box2
         return this.world.CreateJoint(wjd);
     }
 
+    function expand(dims, pName) {
+        return { 
+            x: typeof dims.x === 'function' ? dims.x(pName) : dims.x,
+            y: typeof dims.y === 'function' ? dims.y(pName) : dims.y
+        }
+    }
+
+    function addRevJoint(name, pName1, pName2, loc1, loc2, collide) {
+        var localA = expand(loc1, pName1),
+            localB = expand(loc2, pName2);
+
+        console.log('localA '+JSON.stringify(localA));
+        console.log('localB '+JSON.stringify(localB));
+
+        this.joints[name] = getRevJoint.call(this, 
+                this.bodies[pName1], this.bodies[pName2],
+                localA, localB, collide);
+    }
+
+    function addWeldJoint(name, pName1, pName2, loc1, loc2) {
+        var localA = expand(loc1, pName1),
+            localB = expand(loc2, pName2);
+
+        console.log('localA '+JSON.stringify(localA));
+        console.log('localB '+JSON.stringify(localB));
+
+        this.joints[name] = getWeldJoint.call(this,
+                this.bodies[pName1], this.bodies[pName2],
+                localA, localB);
+    }
+
+
     function initP(stabilize) {
         
         var humanFixDef = new b2FixtureDef(); 
@@ -182,7 +214,9 @@ define(['backbone', 'box2dweb', 'underscore', 'config'], function(Backbone, Box2
         bodyDef.position.Set(chairX+this.inches(2), chairY-1);
 
 
-        var parts = this.humanParts, bodies = this.humanPartBodies;
+        var parts = this.humanParts,
+            bodies = this.humanPartBodies,
+            joints = this.humanParts.joints;
 
         var person = this.humanMeasures.get('person');
         for(var bp in person) {
@@ -199,90 +233,111 @@ define(['backbone', 'box2dweb', 'underscore', 'config'], function(Backbone, Box2
             return person[name].size.y;
         }
 
-        // joints have gotten more complicated (additional bodies)
-        var joints = this.humanParts.joints;
+        function R(name) {
+            return person[name].size.r;
+        }
 
-        var neck_1 = getRevJoint.call(this, bodies.neck, bodies.head,
-                { x: X('neck')/2 * 0.4, y: -Y('neck')/2 * 0.4 },
-                { x: -X('head')/2 * 0.15, y: Y('head')/2 * 0.5 });
-        neck_1.SetLimits(0 * Math.PI, 0 * Math.PI);
-        neck_1.EnableLimit(true);
+        function Near(func, ratio) {
+            return function(name) {
+                return ratio * func(name);
+            }
+        }
+
+        function Bottom(name) {
+            if(person[name].type === 'circle')
+                return R(name);
+            return person[name].size.y/2;
+        }
+
+        function Top(name) {
+            if(person[name].type === 'circle')
+                return -R(name);
+            return -Bottom(name);
+        }
+
+        function Right(name) {
+            if(person[name].type === 'circle')
+                return R(name);
+            return person[name].size.x/2;
+        }
+
+        function Left(name) {
+            if(person[name].type === 'circle')
+                return -R(name);
+            return -Right(name);
+        }
+
+
+        var ctx = {
+            parts: parts,
+            bodies: bodies,
+            joints: joints,
+            world: this.world,
+            addRevJoint: addRevJoint,
+            addWeldJoint: addWeldJoint
+        };
+
+        var legX = -X('upperLeg')/2 + X('waist')/2 - this.inches(1),
+            legY = Y('upperLeg')/2 - Y('waist')/2;
+
+        // FIXME shoulder, knee if possible
+        ctx.addRevJoint('neck_1', 'neck', 'head',
+                { x: Near(Right, 0.4), y: Near(Top, 0.4) },
+                { x: Near(Left, 0.15), y: Near(Bottom, 0.5) });
         
-        var neck_2 = getRevJoint.call(this, bodies.neck, bodies.chest,
-                { x: X('neck')/2 * 0.4, y: Y('neck')/2 * 0.4 },
-                { x: 0, y: -Y('chest')/2 });
-        neck_2.SetLimits(0 * Math.PI, 0 * Math.PI);
-        neck_2.EnableLimit(true);
+        ctx.addRevJoint('neck_2', 'neck', 'chest',
+                { x: Near(Right, 0.4), y: Near(Bottom, 0.4) },
+                { x: 0, y: Top });
 
-        // this notation confuses reader
-        var shoulder = bodies.shoulderJ;
-        var Rs = person['shoulderJ'].size.r;
-
-        var s_1 = getWeldJoint.call(this, shoulder, bodies.chest,
+        ctx.addWeldJoint('s_1', 'shoulder', 'chest',
                 { x: 0, y: 0 },
-                { x: -X('chest')/2 * 0.4, y: -Y('chest')/2 * 0.55 });
+                { x: Near(Left, 0.4), y: Near(Top, 0.55) });
         
-        var knee = bodies.kneeJ;
-        var kr = person['kneeJ'].size.r;
+        ctx.addRevJoint('knee_1', 'knee', 'lowerLeg', 
+                { x: 0, y: 0 }, { x: Left, y: 0 });
 
-        var knee_1 = getRevJoint.call(this, knee, bodies.lowerLeg, 
-                { x: 0, y: 0 },
-                { x: -X('lowerLeg')/2, y: 0 });
-        knee_1.SetLimits(0, Math.PI);
-        knee_1.EnableLimit(true);
-
-        // should be fixture
-        var knee_2 = getWeldJoint.call(this, bodies.upperLeg, knee,
-                { x: X('upperLeg')/2, y: kr * 0.60 },
+        ctx.addWeldJoint('knee_2',  'upperLeg', 'knee',
+                { x: Right, y: Near(Bottom, 0.60) }, 
                 { x: 0, y: 0 });
 
+        ctx.addRevJoint('elbow', 'upperArm', 'lowerArm', 
+                { x: 0, y: Bottom }, { x: 0, y: Top }); 
 
-        var elbow = getRevJoint.call(this, bodies.upperArm, bodies.lowerArm, 
-                { x: 0, y: Y('upperArm')/2 },
-                { x: 0, y: -Y('lowerArm')/2 }); 
+        ctx.addRevJoint('t2', 'waist', 'midsection',
+                { x: 0, y: Top },
+                { x: Near(Left, 2/3), y: Near(Bottom, 1/3) }, true);
+
+        ctx.addRevJoint('t1', 'chest', 'midsection',
+                { x: 0, y: Bottom },
+                { x: 0, y: Near(Left, 2/3) }, true);
+
+        ctx.addWeldJoint('foot', 'lowerLeg', 'foot',
+                { x: Right, y: Near(Bottom, 0.65) },
+                { x: Left, y: Bottom });
+
+        ctx.addRevJoint('hip', 'upperLeg', 'waist', 
+                { x: legX, y: legY }, { x: 0, y: 0 });
+
+        ctx.addRevJoint('shoulder', 'upperArm', 'shoulder', 
+                { x: 0, y: Top }, { x: 0, y: 0 });
 
 
-        var mr = person['midsection'].size.r;
-        var t2 = getRevJoint.call(this, bodies.waist, bodies.midsection,
-                { x: 0, y: -Y('waist')/2 },
-                { x: -mr * 2/3, y: mr * (1/3) }, true);
-
-        var t1 = getRevJoint.call(this, bodies.chest, bodies.midsection,
-                { x: 0, y: Y('chest')/2 },
-                { x: 0, y: -person['midsection'].size.r * (2/3) }, true);
 
         // The order of these limits is the reverse of my assumption
-        t1.SetLimits(-0.3 * Math.PI, 0.1 * Math.PI);
-        t1.EnableLimit(true);
-        t2.SetLimits(-1.9 * Math.PI, 0.2 * Math.PI);
-        t2.EnableLimit(true);
+        joints.neck_1.SetLimits(0 * Math.PI, 0 * Math.PI);
+        joints.neck_1.EnableLimit(true);
+
+        joints.neck_2.SetLimits(0 * Math.PI, 0 * Math.PI);
+        joints.neck_2.EnableLimit(true);
+
+        joints.knee_1.SetLimits(0, Math.PI);
+        joints.knee_1.EnableLimit(true);
+
+        joints.t1.SetLimits(-0.3 * Math.PI, 0.1 * Math.PI);
+        joints.t1.EnableLimit(true);
+        joints.t2.SetLimits(-1.9 * Math.PI, 0.2 * Math.PI);
+        joints.t2.EnableLimit(true);
         
-
-        var hip = getRevJoint.call(this, bodies.upperLeg, bodies.waist, 
-                { x: -X('upperLeg')/2 + X('waist')/2 - this.inches(1), y: Y('upperLeg')/2 - Y('waist')/2 },
-                { x: 0, y: 0 });
-                //{ x: -X('waist')/2 * 0.5, y: Y('waist')/2 });
-
-        var foot = getWeldJoint.call(this, bodies.lowerLeg, bodies.foot,
-                { x: X('lowerLeg')/2, y: Y('lowerLeg')/2 * 0.65 },
-                { x: -X('foot')/2, y: Y('foot')/2 });
-
-
-        var shoulder = getRevJoint.call(this, bodies.upperArm, bodies.shoulderJ, 
-                { x: 0, y: -Y('upperArm')/2 },
-                { x: 0, y: 0 });
-
-        // dynamic joints for person control
-        joints.shoulder = s_1;
-        joints.neck_1 = neck_1;
-        joints.neck_2 = neck_2;
-        joints.elbow = elbow;
-        joints.t1 = t1;
-        joints.t2 = t2;
-        joints.hip = hip;
-        joints.knee_1 = knee_1;
-        joints.knee_2 = knee_2;
-        joints.foot = foot;
         parts.initted = true;
 
 
@@ -748,8 +803,8 @@ define(['backbone', 'box2dweb', 'underscore', 'config'], function(Backbone, Box2
         var wheel = this.chairParts.wheel,
             wheelB = this.chairPartBodies.wheel;
 
-        var shoulder = this.humanParts.shoulderJ,
-            shoulderB = this.humanPartBodies.shoulderJ,
+        var shoulder = this.humanParts.shoulder,
+            shoulderB = this.humanPartBodies.shoulder,
             sPos = shoulderB.GetPosition(),
             sRad = shoulder.size.r * config.PTM,
             wheelPos = wheelB.GetPosition(),

@@ -88,7 +88,7 @@ define(['jquery', 'underscore', 'backbone', './image-data', '../config'], functi
             var kRad = lowerLegWidth/2; 
             var hack = 1; // leg offset
 
-            ps.shoulderJ.size = { r: sRad }; 
+            ps.shoulder.size = { r: sRad }; 
             ps.upperArm.size = { x: upperArmWidth, y: upperArmLength };
             ps.lowerArm.size = { x: lowerArmWidth, y: lowerArmLength };
             ps.waist.size = { x: upperLegWidth, y: upperLegWidth };
@@ -96,7 +96,7 @@ define(['jquery', 'underscore', 'backbone', './image-data', '../config'], functi
             ps.chest.size = { x: trunkDepth, y: ch };
             ps.head.size = { x: 9, y: 7 * 3/2 };
             ps.neck.size = { x: trunkDepth / 2.5, y: 6 }; // FIXME
-            ps.kneeJ.size = { r: kRad };
+            ps.knee.size = { r: kRad };
             ps.foot.size = { x: footWidth, y: footLength }; 
             ps.upperLeg.size = { x: upperLegLength - kRad - hack, y: upperLegWidth };
             ps.lowerLeg.size = { x: lowerLegLength - kRad - footWidth, y: lowerLegWidth };

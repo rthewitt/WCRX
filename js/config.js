@@ -34,7 +34,7 @@ define(['./scaled-polygons', 'backbone'], function(pollyColl, Backbone){
             cat: HM_JOINT,
             mask: personMask
         },
-        shoulderJ: {
+        shoulder: {
             name: 'shoulder',
             type: 'circle',
             pos: { z: 2 },
@@ -84,7 +84,7 @@ define(['./scaled-polygons', 'backbone'], function(pollyColl, Backbone){
             cat: HM_SOLID,
             mask: personMask
         },
-        kneeJ: {
+        knee: {
             name: 'knee',
             type: 'circle',
             pos: { z: 0 },
