@@ -19,29 +19,27 @@ define(['box2dweb', 'config'], function(Box2d, config) {
 
         context.clearRect(0, 0, context.canvas.width, context.canvas.height);
 
-        context.save();
-                context.beginPath();
-                context.arc(context.canvas.width/2, 300, 5, 0, 2*Math.PI, false);
-                context.fillStyle = 'green';
-                context.fill();
-                context.stroke();
-        context.restore();
-
         imgdColl.sort(zSort);
         for(imgd in imgdColl) {
-            //context.save();
             var imgData = imgdColl[imgd];
             var x = imgData.pos.x || 90;
             var y = imgData.pos.y || 90;
-            context.drawImage(imgData.img, x, y, imgData.dims.x, imgData.dims.y);
-
+            if(imgData.flip) {
+                context.save();
+                context.translate(x+imgData.dims.x, y);
+                context.scale(-1, 1);
+                context.drawImage(imgData.img, 0, 0, imgData.dims.x, imgData.dims.y);
+                context.restore();
+            } else {
+                console.log('graphics: '+imgData.name);
+                context.drawImage(imgData.img, x, y, imgData.dims.x, imgData.dims.y);
+            }
             context.beginPath();
-            context.lineWidth="6";
-            context.strokeStyle="red";
+            context.lineWidth = '6';
+            context.strokeStyle = imgData.type === 'person' ? 'red' : 'green';
             context.rect(x, y, imgData.dims.x, imgData.dims.y);
             context.stroke();
 
-            //context.restore();
         }
     }
 

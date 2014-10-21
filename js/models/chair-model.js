@@ -8,6 +8,7 @@ define(['jquery', 'underscore', 'backbone', './image-data', '../config'], functi
             seatWidth: 15,
             seatBackHeight: 13,
             axleDistance: 3.5,
+            raiseBarLength: 5,
             seatDepth: 13,
             foamHeight: 2,
             groundClr: 0.0
@@ -22,7 +23,8 @@ define(['jquery', 'underscore', 'backbone', './image-data', '../config'], functi
             this.dispatcher = options.dispatcher;
 
             var toMake = {
-                side: options.chairSide
+                side: options.chairSide,
+                front: options.chairFront
             };
             this.construct(toMake, options.imgRoot);
 
@@ -64,10 +66,16 @@ define(['jquery', 'underscore', 'backbone', './image-data', '../config'], functi
         },
 
         resize: function() {
+            this.resizeSide();
+            this.resizeFront();
+        },
+
+        resizeSide: function() {
             var wc = this.get('side'),
                 seatBackWidth = this.get('seatBackWidth'),
                 seatBackHeight = this.get('seatBackHeight'),
                 foamHeight = this.get('foamHeight'),
+                raiseBarLength = this.get('raiseBarLength'),
                 seatDepth = this.get('seatDepth'),
                 wheelDiameter = this.get('wheelDiameter');
 
@@ -78,13 +86,24 @@ define(['jquery', 'underscore', 'backbone', './image-data', '../config'], functi
             wc.supportWheel.size = { r: 2.5 };
             wc.frameConnector.size = { x: 3, y: 6 }; 
             wc.frontConnector.size = { x: 4, y: 7 };  // FIXME height diff
-            wc.raiseBar.size = { x: 2.25, y: 5 }; 
+            wc.raiseBar.size = { x: 2.25, y: raiseBarLength }; 
             wc.LBar.size = { x: 18.5, y: 11 }; // estimated
             wc.footRest.size = { x: 4, y: 6 }; // estimated
 
             this.normalize();
-        }
+        },
 
+        resizeFront: function() {
+            var wcf = this.get('front'),
+                seatBackWidth = this.get('seatBackWidth'),
+                seatBackHeight = this.get('seatBackHeight'),
+                foamHeight = this.get('foamHeight'),
+                seatDepth = this.get('seatDepth'),
+                wheelDiameter = this.get('wheelDiameter');
+            
+            wcf.leftWheel.size = { x: 3, y: wheelDiameter };
+            wcf.rightWheel.size = { x: 3, y: wheelDiameter };
+        }
     });
 
     return ChairModel;

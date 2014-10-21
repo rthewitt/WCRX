@@ -121,27 +121,52 @@ define(['./scaled-polygons', 'backbone'], function(pollyColl, Backbone){
     var personFront = {
         head: {
             name: 'head',
+            type: 'person',
             pos: { z: 1 }
         },
         neck: {
             name: 'neck',
+            type: 'person',
             pos: { z: 0 }
         },
         chest: {
             name: 'chest',
+            type: 'person',
             pos: { z: 2 }
         },
         midsection: {
             name: 'midsection',
-            pos: { z: 1 }
+            type: 'person',
+            pos: { z: 0 }
         },
         waist: {
             name: 'waist',
+            type: 'person',
+            pos: { z: 1 }
+        },
+        leftLeg: {
+            name: 'leg',
+            type: 'person',
+            pos: { z: 2 }
+        },
+        rightLeg: {
+            name: 'leg',
+            type: 'person',
+            flip: true,
+            pos: { z: 2 }
+        }
+    };
+
+    var chairFront = {
+        leftWheel: {
+            name: 'wheel',
+            type: 'chair',
             pos: { z: 0 }
         },
-        leg: {
-            name: 'leg',
-            pos: { z: 2 }
+        rightWheel: {
+            name: 'wheel',
+            type: 'chair',
+            pos: { z: 0 }
         }
     };
 
@@ -234,6 +259,7 @@ define(['./scaled-polygons', 'backbone'], function(pollyColl, Backbone){
         imgPathRoot: 'images/v2/',
 
         chairSide: chairSide,
+        chairFront: chairFront,
         personSide: personSide,
         personFront: personFront,
 

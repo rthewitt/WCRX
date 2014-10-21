@@ -45,6 +45,7 @@ require([ 'jquery', 'backbone',
                 var wcModel = new ChairModel({}, { 
                     dispatcher: dispatcher,
                     chairSide: config.chairSide,
+                    chairFront: config.chairFront,
                     imgRoot: config.imgPathRoot 
                 });
 

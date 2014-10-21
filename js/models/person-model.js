@@ -114,13 +114,18 @@ define(['jquery', 'underscore', 'backbone', './image-data', '../config'], functi
             ps.upperLeg.size = { x: upperLegLength - kRad - hack, y: upperLegWidth };
             ps.lowerLeg.size = { x: lowerLegLength - kRad - footWidth, y: lowerLegWidth };
 
+            var frAboveWaist = torsoLength - upperLegWidth,
+                fmh = frAboveWaist * (3/7), // experimental ratio
+                fch = frAboveWaist - fmh;
+
             // front
             pf.head.size = { x: 9, y: 7 * 3/2 };
-            pf.neck.size = { x: 8, y: 6 }; // FIXME
-            pf.chest.size = { x: chestWidth, y: ch };
-            pf.midsection.size = { x: chestWidth * 0.75, y: 0.5*ch + mh }; // rect instead of circle
-            pf.waist.size = { x: hipWidth, y: 5 }; 
-            pf.leg.size = { x: hipWidth/2, y: (footWidth + lowerLegLength) * 1.016 }; // creeping upper leg
+            pf.neck.size = { x: 7.5, y: 6 }; // FIXME
+            pf.chest.size = { x: chestWidth, y: fch };
+            pf.midsection.size = { x: chestWidth * 0.75, y: fmh * 1.25 }; // extension for overlap
+            pf.waist.size = { x: hipWidth, y: upperLegWidth }; 
+            pf.leftLeg.size = { x: hipWidth/2, y: (footWidth + lowerLegLength) * 1.016 }; // creeping upper leg
+            pf.rightLeg.size = { x: hipWidth/2, y: (footWidth + lowerLegLength) * 1.016 }; // creeping upper leg
 
             this.normalize();
         }
