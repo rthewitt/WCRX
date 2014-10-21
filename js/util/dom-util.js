@@ -1,4 +1,4 @@
-define([], function() {
+define(['../config'], function(config) {
 
     // functions that may be needed for multiple views
     return { 
@@ -19,6 +19,15 @@ define([], function() {
                }
             }
             return { x: x, y: y };
+        },
+        inchesToPixels: function(inches) {
+            return inches * config.PTM / config.ITM
+        },
+        inchesToMeters: function(numInches) {
+            return numInches / config.ITM;
+        },
+        pixesToMeters: function(numPixels) {
+            return numPixels / config.ITM;
         }
     };
 

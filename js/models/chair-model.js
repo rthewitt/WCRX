@@ -21,7 +21,10 @@ define(['jquery', 'underscore', 'backbone', './image-data', '../config'], functi
 
             this.dispatcher = options.dispatcher;
 
-            this.construct(options.chairDef, options.imgRoot);
+            var toMake = {
+                side: options.chairSide
+            };
+            this.construct(toMake, options.imgRoot);
 
             this.on('change:wheelDiameter', this.broadcast);
             this.on('change:axleDistance', this.broadcast);
@@ -30,26 +33,30 @@ define(['jquery', 'underscore', 'backbone', './image-data', '../config'], functi
             this.on('change:seatBackHeight', this.broadcast);
             this.on('change:seatDepth', this.broadcast);
             this.on('change:foamHeight', this.broadcast);
-            this.on('change:wheelChair', function() { console.log('model changed chair');});
         },
 
-        construct: function(defs, imgRoot) {
-            var wc = {};
-            for(var partName in defs) {
-                var part = defs[partName];
-                var img = new Image();
-                img.src = imgRoot + part.name + '.svg';
-                part.img = img;
-                wc[partName] = new ImageData(part);
+        construct: function(constructs, imgRoot) {
+            for(var construct in constructs) {
+
+                var defs = constructs[construct],
+                    chair = {};
+
+                for(var partName in defs) {
+                    var part = defs[partName];
+                    var img = new Image();
+                    img.src = imgRoot + construct + '/' + part.name + '.svg';
+                    part.img = img;
+                    chair[partName] = new ImageData(part);
+                }
+                this.set(construct, chair);
             }
-            this.set('wheelChair', wc);
         },
 
         // convert to meters
         normalize: function() {
-            var person = this.get('wheelChair');
-            for(var p in person) {
-                var size = person[p].size;
+            var chair = this.get('side');
+            for(var p in chair) {
+                var size = chair[p].size;
                 for(var dim in size) {
                     size[dim] = size[dim] / config.ITM;
                 }
@@ -57,7 +64,7 @@ define(['jquery', 'underscore', 'backbone', './image-data', '../config'], functi
         },
 
         resize: function() {
-            var wc = this.get('wheelChair'),
+            var wc = this.get('side'),
                 seatBackWidth = this.get('seatBackWidth'),
                 seatBackHeight = this.get('seatBackHeight'),
                 foamHeight = this.get('foamHeight'),

@@ -15,7 +15,7 @@ define(['./scaled-polygons', 'backbone'], function(pollyColl, Backbone){
     var armyMask = WC_WHEEL | GROUND;
 
 
-    var personData = {
+    var personSide = {
         head: {
             name: 'head',
             type: 'poly',
@@ -121,7 +121,7 @@ define(['./scaled-polygons', 'backbone'], function(pollyColl, Backbone){
     var personFront = {
         head: {
             name: 'head',
-            pos: { z: 0 }
+            pos: { z: 1 }
         },
         neck: {
             name: 'neck',
@@ -129,11 +129,11 @@ define(['./scaled-polygons', 'backbone'], function(pollyColl, Backbone){
         },
         chest: {
             name: 'chest',
-            pos: { z: 0 }
+            pos: { z: 2 }
         },
         midsection: {
             name: 'midsection',
-            pos: { z: 0 }
+            pos: { z: 1 }
         },
         waist: {
             name: 'waist',
@@ -141,11 +141,11 @@ define(['./scaled-polygons', 'backbone'], function(pollyColl, Backbone){
         },
         leg: {
             name: 'leg',
-            pos: { z: 0 }
+            pos: { z: 2 }
         }
     };
 
-    var chairData = {
+    var chairSide= {
         seatBack: {
             name: 'seat-back',
             type: 'box',
@@ -233,8 +233,8 @@ define(['./scaled-polygons', 'backbone'], function(pollyColl, Backbone){
 
         imgPathRoot: 'images/v2/',
 
-        chairData: chairData,
-        personData: personData,
+        chairSide: chairSide,
+        personSide: personSide,
         personFront: personFront,
 
         bits: {

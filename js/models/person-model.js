@@ -10,7 +10,7 @@ define(['jquery', 'underscore', 'backbone', './image-data', '../config'], functi
             torsoLength: 25, // 26 total
             contactPoint: 2.0, // seat contact forward
             chestWidth: 16,
-            hipWidth: 0,
+            hipWidth: 14,
             trunkDepth: 9,
             upperLegLength: 22,
             upperLegWidth: 6,
@@ -26,7 +26,11 @@ define(['jquery', 'underscore', 'backbone', './image-data', '../config'], functi
         initialize: function(model, options) {
             this.dispatcher = options.dispatcher;
 
-            this.construct(options.personDef, options.imgRoot);
+            var toMake = {
+                side: options.personSide,
+                front: options.personFront
+            };
+            this.construct(toMake, options.imgRoot);
 
             this.on('change:contactPoint', this.broadcast);
             this.on('change:lowerArmLength', this.broadcast);
@@ -41,21 +45,26 @@ define(['jquery', 'underscore', 'backbone', './image-data', '../config'], functi
             this.on('change:lowerLegWidth', this.broadcast)
         },
 
-        construct: function(defs, imgRoot) {
-            var person = {};
-            for(var partName in defs) {
-                var part = defs[partName];
-                var img = new Image();
-                img.src = imgRoot + part.name + '.svg';
-                part.img = img;
-                person[partName] = new ImageData(part);
+        construct: function(constructs, imgRoot) {
+            for(var construct in constructs) {
+
+                var defs = constructs[construct],
+                    person = {};
+
+                for(var partName in defs) {
+                    var part = defs[partName];
+                    var img = new Image();
+                    img.src = imgRoot + construct + '/' + part.name + '.svg';
+                    part.img = img;
+                    person[partName] = new ImageData(part);
+                }
+                this.set(construct, person);
             }
-            this.set('person', person);
         },
 
         // convert to meters
         normalize: function() {
-            var person = this.get('person');
+            var person = this.get('side');
             for(var p in person) {
                 var size = person[p].size;
                 for(var dim in size) {
@@ -65,7 +74,8 @@ define(['jquery', 'underscore', 'backbone', './image-data', '../config'], functi
         },
 
         resize: function() {
-            var ps = this.get('person'),
+            var ps = this.get('side'),
+                pf = this.get('front'),
                 upperArmWidth = this.get('upperArmWidth'),
                 upperArmLength = this.get('upperArmLength'),
                 lowerArmWidth = this.get('lowerArmWidth'),
@@ -75,7 +85,9 @@ define(['jquery', 'underscore', 'backbone', './image-data', '../config'], functi
                 lowerLegWidth = this.get('lowerLegWidth'), 
                 lowerLegLength = this.get('lowerLegLength'), 
                 torsoLength = this.get('torsoLength'),
+                hipWidth = this.get('hipWidth'),
                 trunkDepth = this.get('trunkDepth'),
+                chestWidth = this.get('chestWidth'),
                 footLength = this.get('footLength'),
                 footWidth = this.get('footWidth');
 
@@ -88,6 +100,7 @@ define(['jquery', 'underscore', 'backbone', './image-data', '../config'], functi
             var kRad = lowerLegWidth/2; 
             var hack = 1; // leg offset
 
+            // side 
             ps.shoulder.size = { r: sRad }; 
             ps.upperArm.size = { x: upperArmWidth, y: upperArmLength };
             ps.lowerArm.size = { x: lowerArmWidth, y: lowerArmLength };
@@ -100,6 +113,14 @@ define(['jquery', 'underscore', 'backbone', './image-data', '../config'], functi
             ps.foot.size = { x: footWidth, y: footLength }; 
             ps.upperLeg.size = { x: upperLegLength - kRad - hack, y: upperLegWidth };
             ps.lowerLeg.size = { x: lowerLegLength - kRad - footWidth, y: lowerLegWidth };
+
+            // front
+            pf.head.size = { x: 9, y: 7 * 3/2 };
+            pf.neck.size = { x: 8, y: 6 }; // FIXME
+            pf.chest.size = { x: chestWidth, y: ch };
+            pf.midsection.size = { x: chestWidth * 0.75, y: 0.5*ch + mh }; // rect instead of circle
+            pf.waist.size = { x: hipWidth, y: 5 }; 
+            pf.leg.size = { x: hipWidth/2, y: (footWidth + lowerLegLength) * 1.016 }; // creeping upper leg
 
             this.normalize();
         }

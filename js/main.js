@@ -44,14 +44,15 @@ require([ 'jquery', 'backbone',
                 //var cf = getImgData(config.chairFront, 'front');
                 var wcModel = new ChairModel({}, { 
                     dispatcher: dispatcher,
-                    chairDef: config.chairData,
+                    chairSide: config.chairSide,
                     imgRoot: config.imgPathRoot 
                 });
 
                 //var pf = getImgData(config.personFront, 'front');
                 var pModel = new PersonModel({}, { 
                     dispatcher: dispatcher,
-                    personDef: config.personData,
+                    personSide: config.personSide,
+                    personFront: config.personFront,
                     imgRoot: config.imgPathRoot 
                 });
 
@@ -70,16 +71,12 @@ require([ 'jquery', 'backbone',
                 var frontView = new FrontView(shared);
 
                 RegionManager.show(chairControls);
+                frontView.render();
                 sideView.render();
-
-                dispatcher.on('modified:chair', sideView.reset);
-                dispatcher.on('modified:person', sideView.reset);
 
                 $(document).ready(function($) {
 
                     $('#btn-reset').click(function() {
-                        personControls.resize();
-                        chairControls.resize();
                         dispatcher.trigger('reset');
                     });
                     $('#btn-snapshot').click(function() {

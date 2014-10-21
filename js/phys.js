@@ -3,6 +3,8 @@ define(['backbone', 'box2dweb', 'underscore', 'config'], function(Backbone, Box2
     //////// REMOVE ///////
     var chairX,
         chairY;
+
+    var lastKnownPos;
     //////////////////////////
 
     var   b2Vec2 = Box2D.Common.Math.b2Vec2, 
@@ -181,9 +183,6 @@ define(['backbone', 'box2dweb', 'underscore', 'config'], function(Backbone, Box2
         var localA = expand(loc1, pName1),
             localB = expand(loc2, pName2);
 
-        console.log('localA '+JSON.stringify(localA));
-        console.log('localB '+JSON.stringify(localB));
-
         this.joints[name] = getRevJoint.call(this, 
                 this.bodies[pName1], this.bodies[pName2],
                 localA, localB, collide);
@@ -193,12 +192,57 @@ define(['backbone', 'box2dweb', 'underscore', 'config'], function(Backbone, Box2
         var localA = expand(loc1, pName1),
             localB = expand(loc2, pName2);
 
-        console.log('localA '+JSON.stringify(localA));
-        console.log('localB '+JSON.stringify(localB));
-
         this.joints[name] = getWeldJoint.call(this,
                 this.bodies[pName1], this.bodies[pName2],
                 localA, localB);
+    }
+
+    // get utility functions to simply code
+    function conveniences(obj) {
+        var cnv = {};
+        cnv.X = function(name) {
+            return obj[name].size.x;
+        };
+        cnv.Y = function(name) {
+            return obj[name].size.y;
+        };
+        cnv.R = function(name) {
+            return obj[name].size.r;
+        };
+        cnv.Near = function(func, ratio) {
+            return function(name) {
+                return ratio * func(name);
+            }
+        };
+        cnv.Delta = function(func, delta) {
+            return function(name) {
+                return delta + func(name);
+            }
+        };
+        cnv.Center = function(name) {
+            return 0;
+        };
+        cnv.Bottom = function(name) {
+            if(obj[name].type === 'circle')
+                return cnv.R(name);
+            return obj[name].size.y/2;
+        };
+        cnv.Top = function(name) {
+            if(obj[name].type === 'circle')
+                return -cnv.R(name);
+            return -cnv.Bottom(name);
+        };
+        cnv.Right = function(name) {
+            if(obj[name].type === 'circle')
+                return cnv.R(name);
+            return obj[name].size.x/2;
+        };
+        cnv.Left = function(name) {
+            if(obj[name].type === 'circle')
+                return -cnv.R(name);
+            return -cnv.Right(name);
+        };
+        return cnv;
     }
 
 
@@ -218,55 +262,23 @@ define(['backbone', 'box2dweb', 'underscore', 'config'], function(Backbone, Box2
             bodies = this.humanPartBodies,
             joints = this.humanParts.joints;
 
-        var person = this.humanMeasures.get('person');
+        var person = this.humanMeasures.get('side');
         for(var bp in person) {
             var b2b = getBodyPart.call(this, person[bp], humanFixDef, bodyDef);
             bodies[bp] = b2b;
             parts[bp] = b2b.GetUserData();
         }
 
-        function X(name) {
-            return person[name].size.x;
-        }
-
-        function Y(name) {
-            return person[name].size.y;
-        }
-
-        function R(name) {
-            return person[name].size.r;
-        }
-
-        function Near(func, ratio) {
-            return function(name) {
-                return ratio * func(name);
-            }
-        }
-
-        function Bottom(name) {
-            if(person[name].type === 'circle')
-                return R(name);
-            return person[name].size.y/2;
-        }
-
-        function Top(name) {
-            if(person[name].type === 'circle')
-                return -R(name);
-            return -Bottom(name);
-        }
-
-        function Right(name) {
-            if(person[name].type === 'circle')
-                return R(name);
-            return person[name].size.x/2;
-        }
-
-        function Left(name) {
-            if(person[name].type === 'circle')
-                return -R(name);
-            return -Right(name);
-        }
-
+        // setup convenience functions
+        var cnv = conveniences(person),
+            X = cnv.X, Y = cnv.Y, R = cnv.R,
+            Top = cnv.Top,
+            Center = cnv.Center,
+            Bottom = cnv.Bottom,
+            Left = cnv.Left,
+            Right = cnv.Right,
+            Delta = cnv.Delta,
+            Near = cnv.Near;
 
         var ctx = {
             parts: parts,
@@ -280,49 +292,51 @@ define(['backbone', 'box2dweb', 'underscore', 'config'], function(Backbone, Box2
         var legX = -X('upperLeg')/2 + X('waist')/2 - this.inches(1),
             legY = Y('upperLeg')/2 - Y('waist')/2;
 
-        // FIXME shoulder, knee if possible
         ctx.addRevJoint('neck_1', 'neck', 'head',
                 { x: Near(Right, 0.4), y: Near(Top, 0.4) },
                 { x: Near(Left, 0.15), y: Near(Bottom, 0.5) });
         
         ctx.addRevJoint('neck_2', 'neck', 'chest',
                 { x: Near(Right, 0.4), y: Near(Bottom, 0.4) },
-                { x: 0, y: Top });
+                { x: Center, y: Top });
 
         ctx.addWeldJoint('s_1', 'shoulder', 'chest',
-                { x: 0, y: 0 },
+                { x: Center, y: Center },
                 { x: Near(Left, 0.4), y: Near(Top, 0.55) });
         
         ctx.addRevJoint('knee_1', 'knee', 'lowerLeg', 
-                { x: 0, y: 0 }, { x: Left, y: 0 });
+                { x: Center, y: Center }, { x: Left, y: Center });
 
         ctx.addWeldJoint('knee_2',  'upperLeg', 'knee',
                 { x: Right, y: Near(Bottom, 0.60) }, 
-                { x: 0, y: 0 });
+                { x: Center, y: Center });
 
         ctx.addRevJoint('elbow', 'upperArm', 'lowerArm', 
-                { x: 0, y: Bottom }, { x: 0, y: Top }); 
+                { x: Center, y: Bottom }, { x: Center, y: Top }); 
 
         ctx.addRevJoint('t2', 'waist', 'midsection',
-                { x: 0, y: Top },
+                { x: Center, y: Top },
                 { x: Near(Left, 2/3), y: Near(Bottom, 1/3) }, true);
 
         ctx.addRevJoint('t1', 'chest', 'midsection',
-                { x: 0, y: Bottom },
-                { x: 0, y: Near(Left, 2/3) }, true);
+                { x: Center, y: Bottom },
+                { x: Center, y: Near(Left, 2/3) }, true);
 
         ctx.addWeldJoint('foot', 'lowerLeg', 'foot',
                 { x: Right, y: Near(Bottom, 0.65) },
                 { x: Left, y: Bottom });
 
         ctx.addRevJoint('hip', 'upperLeg', 'waist', 
-                { x: legX, y: legY }, { x: 0, y: 0 });
+                { x: legX, y: legY }, 
+                { x: Center, y: Center });
 
         ctx.addRevJoint('shoulder', 'upperArm', 'shoulder', 
-                { x: 0, y: Top }, { x: 0, y: 0 });
+                { x: Center, y: Top }, 
+                { x: Center, y: Center });
 
 
 
+        // TODO separate this into function
         // The order of these limits is the reverse of my assumption
         joints.neck_1.SetLimits(0 * Math.PI, 0 * Math.PI);
         joints.neck_1.EnableLimit(true);
@@ -428,7 +442,7 @@ define(['backbone', 'box2dweb', 'underscore', 'config'], function(Backbone, Box2
     }
 
     Physics.prototype.weldFootRest = function() {
-        var wheelChair = this.chairMeasures.get('wheelChair');
+        var wheelChair = this.chairMeasures.get('side');
         function X(name) {
             return wheelChair[name].size.x;
         }
@@ -465,30 +479,42 @@ define(['backbone', 'box2dweb', 'underscore', 'config'], function(Backbone, Box2
         bodyDef.type = b2Body.b2_dynamicBody;
         bodyDef.position.Set(chairX, chairY);
 
-        var parts = this.chairParts, bodies = this.chairPartBodies;
+        var parts = this.chairParts, 
+            bodies = this.chairPartBodies,
+            joints = this.chairParts.joints;
 
-        var wheelChair = this.chairMeasures.get('wheelChair');
+        var wheelChair = this.chairMeasures.get('side');
         for(var cp in wheelChair) {
             var b2b = getBodyPart.call(this, wheelChair[cp], chairFixDef, bodyDef);
             bodies[cp] = b2b;
             parts[cp] = b2b.GetUserData();
         }
 
-        function X(name) {
-            return wheelChair[name].size.x;
-        }
+        // setup convenience functions
+        var cnv = conveniences(wheelChair),
+            X = cnv.X, Y = cnv.Y, R = cnv.R,
+            Top = cnv.Top,
+            Center = cnv.Center,
+            Bottom = cnv.Bottom,
+            Left = cnv.Left,
+            Right = cnv.Right,
+            Delta = cnv.Delta,
+            Near = cnv.Near;
 
-        function Y(name) {
-            return wheelChair[name].size.y;
-        }
+        var ctx = {
+            parts: parts,
+            bodies: bodies,
+            joints: joints,
+            world: this.world,
+            addRevJoint: addRevJoint,
+            addWeldJoint: addWeldJoint
+        };
 
-        var joints = this.chairParts.joints;
-        var axle = getRevJoint.call(this, bodies.wheel, bodies.raiseBar, 
+        ctx.addRevJoint('axle', 'wheel', 'raiseBar', 
                 { x: 0, y: 0 },
-                { x: -X('raiseBar')/2 * 0.55, y: Y('raiseBar')/2 * 0.88  });
-        axle.SetLimits(0 * Math.PI, 0 * Math.PI);
-        //axle.EnableLimit(true);
+                { x: Near(Left, 0.55), y: Near(Bottom, 0.88) });
         
+        // didn't we do this somewhere else? FIXME
         var wjd = new b2WeldJointDef();
         wjd.bodyA = bodies.wheel;
         wjd.bodyB = this.ground;
@@ -498,34 +524,35 @@ define(['backbone', 'box2dweb', 'underscore', 'config'], function(Backbone, Box2
 
         var COG = this.inches(this.chairMeasures.get('axleDistance'));
         var vertPipeWidth = this.inches(1); 
+        var frDelta = Near(Bottom, 0.5)('frameConnector');
 
-        var slider = getWeldJoint.call(this, bodies.raiseBar, bodies.LBar,
-                { x: X('raiseBar')-this.inches(2), y: -Y('raiseBar')/2 },
-                { x: -X('LBar')/2 + COG, y: -Y('LBar')/2 }); 
+        ctx.addWeldJoint('slider', 'raiseBar', 'LBar',
+                { x: Delta(Right, -this.inches(2)), y: Top },
+                { x: Delta(Left, COG), y: Top }); 
 
-        var frameWeld = getWeldJoint.call(this, bodies.handlebars, bodies.frameConnector,
-                { x: X('handlebars')/2, y: Y('handlebars')/2 - (Y('frameConnector') * 0.5) },
-                { x: 0, y: -Y('frameConnector')/2 });
+        ctx.addWeldJoint('frameWeld', 'handlebars', 'frameConnector',
+                { x: Right, y: Delta(Bottom, -frDelta) },
+                { x: Center, y: Top });
 
-        var seatWeld = getWeldJoint.call(this, bodies.LBar, bodies.foam, 
-                { x: -X('LBar')/2 + vertPipeWidth, y: -Y('LBar')/2 },  
-                { x: -X('foam')/2, y: Y('foam')/2 });
+        ctx.addWeldJoint('seatWeld', 'LBar', 'foam', 
+                { x: Delta(Left, vertPipeWidth), y: Top },  
+                { x: Left, y: Bottom });
 
-        var backWeld = getWeldJoint.call(this, bodies.handlebars, bodies.seatBack, 
-                { x: X('handlebars')/2, y: Y('handlebars')/2 - Y('foam') },
-                { x: -X('seatBack')/2, y: Y('seatBack')/2 });
+        ctx.addWeldJoint('backWeld', 'handlebars', 'seatBack', 
+                { x: Right, y: Delta(Bottom, -Y('foam')) },
+                { x: Left, y: Bottom });
 
-        var handleBarPos = getWeldJoint.call(this, bodies.LBar, bodies.handlebars,
-                { x: -X('LBar')/2, y: -Y('LBar')/2 },
-                { x: X('handlebars')/2 - vertPipeWidth, y: Y('handlebars')/2 });
+        ctx.addWeldJoint('haldeBarPos', 'LBar', 'handlebars',
+                { x: Left, y: Top },
+                { x: Delta(Right, -vertPipeWidth), y: Bottom });
 
-        var frontAxle = getRevJoint.call(this, bodies.supportWheel, bodies.frontConnector, 
-                { x: 0, y: 0 },
-                { x: -X('frontConnector')/2 * 0.7, y: Y('frontConnector')/2 * 0.8 });
+        ctx.addRevJoint('frontAxle', 'supportWheel', 'frontConnector', 
+                { x: Center, y: Center },
+                { x: Near(Left, 0.7), y: Near(Bottom, 0.8) });
 
-        var frontWeld = getWeldJoint.call(this, bodies.LBar, bodies.frontConnector, 
-                { x: X('LBar')/2 * 0.7, y: Y('LBar')/2 },
-                { x: 0, y: -Y('frontConnector')/2 * 0.8 });
+        ctx.addWeldJoint('frontWeld', 'LBar', 'frontConnector', 
+                { x: Near(Right, 0.7), y: Bottom },
+                { x: Center, y: Near(Top, 0.8) });
 
 
         var fryj = new b2PrismaticJointDef();
@@ -540,12 +567,13 @@ define(['backbone', 'box2dweb', 'underscore', 'config'], function(Backbone, Box2
         fryj.upperTranslation = Y('footRest')*0.9;
         fryj.lowerTranslation = Y('LBar')*0.03;
         fryj.enableLimit = true;
-        var footRestSlide = this.world.CreateJoint(fryj);
+        joints.footRestSlide = this.world.CreateJoint(fryj);
 
         var clr = this.chairMeasures.get('groundClr');
         clr = this.inches(clr);
         console.log('clr: '+clr);
         var weldY;
+        /*
         if(clr > 0) {
             //var frs = parts.footRest.size;
             var frameLocal = new b2Vec2(X('LBar')/2, 0.70 * Y('LBar')/2);
@@ -561,11 +589,18 @@ define(['backbone', 'box2dweb', 'underscore', 'config'], function(Backbone, Box2
             // weld point
             weldY = Y('LBar')/2 - slideDelta;
             console.log('weldY: '+weldY);
+            if(lastKnownPos) {
+                bodies.footRest.SetPosition(lastKnownPos);
+                this.weldFootRest();
+            }
         } else weldY = Y('LBar')/2;
+        */
 
-        var footRest = getWeldJoint.call(this, bodies.LBar, bodies.footRest,
+        /*
+        joints.footRest = getWeldJoint.call(this, bodies.LBar, bodies.footRest,
                 { x: X('LBar')/2, y: weldY },
                 { x: X('footRest')/2, y: -Y('footRest')/2 });
+                */
 
         // add footrest barrier
         var fixDef = new b2FixtureDef;
@@ -584,23 +619,6 @@ define(['backbone', 'box2dweb', 'underscore', 'config'], function(Backbone, Box2
         footStop.SetFilterData(ffd);
         // end footrest barrier
 
-        // dynamic joints for control
-        joints.axle = axle;
-        joints.slider = slider;
-        joints.frontAxle = frontAxle;
-        joints.backWeld = backWeld;
-        joints.frameWeld = frameWeld;
-        joints.seatWeld = seatWeld;
-        joints.handleBarPos = handleBarPos;
-        joints.frontWeld = frontWeld;
-        joints.footRest = footRest;
-        joints.footRestSlide = footRestSlide;
-
-        for(var bod in bodies) {
-            var ud = bodies[bod].GetUserData();
-            //if(!!ud) console.log(ud.get('dims'));
-        }
-
         parts.initted = true;
 
         if(stabilize) this.stabilize(25);
@@ -609,7 +627,7 @@ define(['backbone', 'box2dweb', 'underscore', 'config'], function(Backbone, Box2
     function _destroyChair() {
         console.log('destroying chair');
 
-        // detach human
+        // detach person 
         /*
         var hJoints = this.humanParts.joints;
         if(hJoints.seatRev) {
@@ -751,7 +769,6 @@ define(['backbone', 'box2dweb', 'underscore', 'config'], function(Backbone, Box2
 
     // update without rendering to reduce jolts
     Physics.prototype.stabilize = function(num) {
-        console.log('stabilizing');
         for(var x=0; x<num; x++) { 
             this.update(); 
         }

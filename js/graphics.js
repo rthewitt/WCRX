@@ -3,11 +3,45 @@ define(['box2dweb', 'config'], function(Box2d, config) {
     var b2Body = Box2D.Dynamics.b2Body,
         b2DebugDraw = Box2D.Dynamics.b2DebugDraw;
 
+    function zSort(a, b) { 
+        var az = !!a ? a.pos.z : 0;
+        var bz = !!b ? b.pos.z : 0;
+        return az - bz;
+    }
+
+    function bodyZSort(a, b) {
+        var aud = a.GetUserData();
+        var bud = b.GetUserData();
+        return zSort(aud, bud);
+    }
+
     function drawSimple(context, imgdColl) {
+
+        context.clearRect(0, 0, context.canvas.width, context.canvas.height);
+
+        context.save();
+                context.beginPath();
+                context.arc(context.canvas.width/2, 300, 5, 0, 2*Math.PI, false);
+                context.fillStyle = 'green';
+                context.fill();
+                context.stroke();
+        context.restore();
+
+        imgdColl.sort(zSort);
         for(imgd in imgdColl) {
+            //context.save();
             var imgData = imgdColl[imgd];
-            context.drawImage(imgData.img, 0, 0, 
-                imgData.dims.x, imgData.dims.y);
+            var x = imgData.pos.x || 90;
+            var y = imgData.pos.y || 90;
+            context.drawImage(imgData.img, x, y, imgData.dims.x, imgData.dims.y);
+
+            context.beginPath();
+            context.lineWidth="6";
+            context.strokeStyle="red";
+            context.rect(x, y, imgData.dims.x, imgData.dims.y);
+            context.stroke();
+
+            //context.restore();
         }
     }
 
@@ -59,13 +93,7 @@ define(['box2dweb', 'config'], function(Box2d, config) {
             if(config.showImages) zList.push(b);
         }
 
-        zList.sort(function(a, b){ 
-            var aud = a.GetUserData();
-            var bud = b.GetUserData();
-            var az = !!aud ? aud.pos.z : 0;
-            var bz = !!bud ? bud.pos.z : 0;
-            return az - bz;
-        });
+        zList.sort(bodyZSort);
 
         zList.forEach(function(b) {
             // change this, determine if fixture will work and add userData

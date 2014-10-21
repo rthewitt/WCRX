@@ -16,6 +16,8 @@ define(['jquery', 'underscore', 'backbone', '../graphics', '../phys', '../util/d
 
             this.listenTo(options.dispatcher, 'snapshot', this.snapshot);
             this.listenTo(options.dispatcher, 'reset', this.reset);
+            this.listenTo(options.dispatcher, 'modified:chair', this.reset);
+            this.listenTo(options.dispatcher, 'modified:person', this.reset);
             
             var physics = new Physics(options.chairModel, options.personModel);
 
@@ -31,25 +33,6 @@ define(['jquery', 'underscore', 'backbone', '../graphics', '../phys', '../util/d
             this.unbind();
             this.$('canvas-side').off('mouseup mousedown mousemove');
             Backbone.View.prototype.remove.apply(this, arguments);
-        },
-
-        reset: function() {
-            var physics = this.physics;
-            this.haltPhysics();
-
-            var snapshotDiv = $('#armies');
-            if(snapshotDiv.length) snapshotDiv.remove();
-
-            physics.reset();
-
-            var gx = graphics,
-                context = this.$('#canvas-side')[0].getContext('2d'),
-                draw = gx.getDraw(context);
-
-            gx.setDebug(physics.world, context);
-            physics.token = window.setInterval(function() {
-                physics.update(draw);
-            }, 1000 / 60);
         },
 
         render: function() {
@@ -70,6 +53,25 @@ define(['jquery', 'underscore', 'backbone', '../graphics', '../phys', '../util/d
 
             this.canvasPos = domUtil.getElementPos(sideCvs);
             this.reset();
+        },
+
+        reset: function() {
+            var physics = this.physics;
+            this.haltPhysics();
+
+            var snapshotDiv = $('#armies');
+            if(snapshotDiv.length) snapshotDiv.remove();
+
+            physics.reset();
+
+            var gx = graphics,
+                context = this.$('#canvas-side')[0].getContext('2d'),
+                draw = gx.getDraw(context);
+
+            gx.setDebug(physics.world, context);
+            physics.token = window.setInterval(function() {
+                physics.update(draw);
+            }, 1000 / 60);
         },
 
         haltPhysics: function() {
