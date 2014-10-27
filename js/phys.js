@@ -303,6 +303,13 @@ define(['backbone', 'box2dweb', 'underscore', 'config'], function(Backbone, Box2
         ctx.addWeldJoint('s_1', 'shoulder', 'chest',
                 { x: Center, y: Center },
                 { x: Near(Left, 0.4), y: Near(Top, 0.55) });
+
+        ctx.addRevJoint('elbow_1', 'upperArm', 'elbow',
+                { x: Center, y: Bottom }, { x: Center, y: Center });
+
+        ctx.addWeldJoint('elbow_2', 'elbow', 'lowerArm',
+                { x: Center, y: Center }, { x: Center, y: Top });
+        
         
         ctx.addRevJoint('knee_1', 'knee', 'lowerLeg', 
                 { x: Center, y: Center }, { x: Left, y: Center });
@@ -311,8 +318,12 @@ define(['backbone', 'box2dweb', 'underscore', 'config'], function(Backbone, Box2
                 { x: Right, y: Near(Bottom, 0.60) }, 
                 { x: Center, y: Center });
 
-        ctx.addRevJoint('elbow', 'upperArm', 'lowerArm', 
-                { x: Center, y: Bottom }, { x: Center, y: Top }); 
+        ctx.addWeldJoint('wrist_1',  'lowerArm', 'wrist',
+                { x: Center, y: Bottom }, { x: Center, y: Center });
+
+        ctx.addWeldJoint('wrist_2', 'wrist', 'hand', 
+                { x: Center, y: Center },
+                { x: Near(Left, 0.6), y: Top });
 
         ctx.addRevJoint('t2', 'waist', 'midsection',
                 { x: Center, y: Top },
@@ -335,7 +346,6 @@ define(['backbone', 'box2dweb', 'underscore', 'config'], function(Backbone, Box2
                 { x: Center, y: Center });
 
 
-
         // TODO separate this into function
         // The order of these limits is the reverse of my assumption
         joints.neck_1.SetLimits(0 * Math.PI, 0 * Math.PI);
@@ -346,6 +356,11 @@ define(['backbone', 'box2dweb', 'underscore', 'config'], function(Backbone, Box2
 
         joints.knee_1.SetLimits(0, Math.PI);
         joints.knee_1.EnableLimit(true);
+
+        joints.elbow_1.SetLimits(-0.8*Math.PI, 0);
+        joints.elbow_1.EnableMotor(true);
+        joints.elbow_1.SetMaxMotorTorque(500);
+        joints.elbow_1.EnableLimit(true);
 
         joints.t1.SetLimits(-0.3 * Math.PI, 0.1 * Math.PI);
         joints.t1.EnableLimit(true);
@@ -371,17 +386,13 @@ define(['backbone', 'box2dweb', 'underscore', 'config'], function(Backbone, Box2
         chestPos.Add(midPos);
         bodies.chest.SetPosition(chestPos);
 
-        // TODO review this
-        // oddly enough this is helping the arm positioning
-        var sillyForce = new b2Vec2(-1, 1);
-        bodies.midsection.ApplyForce(sillyForce, new b2Vec2(0, 0));
-
         var uaPos = new b2Vec2(-this.inches(2), 0);
         uaPos.Add(chestPos);
-        bodies.upperArm.SetPosition(uaPos);
+        bodies.upperArm.SetPositionAndAngle(uaPos, Math.PI/2);
         var laPos = new b2Vec2(-this.inches(2), 0);
         laPos.Add(midPos);
-        bodies.lowerArm.SetPosition(laPos);
+        bodies.elbow.SetPosition(laPos);
+        bodies.lowerArm.SetPositionAndAngle(laPos, -Math.PI/2);
 
 
         var ulx = parts.upperLeg.size.x;
@@ -435,10 +446,11 @@ define(['backbone', 'box2dweb', 'underscore', 'config'], function(Backbone, Box2
     // call with context
     function bindWrist() {
         if(!this.chairParts.initted || !this.humanParts.initted) return;
-        var wheel = this.chairParts.wheel, lowerArm = this.humanParts.lowerArm;
-        return getRevJoint.call(this, this.humanPartBodies.lowerArm, this.chairPartBodies.wheel, 
-                { x: 0, y: lowerArm.size.y/2 },
-                { x: 0, y: -wheel.size.r }, true);
+        var wheel = this.chairParts.wheel; 
+        //return getWeldJoint.call(this, this.humanPartBodies.hand, this.chairPartBodies.wheel, 
+        return getRevJoint.call(this, this.humanPartBodies.hand, this.chairPartBodies.wheel, 
+                { x: 0, y: 0 },
+                { x: 0, y: -wheel.size.r });
     }
 
     Physics.prototype.weldFootRest = function() {

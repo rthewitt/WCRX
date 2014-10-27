@@ -88,17 +88,44 @@ define(['jquery', 'underscore', 'backbone', '../graphics', 'util/dom-util'], fun
 
             var chair = this.options.chairModel,
                 seatWidth = chair.get('seatWidth'),
+                axleGap = chair.get('axleGap'),
                 raiseBarLength = chair.get('raiseBarLength'),
+                foamHeight = chair.get('foamHeight'),
+                wheelWidth = chair.get('wheelWidth'),
                 wheelDiameter = chair.get('wheelDiameter');
 
             var basePos = this.basePos;
-            var wheelWidth = 3; // handle, tire, spokes...
+            var seatPos = {
+                x: this.basePos.x,
+                y: this.basePos.y - norm(wheelDiameter/2 + raiseBarLength + foamHeight - 0.45) 
+            }
 
-            cf.leftWheel.pos.x = basePos.x - norm(seatWidth/2 + wheelWidth);
+            cf.leftWheel.pos.x = basePos.x - norm(cf.frame.size.x/2 + wheelWidth);
             cf.leftWheel.pos.y = basePos.y - norm(wheelDiameter);
 
-            cf.rightWheel.pos.x = basePos.x + norm(seatWidth/2);
+            cf.rightWheel.pos.x = basePos.x + norm(seatWidth/2 + axleGap);
             cf.rightWheel.pos.y = basePos.y - norm(wheelDiameter);
+
+            cf.leftWheelFr.pos.x = basePos.x - norm(seatWidth/2 + 0.8 * cf.leftWheelFr.size.x);
+            cf.leftWheelFr.pos.y = basePos.y - norm(cf.leftWheelFr.size.y);
+
+            cf.rightWheelFr.pos.x = basePos.x + norm(seatWidth/2 - (0.2 * cf.rightWheelFr.size.x));
+            cf.rightWheelFr.pos.y = basePos.y - norm(cf.rightWheelFr.size.y);
+
+            cf.seatBack.pos.x = seatPos.x - norm(seatWidth)/2;
+            cf.seatBack.pos.y = seatPos.y + norm(foamHeight) - norm(cf.seatBack.size.y);
+
+            cf.foam.pos.x = seatPos.x - norm(seatWidth)/2;
+            cf.foam.pos.y = seatPos.y - norm(foamHeight);
+
+            cf.frame.pos.x = seatPos.x - norm(cf.frame.size.x/2);
+            cf.frame.pos.y = seatPos.y + norm(foamHeight) - norm(0.15 * cf.frame.size.y); // seat starts below image top
+
+            cf.leftHBar.pos.x = seatPos.x - norm(seatWidth/2 + cf.leftHBar.size.x);
+            cf.leftHBar.pos.y = seatPos.y + norm(foamHeight) - norm(cf.leftHBar.size.y);
+
+            cf.rightHBar.pos.x = seatPos.x + norm(seatWidth/2);
+            cf.rightHBar.pos.y = seatPos.y + norm(foamHeight) - norm(cf.leftHBar.size.y);
         },
 
         positionPerson: function() {
@@ -135,7 +162,7 @@ define(['jquery', 'underscore', 'backbone', '../graphics', 'util/dom-util'], fun
 
             var seatPos = {
                 x: this.basePos.x,
-                y: this.basePos.y - norm(wheelDiameter/2 + raiseBarLength + foamHeight) 
+                y: this.basePos.y - norm(wheelDiameter/2 + raiseBarLength + foamHeight - 0.45) 
             }
 
             pf.waist.pos.x = seatPos.x - norm(pf.waist.size.x/2);

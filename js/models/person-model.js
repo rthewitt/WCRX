@@ -91,24 +91,29 @@ define(['jquery', 'underscore', 'backbone', './image-data', '../config'], functi
                 footLength = this.get('footLength'),
                 footWidth = this.get('footWidth');
 
-            var sRad = upperArmWidth/2;
 
             var aboveWaist = torsoLength - upperLegWidth,
                 mh = aboveWaist * (6.8/17), // experimental ratio
                 ch = aboveWaist - mh;
 
-            var kRad = lowerLegWidth/2; 
+            var sRad = upperArmWidth/2; // shoulder
+            var eRad = upperArmWidth/2.5; // elbow
+            var kRad = lowerLegWidth/2; // knee
+            var wRad = lowerLegWidth/4; // wrist
             var hack = 1; // leg offset
 
             // side 
             ps.shoulder.size = { r: sRad }; 
-            ps.upperArm.size = { x: upperArmWidth, y: upperArmLength };
-            ps.lowerArm.size = { x: lowerArmWidth, y: lowerArmLength };
+            ps.upperArm.size = { x: upperArmWidth, y: upperArmLength - sRad };
+            ps.lowerArm.size = { x: lowerArmWidth, y: lowerArmLength - eRad - wRad };
             ps.waist.size = { x: upperLegWidth, y: upperLegWidth };
             ps.midsection.size = { r: mh/2 };
             ps.chest.size = { x: trunkDepth, y: ch };
             ps.head.size = { x: 9, y: 7 * 3/2 };
             ps.neck.size = { x: trunkDepth / 2.5, y: 6 }; // FIXME
+            ps.elbow.size = { r: eRad };
+            ps.wrist.size = { r: wRad };
+            ps.hand.size = { x: 5*wRad, y: 5*wRad }; // FIXME
             ps.knee.size = { r: kRad };
             ps.foot.size = { x: footWidth, y: footLength }; 
             ps.upperLeg.size = { x: upperLegLength - kRad - hack, y: upperLegWidth };
@@ -119,8 +124,8 @@ define(['jquery', 'underscore', 'backbone', './image-data', '../config'], functi
                 fch = frAboveWaist - fmh;
 
             // front
-            pf.head.size = { x: 9, y: 7 * 3/2 };
-            pf.neck.size = { x: 7.5, y: 6 }; // FIXME
+            pf.head.size = { x: 8, y: 7 * 3/2 };
+            pf.neck.size = { x: 8 * 5/8, y: 6 }; // FIXME
             pf.chest.size = { x: chestWidth, y: fch };
             pf.midsection.size = { x: chestWidth * 0.75, y: fmh * 1.25 }; // extension for overlap
             pf.waist.size = { x: hipWidth, y: upperLegWidth }; 

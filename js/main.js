@@ -71,11 +71,17 @@ require([ 'jquery', 'backbone',
                 var sideView = new SideView(shared);
                 var frontView = new FrontView(shared);
 
-                RegionManager.show(chairControls);
+                RegionManager.show(personControls);
                 frontView.render();
                 sideView.render();
 
                 $(document).ready(function($) {
+
+                    dispatcher.on('measured:person', function() {
+                        $('#btn-cmx').prop('disabled', false);
+                    });
+
+                    $('#btn-pmx').addClass('active');
 
                     $('#btn-reset').click(function() {
                         dispatcher.trigger('reset');
@@ -85,10 +91,15 @@ require([ 'jquery', 'backbone',
                             dispatcher.trigger('snapshot');
                         }
                     });
-                    $('#btn-pmx').click(function() {
+                    $('#btn-pmx').click(function(e) {
+                        if($(this).hasClass('active')) return;
+                        $('#btn-cmx').removeClass('active');
+                        $('#btn-pmx').addClass('active');
                         RegionManager.show(personControls);
                     });
                     $('#btn-cmx').click(function() {
+                        $('#btn-pmx').removeClass('active');
+                        $('#btn-cmx').addClass('active');
                         RegionManager.show(chairControls);
                     });
                     $('#btn-chair').click(function() {

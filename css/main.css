@@ -38,11 +38,11 @@ span.customSelectFocus {
 #temp-controls {
     width: 100%
 }
-#human-side, #chair-side {
-    float:left;
+#human-front, #chair-front {
+    float: left;
     margin-left: 20px;
 }
-#human-front, #chair-front {
+#human-side, #chair-side {
     float: right;
     margin-right: 20px;
 }
@@ -91,6 +91,9 @@ span.customSelectFocus {
     border: solid 3px #173a61;
     box-shadow: inset 0 0 0 1px #90adcd;
 }
+.mxrx input[type="text"].unset {
+    border-color: #b71e06;
+}
 .tmp-internal h3 {
     color: #5a8ac0;
     font-weight: bold;
@@ -135,7 +138,7 @@ h3 {
     color: #173a61;
     font-weight: normal;
 }
-.btn-box {
+.button-holder input {
     -moz-box-shadow: inset 1px 1px 0px 0px #90adcd;
     -webkit-box-shadow: inset 1px 1px 0px 0px #90adcd;
     -box-shadow: inset 1px 1px 0px 0px #90adcd;
@@ -165,6 +168,11 @@ h3 {
     line-height: 35px;
     margin: 5px;
 }
+
+.button-holder input.active {
+    background-color: #2b4f77;
+}
+
 .btn-box:hover {
     background-color: #173a61;
 }

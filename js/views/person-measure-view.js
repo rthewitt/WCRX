@@ -6,13 +6,15 @@ define(["jquery", "underscore", "backbone", "text!humanTemplate"], function($, _
 
         events: {
             "change input":"changed",
-            "change select":"changed"
+            "blur input":"blurred"
         },
 
         initialize: function(options) {
             this.dispatcher = options.dispatcher;
             this.model = options.personModel;
+            this.modified = false;
             _.bindAll(this, "changed");
+            _.bindAll(this, "blurred");
             this.model.resize();
         },
         
@@ -37,12 +39,28 @@ define(["jquery", "underscore", "backbone", "text!humanTemplate"], function($, _
         render: function() {
             var ct = _.template(templateH);
             this.$el.html(ct(this.model.attributes));
+            if(!this.modified) {
+                this.$('input').addClass('unset');
+                this.$('select').addClass('unset');
+                this.modified = true;
+            }
             this.decorate();
+        },
+
+        blurred: function(evt) {
+            // do not require measure change 
+            // default may be accurate
+            var visited = evt.currentTarget;
+            $(visited).removeClass('unset');
+            if(this.$('input.unset').length === 0) {
+                // tell application that we can progress
+                this.dispatcher.trigger('measured:person');
+            }
         },
 
         changed: function(evt) {
             var changed = evt.currentTarget;
-            var value = $(evt.currentTarget).val();
+            var value = $(changed).val();
             var mx = this.model.set(changed.name, parseFloat(value));
             this.model.resize();
             this.dispatcher.trigger('modified:person');

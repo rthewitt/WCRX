@@ -34,12 +34,13 @@ define(['box2dweb', 'config'], function(Box2d, config) {
                 console.log('graphics: '+imgData.name);
                 context.drawImage(imgData.img, x, y, imgData.dims.x, imgData.dims.y);
             }
+            /*
             context.beginPath();
             context.lineWidth = '6';
             context.strokeStyle = imgData.type === 'person' ? 'red' : 'green';
             context.rect(x, y, imgData.dims.x, imgData.dims.y);
             context.stroke();
-
+            */
         }
     }
 

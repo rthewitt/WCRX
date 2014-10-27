@@ -60,6 +60,28 @@ define(['./scaled-polygons', 'backbone'], function(pollyColl, Backbone){
             cat: HM_SOLID,
             mask: armyMask
         },
+        elbow: {
+            name: 'elbow',
+            type: 'circle',
+            pos: { z: 4 },
+            cat: HM_JOINT,
+            //mask: personMask
+            mask: armyMask
+        },
+        wrist: {
+            name: 'wrist',
+            type: 'circle',
+            pos: { z: 7 },
+            cat: HM_JOINT,
+            mask: armyMask
+        },
+        hand: {
+            name: 'hand',
+            type: 'box',
+            pos: { z: 8 },
+            cat: HM_JOINT,
+            mask: armyMask
+        },
         waist: {
             name: 'waist',
             type: 'poly',
@@ -117,47 +139,82 @@ define(['./scaled-polygons', 'backbone'], function(pollyColl, Backbone){
         }
     };
 
-    // TODO merge data
     var personFront = {
         head: {
             name: 'head',
             type: 'person',
-            pos: { z: 1 }
+            pos: { z: 4 }
         },
         neck: {
             name: 'neck',
             type: 'person',
-            pos: { z: 0 }
+            pos: { z: 3 }
         },
         chest: {
             name: 'chest',
             type: 'person',
-            pos: { z: 2 }
+            pos: { z: 5 }
         },
         midsection: {
             name: 'midsection',
             type: 'person',
-            pos: { z: 0 }
+            pos: { z: 3 }
         },
         waist: {
             name: 'waist',
             type: 'person',
-            pos: { z: 1 }
+            pos: { z: 4 }
         },
         leftLeg: {
             name: 'leg',
             type: 'person',
-            pos: { z: 2 }
+            pos: { z: 5 }
         },
         rightLeg: {
             name: 'leg',
             type: 'person',
             flip: true,
-            pos: { z: 2 }
+            pos: { z: 5 }
         }
     };
 
     var chairFront = {
+        leftWheelFr: {
+            name: 'support-wheel',
+            type: 'chair',
+            pos: { z: 1 }
+        },
+        rightWheelFr: {
+            name: 'support-wheel',
+            type: 'chair',
+            flip: true,
+            pos: { z: 1 }
+        },
+        seatBack: {
+            name: 'back-rest',
+            type: 'chair',
+            pos: { z: 0 }
+        },
+        foam: {
+            name: 'foam',
+            type: 'chair',
+            pos: { z: 1 },
+        },
+        frame: {
+            name: 'frame',
+            type: 'chair',
+            pos: { z: 2 }
+        },
+        leftHBar: {
+            name: 'handlebar',
+            type: 'chair',
+            pos: { z: 0 }
+        },
+        rightHBar: {
+            name: 'handlebar',
+            type: 'chair',
+            pos: { z: 0 }
+        },
         leftWheel: {
             name: 'wheel',
             type: 'chair',
@@ -166,6 +223,7 @@ define(['./scaled-polygons', 'backbone'], function(pollyColl, Backbone){
         rightWheel: {
             name: 'wheel',
             type: 'chair',
+            flip: true,
             pos: { z: 0 }
         }
     };
