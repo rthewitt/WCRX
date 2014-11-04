@@ -132,6 +132,7 @@ span.customSelectFocus {
 .c-wrap {
     margin-left: auto;
     margin-right: auto;
+    //position: relative;
 }
 h3 {
     margin: 0px;
@@ -179,7 +180,7 @@ h3 {
 canvas {
     display: inline-block;
     margin: 15px auto;
-    background-color:#5a8ac0;
+    position: absolute;
 }
 #container {
     position: absolute;
