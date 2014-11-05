@@ -78,7 +78,8 @@ require([ 'jquery', 'backbone',
                 $(document).ready(function($) {
 
                     var bgImg = new Image();
-                    bgImg.src = "http://cdn.londonandpartners.com/l-and-p/assets/business/45356-640x360-london_eye_hero.jpg";
+                    //bgImg.src = "http://cdn.londonandpartners.com/l-and-p/assets/business/45356-640x360-london_eye_hero.jpg";
+                    bgImg.src = "https://www.dropbox.com/s/frly404ss21viyg/Photo%20Nov%2004%2C%205%2056%2041%20PM.jpg?dl=0";
                     var bgCv = $('#bg-canvas');
                     bgCv.css({ 'right': '20%', 'z-index': 0 })
                     bgCv[0].width = shared.width;
