@@ -48,7 +48,7 @@ define(['jquery', 'underscore', 'backbone', '../graphics', '../phys', '../util/d
 
             $(sideCvs).on('mousemove', this.onMouseMove);
             $(sideCvs).on('mouseup', this.onMouseUp);
-            $(sideCvs).on('touchend', function(e) {
+            $(sideCvs).on('touchend touchcancel', function(e) {
                 alert('touch end received');
             });
             $(sideCvs).on('touchstart', function(e) {
