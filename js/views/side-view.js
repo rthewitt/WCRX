@@ -47,6 +47,7 @@ define(['jquery', 'underscore', 'backbone', '../graphics', '../phys', '../util/d
             var self = this;
 
             $(sideCvs).on('mousemove', this.onMouseMove);
+            $(sideCvs).on('touchmove', this.onMouseMove);
             $(sideCvs).on('mouseup', this.onMouseUp);
             $(sideCvs).on('touchend touchcancel', function(e) {
                 alert('touch end received');
@@ -135,6 +136,7 @@ define(['jquery', 'underscore', 'backbone', '../graphics', '../phys', '../util/d
         },
 
         onMouseMove: function(e) {
+            alert('moved');
             var physics = this.physics;
             mouseX = (e.clientX - this.canvasPos.x) / this.options.conf.PTM;
             mouseY = (e.clientY - this.canvasPos.y) / this.options.conf.PTM;
