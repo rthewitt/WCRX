@@ -49,6 +49,7 @@ define(['jquery', 'underscore', 'backbone', '../graphics', '../phys', '../util/d
             $(sideCvs).on('mousemove', this.onMouseMove);
             $(sideCvs).on('mouseup', this.onMouseUp);
             $(sideCvs).on('mousedown', function(e) {
+                alert('testing touch');
                 isMouseDown = true;
             });
 
