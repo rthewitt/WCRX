@@ -57,6 +57,7 @@ define(['jquery', 'underscore', 'backbone', '../graphics', '../phys', '../util/d
             });
             $(sideCvs).on('mousedown', function(e) {
                 isMouseDown = true;
+                e.preventDefault();
             });
 
             this.canvasPos = domUtil.getElementPos(sideCvs);
