@@ -135,6 +135,7 @@ define(['jquery', 'underscore', 'backbone', '../graphics', '../phys', '../util/d
         },
 
         onMouseMove: function(e) {
+            e.preventDefault();
             alert('moved');
             var physics = this.physics;
             mouseX = (e.clientX - this.canvasPos.x) / this.options.conf.PTM;
