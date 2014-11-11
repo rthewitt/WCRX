@@ -49,7 +49,6 @@ define(['jquery', 'underscore', 'backbone', '../graphics', '../phys', '../util/d
             $(sideCvs).on('mousemove', this.onMouseMove);
             $(sideCvs).on('mouseup', this.onMouseUp);
             $(sideCvs).on('mousedown', function(e) {
-                alert('testing touch');
                 isMouseDown = true;
             });
 
@@ -139,6 +138,7 @@ define(['jquery', 'underscore', 'backbone', '../graphics', '../phys', '../util/d
         },
 
         onMouseUp: function() {
+            alert('testing touch release - md was: '+isMouseDown);
             var physics = this.physics;
             if(physics.mouseJoint) 
                 physics.destroyMouseJoint();
