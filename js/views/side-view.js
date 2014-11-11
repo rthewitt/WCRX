@@ -57,6 +57,7 @@ define(['jquery', 'underscore', 'backbone', '../graphics', '../phys', '../util/d
             });
             $(sideCvs).on('mousedown', function(e) {
                 e.preventDefault();
+                alert('down');
                 isMouseDown = true;
             });
 
