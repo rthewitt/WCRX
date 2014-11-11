@@ -51,6 +51,9 @@ define(['jquery', 'underscore', 'backbone', '../graphics', '../phys', '../util/d
             $(sideCvs).on('touchend', function(e) {
                 alert('touch end received');
             });
+            $(sideCvs).on('touchstart', function(e) {
+                e.preventDefault();
+            });
             $(sideCvs).on('mousedown', function(e) {
                 isMouseDown = true;
             });
@@ -141,7 +144,7 @@ define(['jquery', 'underscore', 'backbone', '../graphics', '../phys', '../util/d
         },
 
         onMouseUp: function() {
-            alert('testing touch release - md was: '+isMouseDown);
+            alert('release - md was: '+isMouseDown);
             var physics = this.physics;
             if(physics.mouseJoint) 
                 physics.destroyMouseJoint();
