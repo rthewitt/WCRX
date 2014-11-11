@@ -37,6 +37,7 @@ define(['jquery', 'underscore', 'backbone', '../graphics', '../phys', '../util/d
 
         render: function() {
             var sideCvs = document.createElement('canvas');
+            $(sideCvs).css({ 'right': '20%', 'z-index': 2 });
             sideCvs.id = 'canvas-side';
             // canvas coordinates are specified by attributes
             // style heith/width are not used
@@ -47,7 +48,7 @@ define(['jquery', 'underscore', 'backbone', '../graphics', '../phys', '../util/d
 
             $(sideCvs).on('mousemove', this.onMouseMove);
             $(sideCvs).on('mouseup', this.onMouseUp);
-            $(sideCvs).on('mousedown', function() {
+            $(sideCvs).on('mousedown', function(e) {
                 isMouseDown = true;
             });
 

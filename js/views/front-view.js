@@ -19,6 +19,8 @@ define(['jquery', 'underscore', 'backbone', '../graphics', 'util/dom-util'], fun
 
         render: function() {
             var frontCvs = document.createElement('canvas');
+            // TODO use class
+            $(frontCvs).css({ 'left': '20%', 'z-index': 2 });
             frontCvs.id = 'canvas-front';
             // style heith/width are not used
             this.basePos = { 

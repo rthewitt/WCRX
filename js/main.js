@@ -78,7 +78,6 @@ require([ 'jquery', 'backbone',
                 $(document).ready(function($) {
 
                     var bgImg = new Image();
-                    //bgImg.src = "http://cdn.londonandpartners.com/l-and-p/assets/business/45356-640x360-london_eye_hero.jpg";
                     bgImg.src = "images/bg.jpg";
                     var bgCv = $('#bg-canvas');
                     bgCv.css({ 'right': '20%', 'z-index': 0 })
