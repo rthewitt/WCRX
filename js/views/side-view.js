@@ -52,6 +52,7 @@ define(['jquery', 'underscore', 'backbone', '../graphics', '../phys', '../util/d
                 alert('touch end received');
             });
             $(sideCvs).on('touchstart', function(e) {
+                alert('touch started');
                 e.preventDefault();
             });
             $(sideCvs).on('mousedown', function(e) {
