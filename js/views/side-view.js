@@ -54,11 +54,9 @@ define(['jquery', 'underscore', 'backbone', '../graphics', '../phys', '../util/d
             });
             $(sideCvs).on('touchstart', function(e) {
                 alert('touch started');
-                e.preventDefault();
             });
             $(sideCvs).on('mousedown', function(e) {
                 isMouseDown = true;
-                e.preventDefault();
             });
 
             this.canvasPos = domUtil.getElementPos(sideCvs);
