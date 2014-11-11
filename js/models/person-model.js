@@ -106,6 +106,7 @@ define(['jquery', 'underscore', 'backbone', './image-data', '../config'], functi
             ps.shoulder.size = { r: sRad }; 
             ps.upperArm.size = { x: upperArmWidth, y: upperArmLength - sRad };
             ps.lowerArm.size = { x: lowerArmWidth, y: lowerArmLength - eRad - wRad };
+            //ps.lowerArm.size = { x: lowerArmWidth, y: lowerArmLength 
             ps.waist.size = { x: upperLegWidth, y: upperLegWidth };
             ps.midsection.size = { r: mh/2 };
             ps.chest.size = { x: trunkDepth, y: ch };

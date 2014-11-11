@@ -447,10 +447,10 @@ define(['backbone', 'box2dweb', 'underscore', 'config'], function(Backbone, Box2
     function bindWrist() {
         if(!this.chairParts.initted || !this.humanParts.initted) return;
         var wheel = this.chairParts.wheel; 
-        //return getWeldJoint.call(this, this.humanPartBodies.hand, this.chairPartBodies.wheel, 
-        return getRevJoint.call(this, this.humanPartBodies.hand, this.chairPartBodies.wheel, 
+        //return getRevJoint.call(this, this.humanPartBodies.hand, this.chairPartBodies.wheel, 
+        return getRevJoint.call(this, this.humanPartBodies.wrist, this.chairPartBodies.wheel, 
                 { x: 0, y: 0 },
-                { x: 0, y: -wheel.size.r });
+                { x: 0, y: -wheel.size.r + this.inches(1.5) });
     }
 
     Physics.prototype.weldFootRest = function() {

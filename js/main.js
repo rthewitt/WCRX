@@ -77,6 +77,56 @@ require([ 'jquery', 'backbone',
 
                 $(document).ready(function($) {
 
+                    var bgImg = new Image();
+                    //bgImg.src = "http://cdn.londonandpartners.com/l-and-p/assets/business/45356-640x360-london_eye_hero.jpg";
+                    bgImg.src = "images/bg.jpg";
+                    var bgCv = $('#bg-canvas');
+                    bgCv.css({ 'right': '20%', 'z-index': 0 })
+                    bgCv[0].width = shared.width;
+                    bgCv[0].height = shared.height;
+                    var bgCtx = bgCv[0].getContext('2d');
+
+                    var bgX = 0, 
+                        bgY = 0, 
+                        zX, zY; // zoom
+
+                    function drawBg(x, y, dx, dy) {
+                        bgCtx.clearRect(0, 0, bgCtx.canvas.width, bgCtx.canvas.height);
+                        bgCtx.drawImage(bgImg, bgX, bgY, dx, dy);
+                    }
+
+                    $(bgImg).on('load', function(){ 
+                        zX = bgImg.width;
+                        zY = bgImg.height;
+                        drawBg(0, 0, zX, zY);
+                    })
+
+                    $(document).keydown(function(e) {
+                        switch(e.keyCode) {
+                            case 37: // left
+                                bgX -= 5;
+                                break;
+                            case 38: // up
+                                bgY -= 5;
+                                break;
+                            case 39: // right
+                                bgX += 5;
+                                break;
+                            case 40: // down
+                                bgY += 5;
+                                break;
+                            case 90: // zoom (z)
+                                zX += 5;
+                                zY += 5;
+                                break;
+                            case 88: // zoom out (x)
+                                zX -= 5;
+                                zY -= 5;
+                                break;
+                        }
+                        drawBg(bgX, bgY, zX, zY);
+                    });
+
                     dispatcher.on('measured:person', function() {
                         $('#btn-cmx').prop('disabled', false);
                     });
