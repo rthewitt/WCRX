@@ -2,6 +2,7 @@ require.config({
     paths: {
         "jquery": ["http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min", 
                     "libs/jquery/dist/jquery.min"],
+        "jqueryui": "libs/jquery-ui/jquery-ui.min",
         "jquery.customSelect": "libs/jquery.customSelect/jquery.customSelect.min",
         "underscore": "libs/underscore/underscore",
         "backbone": "libs/backbone/backbone",
@@ -17,6 +18,10 @@ require.config({
         "backbone": {
             deps: ["jquery", "underscore"],
             exports: "Backbone"
+        },
+        "jqueryui": {
+            deps: ["jquery"],
+            exports: "jQuery"
         },
         "jquery.customSelect": {
             deps: ["jquery"]
@@ -35,7 +40,8 @@ require([ 'jquery', 'backbone',
         'region-manager',
         './config',
         // discard jquery decorators
-        'jquery.customSelect'
+        'jquery.customSelect',
+        'jqueryui'
         ], function($, Backbone, ImageData, ChairModel, PersonModel, SideView,
             FrontView, ChairControls, PersonControls, RegionManager, config) { 
 
@@ -81,7 +87,23 @@ require([ 'jquery', 'backbone',
                 });
 
                 $(document).ready(function($) {
+                    dispatcher.on('side:bgimage', function(dims) {
+                        console.log('loaded bgimage with dims: '+JSON.stringify(dims));
 
+                        $('#slider').slider({
+                            min: 0.2,
+                            max: 5,
+                            value: 1,
+                            step: 0.05,
+                            slide: function(ev, ui) {
+                                console.log('slider value: '+ ui.value);
+                                sideView.sizeBGImage({
+                                    x: dims.x * ui.value,
+                                    y: dims.y * ui.value,
+                                });
+                            }
+                        });
+                    });
 
                     dispatcher.on('measured:person', function() {
                         $('#btn-cmx').prop('disabled', false);

@@ -24,6 +24,7 @@ define(['jquery', 'underscore', 'backbone', '../graphics', '../phys', '../util/d
 
             this.options = options;
             this.physics = physics;
+            this.dispatcher = options.dispatcher;
 
             this.loadBGImage(); // should sep into another view...
         },
@@ -152,9 +153,13 @@ define(['jquery', 'underscore', 'backbone', '../graphics', '../phys', '../util/d
             };
 
 
-            $(bgImg).on('load', this.drawBg);
 
             var self = this;
+            $(bgImg).on('load', function() {
+                self.drawBg();
+                self.dispatcher.trigger('side:bgimage', { x: bgImg.width, y: bgImg.height });
+            });
+
             var bg = this.bg;
             $(document).keydown(function(e) {
                 switch(e.keyCode) {
@@ -193,6 +198,12 @@ define(['jquery', 'underscore', 'backbone', '../graphics', '../phys', '../util/d
 
             bg.ctx.clearRect(0, 0, bg.ctx.canvas.width, bg.ctx.canvas.height);
             bg.ctx.drawImage(bg.img, bg.x, bg.y, bg.width, bg.height);
+        },
+
+        sizeBGImage: function(dims) {
+            this.bg.width = dims.x;
+            this.bg.height = dims.y;
+            this.drawBg();
         },
 
         onMouseMove: function(e) {

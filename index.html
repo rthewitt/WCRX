@@ -1,8 +1,10 @@
 <html>
    <head>
       <title>Wheelchair Rx</title>
-        <script data-main="js/main" src="js/libs/requirejs/require.js"></script>
+        <link rel="stylesheet" href="http://code.jquery.com/ui/1.11.2/themes/smoothness/jquery-ui.css">
         <link rel="stylesheet" type="text/css" href="css/main.css" />
+        <!--<link rel="stylesheet" type="text/css" href="css/slider.css" />-->
+        <script data-main="js/main" src="js/libs/requirejs/require.js"></script>
    </head>
    <body>
    <div id="container">
@@ -18,12 +20,15 @@
               <canvas id="bg-canvas" />
           </div>
       </div>
+      <div id="slider"></div>
      <div class="button-holder">
          <input id="btn-images" class="btn-box" type="button"  value="Images" />
          <input id="btn-skeleton" class="btn-box" type="button"  value="Skeleton" />
+         <!--
          <input id="btn-person" class="btn-box" type="button"  value="Person" />
          <input id="btn-chair" class="btn-box" type="button"  value="Chair" />
          <input id="btn-snapshot" class="btn-box" type="button"  value="Snapshot" />
+         -->
          <input id="btn-reset" class="btn-box" type="button"  value="Reset" />
      </div>
      <div class="button-holder">
