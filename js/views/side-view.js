@@ -13,6 +13,7 @@ define(['jquery', 'underscore', 'backbone', '../graphics', '../phys', '../util/d
             _.bindAll(this, "reset");
             _.bindAll(this, "onMouseMove");
             _.bindAll(this, "onMouseUp");
+            _.bindAll(this, "drawBg");
 
             this.listenTo(options.dispatcher, 'snapshot', this.snapshot);
             this.listenTo(options.dispatcher, 'reset', this.reset);
@@ -46,12 +47,16 @@ define(['jquery', 'underscore', 'backbone', '../graphics', '../phys', '../util/d
             sideCvs.width = this.options.width;
             sideCvs.height = this.options.height;
             this.$el.append(sideCvs);
-            var self = this;
 
             $(sideCvs).on('mousemove', this.onMouseMove);
             $(sideCvs).on('mouseup', this.onMouseUp);
             $(sideCvs).on('mousedown', function(e) {
                 isMouseDown = true;
+            });
+            var self = this;
+            $(sideCvs).on('touchmove', function(e) {
+                alert('e: '+e.changedTouches[0].pageX+', '+e.changedTouches[0].pageY+
+                    '\nbg: '+self.bg.x+', '+self.bg.y);
             });
 
             this.canvasPos = domUtil.getElementPos(sideCvs);
@@ -135,54 +140,56 @@ define(['jquery', 'underscore', 'backbone', '../graphics', '../phys', '../util/d
             bgCv.css({ 'right': '20%', 'z-index': 0 })
             bgCv[0].width = this.options.width;
             bgCv[0].height = this.options.height;
-            var bgCtx = bgCv[0].getContext('2d');
 
-            var isActive = false;
-            var bgX = 0, 
-                bgY = 0, 
-                zX, zY; // zoom
+            this.bg = {
+                img: bgImg,
+                ctx: bgCv[0].getContext('2d'),
+                x: 0,
+                y: 0
+            };
 
-            function drawBg(x, y, dx, dy) {
-                bgCtx.clearRect(0, 0, bgCtx.canvas.width, bgCtx.canvas.height);
-                bgCtx.drawImage(bgImg, bgX, bgY, dx, dy);
-            }
 
-            $(bgImg).on('load', function(){ 
-                zX = bgImg.width;
-                zY = bgImg.height;
-                drawBg(0, 0, zX, zY);
-            })
+            $(bgImg).on('load', this.drawBg);
 
+            var self = this;
+            var bg = this.bg;
             $(document).keydown(function(e) {
                 switch(e.keyCode) {
                     case 37: // left
-                        bgX -= 5;
+                        bg.x -= 5;
                         break;
                     case 38: // up
-                        bgY -= 5;
+                        bg.y -= 5;
                         break;
                     case 39: // right
-                        bgX += 5;
+                        bg.x += 5;
                         break;
                     case 40: // down
-                        bgY += 5;
+                        bg.y += 5;
                         break;
+
+                    // TODO make these ratios
                     case 90: // zoom (z)
-                        zX += 5;
-                        zY += 5;
+                        bg.width += 5;
+                        bg.height += 5;
                         break;
                     case 88: // zoom out (x)
-                        zX -= 5;
-                        zY -= 5;
+                        bg.width -= 5;
+                        bg.height -= 5;
                         break;
                 }
-                drawBg(bgX, bgY, zX, zY);
+                self.drawBg();
             });
+        },
 
-            //$(bgImg).on('touchstart', function() {
-            $(bgImg).on('click', function() {
-                bgX -= 5;
-            });
+        drawBg: function() {
+            var bg = this.bg;
+
+            if(typeof bg.width === 'undefined') bg.width = bg.img.width;
+            if(typeof bg.height === 'undefined') bg.height = bg.img.height;
+
+            bg.ctx.clearRect(0, 0, bg.ctx.canvas.width, bg.ctx.canvas.height);
+            bg.ctx.drawImage(bg.img, bg.x, bg.y, bg.width, bg.height);
         },
 
         onMouseMove: function(e) {
