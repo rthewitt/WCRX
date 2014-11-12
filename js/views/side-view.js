@@ -54,6 +54,9 @@ define(['jquery', 'underscore', 'backbone', '../graphics', '../phys', '../util/d
                 isMouseDown = true;
             });
             var self = this;
+            $(sideCvs).on('touchstart', function(e) {
+                alert('started');
+            });
             $(sideCvs).on('touchmove', function(e) {
                 alert('e: '+e.changedTouches[0].pageX+', '+e.changedTouches[0].pageY+
                     '\nbg: '+self.bg.x+', '+self.bg.y);
