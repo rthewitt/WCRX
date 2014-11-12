@@ -179,7 +179,8 @@ define(['jquery', 'underscore', 'backbone', '../graphics', '../phys', '../util/d
                 drawBg(bgX, bgY, zX, zY);
             });
 
-            $(bgImg).on('touchstart', function() {
+            //$(bgImg).on('touchstart', function() {
+            $(bgImg).on('click', function() {
                 bgX -= 5;
             });
         },
