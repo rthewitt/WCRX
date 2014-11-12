@@ -75,6 +75,11 @@ require([ 'jquery', 'backbone',
                 frontView.render();
                 sideView.render();
 
+                // clear swipe gestures
+                document.addEventListener('touchmove', function(e) {
+                    e.preventDefault();
+                });
+
                 $(document).ready(function($) {
 
 

@@ -54,12 +54,12 @@ define(['jquery', 'underscore', 'backbone', '../graphics', '../phys', '../util/d
                 isMouseDown = true;
             });
             var self = this;
-            $(sideCvs).on('touchstart', function(e) {
-                alert('started');
-            });
+            $(sideCvs).on('touchstart', function(e) { e.preventDefault(); });
             $(sideCvs).on('touchmove', function(e) {
-                alert('e: '+e.changedTouches[0].pageX+', '+e.changedTouches[0].pageY+
-                    '\nbg: '+self.bg.x+', '+self.bg.y);
+                var ev = e.originalEvent;
+                self.bg.x = ev.changedTouches[0].pageX - self.canvasPos.x - self.options.width/2;
+                self.bg.y = ev.changedTouches[0].pageY - self.canvasPos.y - self.options.height/2;
+                self.drawBg();
             });
 
             this.canvasPos = domUtil.getElementPos(sideCvs);
