@@ -23,6 +23,8 @@ define(['jquery', 'underscore', 'backbone', '../graphics', '../phys', '../util/d
 
             this.options = options;
             this.physics = physics;
+
+            this.loadBGImage(); // should sep into another view...
         },
 
         // cleanup
@@ -47,17 +49,8 @@ define(['jquery', 'underscore', 'backbone', '../graphics', '../phys', '../util/d
             var self = this;
 
             $(sideCvs).on('mousemove', this.onMouseMove);
-            $(sideCvs).on('touchmove', this.onMouseMove);
             $(sideCvs).on('mouseup', this.onMouseUp);
-            $(sideCvs).on('touchend touchcancel', function(e) {
-                alert('touch end received');
-            });
-            $(sideCvs).on('touchstart', function(e) {
-                alert('touch started');
-            });
             $(sideCvs).on('mousedown', function(e) {
-                e.preventDefault();
-                alert('down');
                 isMouseDown = true;
             });
 
@@ -135,9 +128,63 @@ define(['jquery', 'underscore', 'backbone', '../graphics', '../phys', '../util/d
             } else physics.destroyChair();
         },
 
+        loadBGImage: function() {
+            var bgImg = new Image();
+            bgImg.src = "images/bg.jpg";
+            var bgCv = $('#bg-canvas');
+            bgCv.css({ 'right': '20%', 'z-index': 0 })
+            bgCv[0].width = this.options.width;
+            bgCv[0].height = this.options.height;
+            var bgCtx = bgCv[0].getContext('2d');
+
+            var isActive = false;
+            var bgX = 0, 
+                bgY = 0, 
+                zX, zY; // zoom
+
+            function drawBg(x, y, dx, dy) {
+                bgCtx.clearRect(0, 0, bgCtx.canvas.width, bgCtx.canvas.height);
+                bgCtx.drawImage(bgImg, bgX, bgY, dx, dy);
+            }
+
+            $(bgImg).on('load', function(){ 
+                zX = bgImg.width;
+                zY = bgImg.height;
+                drawBg(0, 0, zX, zY);
+            })
+
+            $(document).keydown(function(e) {
+                switch(e.keyCode) {
+                    case 37: // left
+                        bgX -= 5;
+                        break;
+                    case 38: // up
+                        bgY -= 5;
+                        break;
+                    case 39: // right
+                        bgX += 5;
+                        break;
+                    case 40: // down
+                        bgY += 5;
+                        break;
+                    case 90: // zoom (z)
+                        zX += 5;
+                        zY += 5;
+                        break;
+                    case 88: // zoom out (x)
+                        zX -= 5;
+                        zY -= 5;
+                        break;
+                }
+                drawBg(bgX, bgY, zX, zY);
+            });
+
+            $(bgImg).on('touchstart', function() {
+                bgX -= 5;
+            });
+        },
+
         onMouseMove: function(e) {
-            e.preventDefault();
-            alert('moved');
             var physics = this.physics;
             mouseX = (e.clientX - this.canvasPos.x) / this.options.conf.PTM;
             mouseY = (e.clientY - this.canvasPos.y) / this.options.conf.PTM;
@@ -149,7 +196,6 @@ define(['jquery', 'underscore', 'backbone', '../graphics', '../phys', '../util/d
         },
 
         onMouseUp: function() {
-            alert('release - md was: '+isMouseDown);
             var physics = this.physics;
             if(physics.mouseJoint) 
                 physics.destroyMouseJoint();
