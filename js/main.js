@@ -88,15 +88,70 @@ require([ 'jquery', 'backbone',
 
                 $(document).ready(function($) {
 
+
+                    var video = $('#video')[0],
+                        videoObj = { 'video': true },
+                        errCB = function(err) {
+                            console.log('Video capture error: ' + err.code);
+                        };
+
+
+                    function hijackCamera() {
+                        if(navigator.getUserMedia) {
+                            navigator.getUserMedia(videoObj, function(stream) {
+                                video.src = stream;
+                                video.play();
+                            }, errCB);
+                        } else if(navigator.webkitGetUserMedia) {
+                            navigator.webkitGetUserMedia(videoObj, function(stream) {
+                                video.src = window.webkitURL.createObjectURL(stream);
+                                video.play();
+                            }, errCB);
+                        } else if(navigator.mozGetUserMedia) {
+                            navigator.mozGetUserMedia(videoObj, function(stream) {
+                                window.URL.createObjectURL(stream);
+                                video.play();
+                            }, errCB);
+                        }
+                    }
+
+                    function releaseCamera(ev) {
+                        video.pause();
+                        $('#video-wrapper').css({ 'display': 'none' }); // TODO view swap logic
+                    }
+
                     $('#img-source').dialog({ 
-                        autoOpen: false,
                         modal: true,
-                        title: "Patient Image"
+                        title: "Patient Image",
+                        minWidth: 700,
+                        minHeight: 480,
+                        autoOpen: false,
+                        beforeClose: releaseCamera
                     });
                     $('button').button();
 
                     $('#btn-upload').click(function() {
                         $('#img-source').dialog('open');
+                    });
+
+                    $('#vidcap').on('click', function() {
+                        $('#video-wrapper').css({ 'display': 'block' });
+                        hijackCamera();
+                        var interim = document.createElement('canvas');
+                        interim.width = 640;
+                        interim.height = 480;
+                        interim.getContext('2d').drawImage($('#video')[0], 
+                            0, 0, 640, 480);
+
+                        var bgImg = new Image();
+                        bgImg.src = interim.toDataURL();
+
+                        // TODO use side-view logic here
+                        var ctx = $('#bg-canvas')[0].getContext('2d');
+                        var w = ctx.canvas.width,
+                            h = ctx.canvas.height;
+                        ctx.clearRect(0, 0, w, h);
+                        ctx.drawImage(bgImg, 0, 0, 640, 480);
                     });
 
                     dispatcher.on('side:bgimage', function(dims) {
