@@ -21,25 +21,28 @@
           </div>
       </div>
      <div class="button-holder">
-         <input id="image-upload" name="image-upload" type="file" style="display: none;" onchange="alert('found');" />
+         <input id="image-upload" name="image-upload" type="file" />
          <div id="img-source">
-             <label for="image-upload">
-                 <span>TEST</span>
-             </label>
+             <div id="src-opts">
+                 <label for="image-upload">
+                     <span>Browse Device</span>
+                 </label>
+                <span id="vidcap">Video Capture</span> 
+             </div>
              <div id="video-wrapper" style="display: none;">
                 <video id="video" width="640" height="480" autoplay></video>
+                <button id="btn-snapshot">Snapshot</button>
+                <button id="v-cancel">Cancel</button>
              </div>
-             <span id="vidcap">Video Capture</span>
          </div>
-         <button id="btn-upload"><span class="ui-icon ui-icon-image white"></span>Import</button>
          <button id="btn-skeleton">Skeleton</button>
+         <button id="btn-upload"><span class="ui-icon ui-icon-image white"></span>Import</button>
          <div id="slider"></div>
          <!--
          <input id="btn-skeleton" class="btn-box" type="button"  value="Skeleton" />
          <input id="btn-images" class="btn-box" type="button"  value="Images" />
          <input id="btn-person" class="btn-box" type="button"  value="Person" />
          <input id="btn-chair" class="btn-box" type="button"  value="Chair" />
-         <input id="btn-snapshot" class="btn-box" type="button"  value="Snapshot" />
          <input id="btn-reset" class="btn-box" type="button"  value="Reset" />
          -->
          

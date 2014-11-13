@@ -216,6 +216,14 @@ canvas {
     height:100%;
 }
 
+#image-upload {
+    display: none;
+}
+
 .ui-icon.white{
     background-image: url('icons/white.png');
+}
+
+#video-wrapper button {
+    width: 45%;
 }

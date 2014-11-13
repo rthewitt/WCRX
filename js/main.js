@@ -9,7 +9,6 @@ require.config({
         "box2dweb": "libs/box2dweb/Box2dWeb-2.1.a.3.min",
         "humanTemplate": "templates/human-template.html",
         "chairTemplate": "templates/chair-template.html",
-        "armTemplate": "templates/arms-2d.html"
     },
     shim: {
         "box2dweb": {
@@ -88,6 +87,24 @@ require([ 'jquery', 'backbone',
 
                 $(document).ready(function($) {
 
+                    dispatcher.on('measured:person', function() {
+                        $('#btn-cmx').prop('disabled', false);
+                    });
+
+                    dispatcher.on('side:bgimage', function(dims) {
+                        $('#slider').slider({
+                            min: 0.2,
+                            max: 5,
+                            value: 1,
+                            step: 0.05,
+                            slide: function(ev, ui) {
+                                sideView.sizeBGImage({
+                                    x: dims.x * ui.value,
+                                    y: dims.y * ui.value,
+                                });
+                            }
+                        });
+                    });
 
                     var video = $('#video')[0],
                         videoObj = { 'video': true },
@@ -115,10 +132,17 @@ require([ 'jquery', 'backbone',
                         }
                     }
 
+                    var streaming = false;
                     function releaseCamera(ev) {
                         video.pause();
-                        $('#video-wrapper').css({ 'display': 'none' }); // TODO view swap logic
+                        streaming = false;
+                        $('#video-wrapper').css({ 'display': 'none' }); 
+                        $('#src-opts').css({ 'display': 'block' }); 
                     }
+
+                    $('#image-upload').on('change', function(ev) {
+                        alert('File access not permitted by HTML.\n\nThis feature will be supported in the packaged application!');
+                    });
 
                     $('#img-source').dialog({ 
                         modal: true,
@@ -135,53 +159,28 @@ require([ 'jquery', 'backbone',
                     });
 
                     $('#vidcap').on('click', function() {
+                        if(streaming) {
+                            return false; // slim chance
+                        }
                         $('#video-wrapper').css({ 'display': 'block' });
+                        $('#src-opts').css({ 'display': 'none' });
                         hijackCamera();
-                        var interim = document.createElement('canvas');
-                        interim.width = 640;
-                        interim.height = 480;
-                        interim.getContext('2d').drawImage($('#video')[0], 
-                            0, 0, 640, 480);
-
-                        var bgImg = new Image();
-                        bgImg.src = interim.toDataURL();
-
-                        // TODO use side-view logic here
-                        var ctx = $('#bg-canvas')[0].getContext('2d');
-                        var w = ctx.canvas.width,
-                            h = ctx.canvas.height;
-                        ctx.clearRect(0, 0, w, h);
-                        ctx.drawImage(bgImg, 0, 0, 640, 480);
+                        streaming = true;
                     });
-
-                    dispatcher.on('side:bgimage', function(dims) {
-                        $('#slider').slider({
-                            min: 0.2,
-                            max: 5,
-                            value: 1,
-                            step: 0.05,
-                            slide: function(ev, ui) {
-                                sideView.sizeBGImage({
-                                    x: dims.x * ui.value,
-                                    y: dims.y * ui.value,
-                                });
-                            }
-                        });
+                    
+                    $('#btn-snapshot').click(function() {
+                        video.pause();
+                        streaming = false;
+                        dispatcher.trigger('snapshot');
                     });
-
-                    dispatcher.on('measured:person', function() {
-                        $('#btn-cmx').prop('disabled', false);
+                    $('#v-cancel').click(function() {
+                        $('#img-source').dialog('close');
                     });
 
                     $('#btn-pmx').addClass('active');
 
                     $('#btn-reset').click(function() {
                         dispatcher.trigger('reset');
-                    });
-                    $('#btn-snapshot').click(function() {
-                        if(!$('#armies').length) {
-                            dispatcher.trigger('snapshot');
-                        }
                     });
                     $('#btn-pmx').click(function(e) {
                         if($(this).hasClass('active')) return;

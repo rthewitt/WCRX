@@ -1,6 +1,6 @@
-define(['jquery', 'underscore', 'backbone', '../graphics', '../phys', '../util/dom-util', 'text!armTemplate'], 
+define(['jquery', 'underscore', 'backbone', '../graphics', '../phys', '../util/dom-util'], 
 
-        function($, _, Backbone, graphics, Physics, domUtil, armTemplate) {
+        function($, _, Backbone, graphics, Physics, domUtil) {
 
     // this will break, "static" // FIXME
     var isMouseDown;
@@ -25,8 +25,6 @@ define(['jquery', 'underscore', 'backbone', '../graphics', '../phys', '../util/d
             this.options = options;
             this.physics = physics;
             this.dispatcher = options.dispatcher;
-
-            this.loadBGImage(); // should sep into another view...
         },
 
         // cleanup
@@ -68,11 +66,8 @@ define(['jquery', 'underscore', 'backbone', '../graphics', '../phys', '../util/d
         },
 
         reset: function() {
-            var physics = this.physics;
             this.haltPhysics();
-
-            var snapshotDiv = $('#armies');
-            if(snapshotDiv.length) snapshotDiv.remove();
+            var physics = this.physics;
 
             physics.reset();
 
@@ -94,25 +89,18 @@ define(['jquery', 'underscore', 'backbone', '../graphics', '../phys', '../util/d
             }
         },
 
+        // Repurposed for image injection
         snapshot: function() {
-            this.haltPhysics();
-            var variables = this.physics.snapshot(this.canvasPos);
+            var interim = document.createElement('canvas');
+            interim.width = 640;
+            interim.height = 480;
+            interim.getContext('2d').drawImage($('#video')[0], 
+                0, 0, 640, 480);
 
-            var at = _.template(armTemplate);
-            $('body').append(at(variables));
+            var bgImg = new Image();
+            bgImg.src = interim.toDataURL();
 
-            var E = variables.E,
-                F = variables.F,
-                W = variables.W,
-                alpha = variables.alpha,
-                beta = variables.beta;
-
-            $('#skew-upper').css({ 'transform-origin': '50% 0%' });
-            $('#skew-upper').css('transform', 'rotateY(-'+Math.atan(W/F)+'rad) rotateZ('+(alpha)+'rad)');
-
-            var elbowY = Math.floor(E * this.options.conf.PTM / this.options.conf.ITM);
-            $('#skew-lower').css({ 'transform-origin': '50% 0%', top: elbowY });
-            $('#skew-lower').css('transform', 'rotateZ('+ -beta +'rad)');
+            this.loadBGImage(bgImg);
         },
 
         hasPerson: function() {
@@ -137,9 +125,7 @@ define(['jquery', 'underscore', 'backbone', '../graphics', '../phys', '../util/d
             } else physics.destroyChair();
         },
 
-        loadBGImage: function() {
-            var bgImg = new Image();
-            bgImg.src = "images/bg.jpg";
+        loadBGImage: function(bgImg) {
             var bgCv = $('#bg-canvas');
             bgCv.css({ 'right': '20%', 'z-index': 0 })
             bgCv[0].width = this.options.width;
