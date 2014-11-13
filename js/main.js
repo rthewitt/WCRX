@@ -172,8 +172,19 @@ require([ 'jquery', 'backbone',
                         video.pause();
                         streaming = false;
                         dispatcher.trigger('snapshot');
+                        setTimeout(function() {
+                            video.play();
+                        }, 500);
+                    });
+                    $('#v-keep').click(function() {
+                        $('#img-source').dialog('close');
                     });
                     $('#v-cancel').click(function() {
+                        sideView.clearBg(true);
+                        var $slider = $('#slider');
+                        if($slider.find('span').length > 0) {
+                            $slider.slider('destroy');
+                        }
                         $('#img-source').dialog('close');
                     });
 

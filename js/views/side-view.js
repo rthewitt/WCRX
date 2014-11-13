@@ -176,14 +176,24 @@ define(['jquery', 'underscore', 'backbone', '../graphics', '../phys', '../util/d
             });
         },
 
+        // remove duplication
         drawBg: function() {
             var bg = this.bg;
+            if(!bg) return;
 
             if(typeof bg.width === 'undefined') bg.width = bg.img.width;
             if(typeof bg.height === 'undefined') bg.height = bg.img.height;
 
-            bg.ctx.clearRect(0, 0, bg.ctx.canvas.width, bg.ctx.canvas.height);
+            this.clearBg();
             bg.ctx.drawImage(bg.img, bg.x, bg.y, bg.width, bg.height);
+        },
+
+        clearBg: function(remove) {
+            var bg = this.bg;
+            if(!bg) return;
+            bg.ctx.clearRect(0, 0, 
+                    bg.ctx.canvas.width, bg.ctx.canvas.height);
+            if(!!remove) this.bg = undefined;
         },
 
         sizeBGImage: function(dims) {
