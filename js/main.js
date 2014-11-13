@@ -87,16 +87,25 @@ require([ 'jquery', 'backbone',
                 });
 
                 $(document).ready(function($) {
-                    dispatcher.on('side:bgimage', function(dims) {
-                        console.log('loaded bgimage with dims: '+JSON.stringify(dims));
 
+                    $('#img-source').dialog({ 
+                        autoOpen: false,
+                        modal: true,
+                        title: "Patient Image"
+                    });
+                    $('button').button();
+
+                    $('#btn-upload').click(function() {
+                        $('#img-source').dialog('open');
+                    });
+
+                    dispatcher.on('side:bgimage', function(dims) {
                         $('#slider').slider({
                             min: 0.2,
                             max: 5,
                             value: 1,
                             step: 0.05,
                             slide: function(ev, ui) {
-                                console.log('slider value: '+ ui.value);
                                 sideView.sizeBGImage({
                                     x: dims.x * ui.value,
                                     y: dims.y * ui.value,
@@ -138,8 +147,6 @@ require([ 'jquery', 'backbone',
                     });
                     $('#btn-skeleton').click(function() {
                         config.skeleton = !config.skeleton;
-                    });
-                    $('#btn-images').click(function() {
                         config.showImages = !config.showImages;
                     });
                 });

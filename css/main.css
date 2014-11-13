@@ -139,7 +139,10 @@ h3 {
     color: #173a61;
     font-weight: normal;
 }
-.button-holder input {
+
+.ui-button, .button-holder input {
+    background-image: none;
+    background-color: #1b3e64;
     -moz-box-shadow: inset 1px 1px 0px 0px #90adcd;
     -webkit-box-shadow: inset 1px 1px 0px 0px #90adcd;
     -box-shadow: inset 1px 1px 0px 0px #90adcd;
@@ -157,26 +160,46 @@ h3 {
     -border-radius-bottom-left: 0px;
     text-indent: 0;
     border: 1px solid #1b3e64;
-    display: inline-block;
-    background-color: #1b3e64;
     color: #90adcd;
     font-family: Trebuchet MS;
     font-size: 15px;
     font-weight: bold;
     font-style: normal;
+    display: inline-block;
     height: 55px;
-    width: 13%;
-    line-height: 35px;
     margin: 5px;
+}
+
+span.ui-icon {
+    display: inline-block;
+    margin-right: 5px;
+}
+
+.btn-box {
+    width: 13%;
 }
 
 .button-holder input.active {
     background-color: #2b4f77;
 }
 
-.btn-box:hover {
+.btn-box:hover, .ui-button:hover {
     background-color: #173a61;
 }
+
+#slider {
+    display: inline-block;
+    width: 13%;
+}
+
+#img-source {
+    display: none;
+}
+
+#img-source span {
+    display: block;
+}
+
 canvas {
     display: inline-block;
     margin: 15px auto;
@@ -191,4 +214,8 @@ canvas {
     left: 0;
     width: 100%;
     height:100%;
+}
+
+.ui-icon.white{
+    background-image: url('icons/white.png');
 }
