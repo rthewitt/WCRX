@@ -10,20 +10,29 @@ Source code copyright &copy; 2014 Ryan Hewitt and Michael C. Hogan. All rights r
 
 Images copyright &copy; 2014 Ramiro Cazaux. All rights reserved.
 
+## To Do
+* Icon
+* Small tile image
+* Screen shot
+
 ## Install the Chrome Extension
-Xavier Rx is deployed as a Chrome Extension for either Google Chrome or the open source Chromium browser.
+Xavier Rx is deployed as a Chrome Extension compatible with either the open source Chromium browser or Google Chrome.
 
-### Windows
-XavierRx is deployed through the Google Chrome App Store.
+1. Open the open source Chromium browser or Google Chrome
+2. Navigate to the [Chrome Web Store](https://chrome.google.com/webstore/category/extensions?hl=en-US).
+3. Search for WcRx.
+4. Click `Free` and `Add` to install the Chrome app.
+5. Navigate to <chrome://apps/> to confirm the extension has been installed.
 
-1. Navigate to <https://chrome.google.com/webstore/category/extensions?hl=en-US> in Google Chrome or Chromium.
-2. Search for Xavier Rx.
+### Try it first at GitHub.io
+Coming soon!
 
-### Linux and Mac OS X
-Manage Chrome extensions from chrome://extensions in Google Chrome or Chromium.
+## Use WcRx
+1. Open the open source Chromium browser or Google Chrome.
+2. Navigate to <chrome://apps/>.
+3. Click the Trash Can icon to delete the extension.
 
-See <https://developer.chrome.com/extensions/hosting>
-
-The extension is hosted at <http://50.112.183.184/wcrx.crx>
-
-Better instructions coming soon.
+## Uninstall the Chrome Extension
+1. Open the open source Chromium browser or Google Chrome.
+2. Navigate to <chrome://extensions/>.
+3. Click the Trash Can icon to delete the extension.
