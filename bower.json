@@ -1,6 +1,6 @@
 {
-    "name": "Wheelchair Rx",
-    "version": "1.0.0",
+    "name": "wcrx",
+    "version": "0.0.2",
     "dependencies": {
         "jquery": "1.11",
         "jquery-ui": "1.11.1",
