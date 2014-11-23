@@ -10,11 +10,6 @@ Source code copyright &copy; 2014 Ryan Hewitt and Michael C. Hogan. All rights r
 
 Images copyright &copy; 2014 Ramiro Cazaux. All rights reserved.
 
-## To Do
-* Icon
-* Small tile image
-* Screen shot
-
 ## Install the Chrome Extension
 Xavier Rx is deployed as a Chrome Extension compatible with either the open source Chromium browser or Google Chrome.
 
