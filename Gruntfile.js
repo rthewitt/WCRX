@@ -16,7 +16,7 @@ module.exports = function(grunt) {
                 }
             },
             files: {
-                "/home/synapse/Desktop/wheelchair/dynamic/js/templates.js": ["/home/synapse/Desktop/wheelchair/dynamic/js/templates/*.html"]
+                "js/templates.js": ["js/templates/*.html"]
             }
         }
     }
