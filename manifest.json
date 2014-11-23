@@ -1,0 +1,14 @@
+{
+    "name": "Xavier Rx",
+    "description": "Interactive wheelchair fitting application",
+    "version": "0.1",
+    "manifest_version": 2,
+    "permissions": [
+        "fullscreen"
+        ],
+    "app": {
+        "background": {
+            "scripts": ["js/background.js"]
+        }
+    }
+}

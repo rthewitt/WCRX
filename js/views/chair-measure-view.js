@@ -1,4 +1,6 @@
-define(["jquery", "underscore", "backbone", "text!chairTemplate"], function($, _, Backbone, templateC) {
+define(["jquery", "underscore", "backbone", "../templates"], function($, _, Backbone, precompiled) {
+
+    var templateC = precompiled['chair-template'];
 
     var CMV = Backbone.View.extend({
 
@@ -35,7 +37,8 @@ define(["jquery", "underscore", "backbone", "text!chairTemplate"], function($, _
         },
 
         render: function() {
-            var ct = _.template(templateC);
+            //var ct = _.template(templateC);
+            var ct = templateC;
             this.$el.html(ct(this.model.attributes));
             this.decorate();
         },

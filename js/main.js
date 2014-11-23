@@ -1,14 +1,13 @@
 require.config({
     paths: {
+        // chrome app will fail on this and use fallback
         "jquery": ["http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min", 
                     "libs/jquery/dist/jquery.min"],
         "jqueryui": "libs/jquery-ui/jquery-ui.min",
         "jquery.customSelect": "libs/jquery.customSelect/jquery.customSelect.min",
         "underscore": "libs/underscore/underscore",
         "backbone": "libs/backbone/backbone",
-        "box2dweb": "libs/box2dweb/Box2dWeb-2.1.a.3.min",
-        "humanTemplate": "templates/human-template.html",
-        "chairTemplate": "templates/chair-template.html",
+        "box2dweb": "libs/box2dweb/Box2dWeb-2.1.a.3.min"
     },
     shim: {
         "box2dweb": {
@@ -86,6 +85,14 @@ require([ 'jquery', 'backbone',
                 });
 
                 $(document).ready(function($) {
+
+                    /*
+                    var el = document.documentElement;
+                    var rfs = el.requestFullScreen || el.webkitRequestFullScreen;
+                    console.log(typeof el);
+                    console.log(typeof rfs);
+                    rfs.call(el);
+                    */
 
                     dispatcher.on('measured:person', function() {
                         $('#btn-cmx').prop('disabled', false);

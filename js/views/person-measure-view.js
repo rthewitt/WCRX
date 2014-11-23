@@ -1,4 +1,6 @@
-define(["jquery", "underscore", "backbone", "text!humanTemplate"], function($, _, Backbone, templateH) {
+define(["jquery", "underscore", "backbone", "../templates"], function($, _, Backbone, precompiled) {
+
+    var templateH = precompiled['human-template'];
 
     var PMV = Backbone.View.extend({
 
@@ -37,8 +39,9 @@ define(["jquery", "underscore", "backbone", "text!humanTemplate"], function($, _
         },
 
         render: function() {
-            var ct = _.template(templateH);
-            this.$el.html(ct(this.model.attributes));
+            //var ct = _.template(templateH);
+            var ht = templateH;
+            this.$el.html(ht(this.model.attributes));
             if(!this.modified) {
                 this.$('input').addClass('unset');
                 this.$('select').addClass('unset');
