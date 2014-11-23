@@ -1,17 +1,17 @@
-# XavierRx
+# WheelChair Rx
 An app that helps fit wheelchairs to the needs of patients.
 
 NOTE: The application cannot run without the images and libraries. These are not currently stored in this Git repo.
 
 ## License
-This is NOT free software. Xavier Rx is distributed as beta shareware.
+This is NOT free software. WheelChair Rx is distributed as beta shareware.
 
 Source code copyright &copy; 2014 Ryan Hewitt and Michael C. Hogan. All rights reserved.
 
 Images copyright &copy; 2014 Ramiro Cazaux. All rights reserved.
 
 ## Install the Chrome Extension
-Xavier Rx is deployed as a Chrome Extension compatible with either the open source Chromium browser or Google Chrome.
+WheelChair Rx is deployed as a Chrome Extension compatible with either the open source Chromium browser or Google Chrome.
 
 1. Open the open source Chromium browser or Google Chrome
 2. Navigate to the [Chrome Web Store](https://chrome.google.com/webstore/category/extensions?hl=en-US).
