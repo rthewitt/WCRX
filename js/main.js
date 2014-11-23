@@ -147,6 +147,8 @@ require([ 'jquery', 'backbone',
                         $('#src-opts').css({ 'display': 'block' }); 
                     }
 
+                    $('.btn-exit').click(function() { window.close(); });
+
                     $('#image-upload').on('change', function(ev) {
                         alert('File access not permitted by HTML.\n\nThis feature will be supported in the packaged application!');
                     });
