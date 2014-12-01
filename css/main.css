@@ -232,6 +232,16 @@ canvas {
     background-image: url('icons/white.png');
 }
 
+/* height not correct even with wrapper */
+.sel-option {
+    height: 50%;
+    width: 100%;
+    border: solid 1px #1b3e64;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    text-align: center;
+}
+
 #video-wrapper button {
     width: 30%;
 }

@@ -22,13 +22,10 @@
           </div>
       </div>
      <div class="button-holder">
-         <input id="image-upload" name="image-upload" type="file" />
          <div id="img-source">
              <div id="src-opts">
-                 <label for="image-upload">
-                     <span>Browse Device</span>
-                 </label>
-                <span id="vidcap">Video Capture</span> 
+                <span id="img-file" class="sel-option">Browse Device</span>
+                <span id="vidcap" class="sel-option">From Camera</span> 
              </div>
              <div id="video-wrapper" style="display: none;">
                 <video id="video" width="640" height="480" autoplay></video>
@@ -40,14 +37,6 @@
          <button id="btn-skeleton">Skeleton</button>
          <button id="btn-upload"><span class="ui-icon ui-icon-image white"></span>Import</button>
          <div id="slider"></div>
-         <!--
-         <input id="btn-skeleton" class="btn-box" type="button"  value="Skeleton" />
-         <input id="btn-images" class="btn-box" type="button"  value="Images" />
-         <input id="btn-person" class="btn-box" type="button"  value="Person" />
-         <input id="btn-chair" class="btn-box" type="button"  value="Chair" />
-         <input id="btn-reset" class="btn-box" type="button"  value="Reset" />
-         -->
-         
      </div>
      <div class="button-holder">
          <input id="btn-pmx" class="btn-box" type="button"  value="Person" />

@@ -10,7 +10,8 @@
     },
     "permissions": [
         "fullscreen",
-        "videoCapture"
+        "videoCapture",
+        { "fileSystem": [] }
         ],
     "app": {
         "background": {

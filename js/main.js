@@ -149,8 +149,22 @@ require([ 'jquery', 'backbone',
 
                     $('.btn-exit').click(function() { window.close(); });
 
-                    $('#image-upload').on('change', function(ev) {
-                        alert('File access not permitted by HTML.\n\nThis feature will be supported in the packaged application!');
+                    $('#img-file').click(function() {
+                        $('#img-source').dialog('close');
+                        chrome.fileSystem.chooseEntry({ type: 'openFile' }, function(entry) {
+                            var reader = new FileReader();
+                            reader.onerror = function(e) {
+                                console.log('error reading file');
+                            };
+                            reader.onloadend = function() {
+                                var isImg = /image/.test(this.result);
+                                if(isImg) dispatcher.trigger('snapshot', { fromFile: true, src: this.result });
+                                else console.log('Must load image: ' + this.result);
+                            };
+                            entry.file(function(file) {
+                                reader.readAsDataURL(file);
+                            });
+                        });
                     });
 
                     $('#img-source').dialog({ 
