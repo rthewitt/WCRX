@@ -90,15 +90,20 @@ define(['jquery', 'underscore', 'backbone', '../graphics', '../phys', '../util/d
         },
 
         // Repurposed for image injection
-        snapshot: function() {
-            var interim = document.createElement('canvas');
-            interim.width = 640;
-            interim.height = 480;
-            interim.getContext('2d').drawImage($('#video')[0], 
-                0, 0, 640, 480);
-
+        snapshot: function(e) {
             var bgImg = new Image();
-            bgImg.src = interim.toDataURL();
+
+            if(!!e && e.fromFile) {
+                bgImg.src = e.src;
+            } else {
+                var interim = document.createElement('canvas');
+                interim.width = 640;
+                interim.height = 480;
+                interim.getContext('2d').drawImage($('#video')[0], 
+                    0, 0, 640, 480);
+
+                bgImg.src = interim.toDataURL();
+            }
 
             this.loadBGImage(bgImg);
         },
