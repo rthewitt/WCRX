@@ -15,7 +15,8 @@ define(['jquery', 'underscore', 'backbone', './image-data', '../config'], functi
             raiseBarLength: 5,
             seatDepth: 13,
             foamHeight: 2,
-            groundClr: 0.0
+            groundClr: 0.0,
+            dump: 0.0
         },
 
         broadcast: function() {

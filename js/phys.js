@@ -891,6 +891,18 @@ define(['backbone', 'box2dweb', 'underscore', 'config'], function(Backbone, Box2
         return body;
     };
 
+    Physics.prototype.calcDump = function() {
+        var seatLen = this.chairParts.foam.size.x;
+        var localLeft = new b2Vec2(-seatLen/2, 0);
+        var localRight = new b2Vec2(seatLen/2, 0);
+        var globalLeft = this.chairPartBodies.foam.GetWorldPoint(localLeft);
+        var globalRight = this.chairPartBodies.foam.GetWorldPoint(localRight);
+        var gDiff = new b2Vec2(0,0);
+        gDiff.Add(globalRight);
+        gDiff.Subtract(globalLeft);
+        return Math.abs(gDiff.y * config.ITM).toFixed(2);
+    };
+
     // TODO remove string array notation from person/chair
     Physics.prototype.calcGroundClearance = function() {
         var ly = this.chairParts.wheel.size.r;
