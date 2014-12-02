@@ -76,8 +76,6 @@ require([ 'jquery', 'backbone',
                 var frontView = new FrontView(shared);
 
                 RegionManager.show(personControls);
-                frontView.render();
-                sideView.render();
 
                 // clear swipe gestures
                 document.addEventListener('touchmove', function(e) {
@@ -86,13 +84,11 @@ require([ 'jquery', 'backbone',
 
                 $(document).ready(function($) {
 
-                    /*
-                    var el = document.documentElement;
-                    var rfs = el.requestFullScreen || el.webkitRequestFullScreen;
-                    console.log(typeof el);
-                    console.log(typeof rfs);
-                    rfs.call(el);
-                    */
+                    // hack on load race condition
+                    setTimeout(function() {
+                        frontView.render();
+                    }, 1000);
+                    sideView.render();
 
                     dispatcher.on('measured:person', function() {
                         $('#btn-cmx').prop('disabled', false);

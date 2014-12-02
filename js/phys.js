@@ -1,11 +1,7 @@
 define(['backbone', 'box2dweb', 'underscore', 'config'], function(Backbone, Box2D, _, config) {
 
-    //////// REMOVE ///////
     var chairX,
         chairY;
-
-    var lastKnownPos;
-    //////////////////////////
 
     var   b2Vec2 = Box2D.Common.Math.b2Vec2, 
           b2AABB = Box2D.Collision.b2AABB,
@@ -25,10 +21,10 @@ define(['backbone', 'box2dweb', 'underscore', 'config'], function(Backbone, Box2
           b2WeldJointDef = Box2D.Dynamics.Joints.b2WeldJointDef;
 
     function Physics(chairMeasures, humanMeasures) {
-        // TEMPORARY /////////////////
+
+        // revisit this if we need multiple simulations
         chairX = this.pixels(125);
         chairY = this.pixels(300)-0.1-this.inches(3);
-        ///////////////////
         
         this.chairMeasures = chairMeasures;
         this.humanMeasures = humanMeasures;
@@ -585,34 +581,6 @@ define(['backbone', 'box2dweb', 'underscore', 'config'], function(Backbone, Box2
         clr = this.inches(clr);
         console.log('clr: '+clr);
         var weldY;
-        /*
-        if(clr > 0) {
-            //var frs = parts.footRest.size;
-            var frameLocal = new b2Vec2(X('LBar')/2, 0.70 * Y('LBar')/2);
-            var framePt = bodies.LBar.GetWorldPoint(frameLocal);
-            var ly = parts.wheel.size.r;
-            var groundPoint = bodies.wheel.GetWorldPoint(
-                new b2Vec2(0, ly));
-            frameClearance = groundPoint.y-framePt.y;
-            console.log('frame clearance: '+frameClearance);
-            var heightFromGround = clr + Y('footRest');
-            var slideDelta = heightFromGround - frameClearance;
-            console.log('slide delta: '+slideDelta);
-            // weld point
-            weldY = Y('LBar')/2 - slideDelta;
-            console.log('weldY: '+weldY);
-            if(lastKnownPos) {
-                bodies.footRest.SetPosition(lastKnownPos);
-                this.weldFootRest();
-            }
-        } else weldY = Y('LBar')/2;
-        */
-
-        /*
-        joints.footRest = getWeldJoint.call(this, bodies.LBar, bodies.footRest,
-                { x: X('LBar')/2, y: weldY },
-                { x: X('footRest')/2, y: -Y('footRest')/2 });
-                */
 
         // add footrest barrier
         var fixDef = new b2FixtureDef;
@@ -638,23 +606,6 @@ define(['backbone', 'box2dweb', 'underscore', 'config'], function(Backbone, Box2
 
     function _destroyChair() {
         console.log('destroying chair');
-
-        // detach person 
-        /*
-        var hJoints = this.humanParts.joints;
-        if(hJoints.seatRev) {
-            this.world.DestroyJoint(hJoints.seatRev);
-            hJoints.seatRev = undefined;
-        }
-        if(hJoints.seatSlide) {
-            this.world.DestroyJoint(hJoints.seatSlide);
-            hJoints.seatSlide = undefined;
-        }
-        if(hJoints.wrist) {
-            this.world.DestroyJoint(hJoints.wrist);
-            hJoints.wrist = undefined;
-        }
-        */
 
         for(var j in this.chairParts.joints) {
             var jj = this.chairParts.joints[j];

@@ -62,21 +62,6 @@ define(['jquery', 'underscore', 'backbone', '../graphics', 'util/dom-util'], fun
             for(p in this.model.person) { arrayOfParts.push(this.model.person[p]); }
             for(p in this.model.chair) { arrayOfParts.push(this.model.chair[p]); }
             draw(arrayOfParts);
-            /*
-            // hack until we find race condition, element load
-            // not sufficient
-            var self = this;
-            if(this.token) {
-                window.clearInterval(this.token);
-            } else {
-                var token = window.setInterval(function() {
-                }, 100);
-                window.setTimeout(function() {
-                    window.clearInterval(token);
-                }, 500);
-                        
-            } 
-            */
         },
 
         setPositions: function() {
