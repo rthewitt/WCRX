@@ -163,6 +163,10 @@ require([ 'jquery', 'backbone',
                         });
                     });
 
+                    $('#image-upload').on('change', function(ev) {
+                        dispatcher.trigger('snapshot', { fromFile: true });
+                    });
+
                     $('#img-source').dialog({ 
                         modal: true,
                         title: "Patient Image",
