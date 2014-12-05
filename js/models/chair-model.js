@@ -9,7 +9,7 @@ define(['jquery', 'underscore', 'backbone', './image-data', '../config'], functi
             seatWidth: 15,
             frameHeight: 11, // estimated
             frameDepth: 18.5, // estimated
-            seatBackHeight: 13,
+            seatBackHeight: 16,
             axleDistance: 3.5, // representing COG (side)
             axleGap: 2.75, // distance between wheel and seat edge (front)
             raiseBarLength: 5,
