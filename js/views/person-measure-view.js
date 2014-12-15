@@ -56,7 +56,6 @@ define(["jquery", "underscore", "backbone", "../templates"], function($, _, Back
 
         clearUnset: function() {
             this.$('input.unset').removeClass('unset');
-            this.dispatcher.trigger('measured:person');
         },
 
         blurred: function(evt) {
@@ -66,7 +65,7 @@ define(["jquery", "underscore", "backbone", "../templates"], function($, _, Back
             $(visited).removeClass('unset');
             if(this.$('input.unset').length === 0) {
                 // tell application that we can progress
-                this.dispatcher.trigger('measured:person');
+                this.dispatcher.trigger('flow:clear');
             }
         },
 

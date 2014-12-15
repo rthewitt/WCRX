@@ -6,7 +6,6 @@ define(["jquery", "underscore", "backbone", "../templates"], function($, _, Back
 
         el: '#summary',
 
-        // TODO make a composite model
         initialize: function(options) {
             this.context = {
                 chair: options.chairModel.attributes,

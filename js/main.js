@@ -92,16 +92,17 @@ require([ 'jquery', 'backbone',
                     }, 1000);
                     sideView.render();
 
-                    dispatcher.on('measured:person', function() {
+                    dispatcher.on('flow:clear', function() {
                         $('#btn-cmx').removeClass('blocked');
+                        $('#btn-rx').removeClass('blocked');
                     });
 
                     dispatcher.on('side:bgimage', function(dims) {
                         $('#slider').slider({
                             min: 0.2,
-                            max: 5,
+                            max: 2,
                             value: 1,
-                            step: 0.05,
+                            step: 0.005,
                             slide: function(ev, ui) {
                                 sideView.sizeBGImage({
                                     x: dims.x * ui.value,
@@ -172,18 +173,7 @@ require([ 'jquery', 'backbone',
                     $('#cmx-confirm').dialog({ 
                         modal: true,
                         title: "Are you sure?",
-                        autoOpen: false,
-                        buttons: [{ 
-                            text: "Cancel", click: function() {
-                                $(this).dialog('close');
-                            }
-                        }, { 
-                            text: "Continue", click: function() {
-                                dispatcher.trigger('flow:clear');
-                                $(this).dialog('close');
-                                $('#btn-cmx').click();
-                            } 
-                        }]
+                        autoOpen: false
                     });
 
                     $('#img-source').dialog({ 
@@ -243,9 +233,25 @@ require([ 'jquery', 'backbone',
                         $('#btn-pmx').addClass('active');
                         RegionManager.show(personControls);
                     });
+
+                    function confirmPerson(origBtn) {
+                        $('#cmx-confirm').dialog('option', 'buttons', [{ 
+                            text: "Cancel", click: function() {
+                                $(this).dialog('close');
+                            }
+                        }, { 
+                            text: "Continue", click: function() {
+                                dispatcher.trigger('flow:clear');
+                                $(this).dialog('close');
+                                $(origBtn).click();
+                            } 
+                        }]);
+                        $('#cmx-confirm').dialog('open');
+                    }
+
                     $('#btn-cmx').click(function(e) {
                         if($(this).hasClass('blocked')) {
-                            $('#cmx-confirm').dialog('open');
+                            confirmPerson(this);
                             e.stopPropagation();
                             e.preventDefault();
                             return;
@@ -256,7 +262,12 @@ require([ 'jquery', 'backbone',
                         RegionManager.show(chairControls);
                     });
                     $('#btn-rx').click(function(e) {
-                        if($(this).hasClass('active')) return;
+                        if($(this).hasClass('blocked')) {
+                            confirmPerson(this);
+                            e.stopPropagation();
+                            e.preventDefault();
+                            return;
+                        } else if($(this).hasClass('active')) return;
                         $('#btn-cmx').removeClass('active');
                         $('#btn-pmx').removeClass('active');
                         $('#btn-rx').addClass('active');
