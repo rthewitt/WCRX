@@ -894,6 +894,11 @@ define(['backbone', 'box2dweb', 'underscore', 'config'], function(Backbone, Box2
                                 return true;
                         }
                     } 
+                    // make arms transparent to click/drag
+                    if(b === self.humanPartBodies.upperArm ||
+                            b === self.humanPartBodies.lowerArm ||
+                            b === self.humanPartBodies.elbow ||
+                            b === self.humanPartBodies.shoulder) return true;
                     body = b;
                     return false;
                 }
