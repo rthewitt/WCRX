@@ -182,13 +182,6 @@ span.ui-icon {
     margin-right: 5px;
 }
 
-.btn-exit {
-    position: absolute;
-    height: 30px;
-    width: 30px;
-    right: 10px;
-    top: 5px;
-}
 
 .btn-box {
     width: 13%;
@@ -216,10 +209,43 @@ span.ui-icon {
     display: block;
 }
 
-canvas {
-    display: inline-block;
-    margin: 15px auto;
-    position: absolute;
+@media print {
+    canvas {
+        display: none;
+    }
+    #print-bg {
+        display: block;
+        width: 100%;
+        text-align: center;
+    }
+    #print-bg img {
+        top-margin: 50px;
+        width: 220px;
+        height: 140px;
+    }
+    .btn-exit {
+        display: none;
+    }
+}
+
+@media screen {
+    canvas {
+        display: inline-block;
+        margin: 15px auto;
+        position: absolute;
+    }
+
+    #print-bg {
+        display: none;
+    }
+
+    .btn-exit {
+        position: absolute;
+        height: 30px;
+        width: 30px;
+        right: 10px;
+        top: 5px;
+    }
 }
 #container {
     position: absolute;
@@ -249,6 +275,8 @@ canvas {
     padding-bottom: 20px;
     text-align: center;
 }
+
+
 
 #video-wrapper button {
     width: 30%;
