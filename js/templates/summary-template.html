@@ -1,52 +1,38 @@
 <div id="summary-patient" class="mxrx">
     <div class="tmp-internal"><h3>Patient</h3></div>
-    <label for="upper-arm-length">Upper Arm Length</label>
-    <span id="upper-arm-length" class="setting-value" name="upperArmLength"><%= person.upperArmLength %>"</span>
-    <label for="lower-arm-length">Forearm Length</label>
-    <span id="lower-arm-length" class="setting-value" name="lowerArmLength"><%= person.lowerArmLength %>"</span>
-    <label for="torso-length">Torso Length</label>
-    <span id="torso-length" class="setting-value" name="torsoLength"><%= person.torsoLength %>"</span>
-    <label for="trunk-depth">Trunk Depth</label>
-    <span id="trunk-depth" class="setting-value" name="trunkDepth"><%= person.trunkDepth %>"</span>
-    <label for="contact-point">Forward Contact</label>
-    <span id="contact-point" class="setting-value" name="contactPoint"><%= person.contactPoint %>"</span>
-    <label for="thigh-depth">Thigh Depth</label>
-    <span id="upper-leg-length" class="setting-value" name="upperLegLength"><%= person.upperLegLength %>"</span>
-    <label for="lower-leg-length">Lower Leg Length</label>
-    <span id="lower-leg-length" class="setting-value" name="lowerLegLength"><%= person.lowerLegLength %>"</span>
-    <label for="chest-width">Chest Width</label>
-    <span id="chest-width" class="setting-value" name="chestWidth"><%= person.chestWidth %>"</span>
-    <label for="hip-width">Hip Width</label>
-    <span id="hip-width" class="setting-value" name="hipWidth"><%= person.hipWidth %>"</span>
+    <label for="upper-arm-length">Upper Arm Length: <span id="upper-arm-length" class="setting-value" name="upperArmLength"><%= person.upperArmLength %>"</span></label>
+    <label for="lower-arm-length">Forearm Length: <span id="lower-arm-length" class="setting-value" name="lowerArmLength"><%= person.lowerArmLength %>"</span></label>
+    <label for="torso-length">Torso Length: <span id="torso-length" class="setting-value" name="torsoLength"><%= person.torsoLength %>"</span></label>
+    <label for="trunk-depth">Trunk Depth: <span id="trunk-depth" class="setting-value" name="trunkDepth"><%= person.trunkDepth %>"</span></label>
+    <label for="contact-point">Forward Contact: <span id="contact-point" class="setting-value" name="contactPoint"><%= person.contactPoint %>"</span></label>
+    <label for="thigh-depth">Thigh Depth: <span id="upper-leg-length" class="setting-value" name="upperLegLength"><%= person.upperLegLength %>"</span></label>
+    <label for="lower-leg-length">Lower Leg Length: <span id="lower-leg-length" class="setting-value" name="lowerLegLength"><%= person.lowerLegLength %>"</span></label>
+    <label for="chest-width">Chest Width: <span id="chest-width" class="setting-value" name="chestWidth"><%= person.chestWidth %>"</span></label>
+    <label for="hip-width">Hip Width: <span id="hip-width" class="setting-value" name="hipWidth"><%= person.hipWidth %>"</span></label>
 </div>
 <div id="summary-chair" class="mxrx">
     <div class="tmp-internal"><h3>WheelChair</h3></div>
-    <label for="seat-back-height">Seat Back Height: <%= chair.seatBackHeight %></label>
-    <label for="seat-depth">Seat Depth</label>
-    <span id="seat-depth" class="setting-value" name="seatDepth"><%= chair.seatDepth %></span>
-    <label for="foam-height">Foam Height</label>
-    <% if(chair.foamHeight === 0.4) { print('selected') %>
-    <span id="foam-height" class="setting-value" name="foamHeight">No Cushion</span>
-    <% } else if(chair.foamHeight === 2) { %>
-    <span id="foam-height" class="setting-value" name="foamHeight">2" Cushion</span>
-    <% } %>
-    <label for="seat-back">Seat Back</label>
-    <% if(chair.seatBackWidth === 0.4) { print('selected') %>
-    <span id="seat-back" class="setting-value" name="seatBackWidth">No Cushion</span>
-    <% } else if(chair.seatBackWidth === 2) { %>
-    <span id="seat-back" class="setting-value" name="seatBackWidth">2" Cushion</span>
-    <% } %>
-    <label for="wheel-diameter">Wheel Diameter</label>
-    <span id="wheel-diameter" class="setting-value" name="wheelDiameter"><%= chair.wheelDiameter %></span>
+    <label for="seat-back-height">Seat Back Height: <span id="="seat-back-height" class="setting-value" name="seatBackHeight"><%= chair.seatBackHeight %>"</span></label>
+    <label for="seat-depth">Seat Depth: <span id="seat-depth" class="setting-value" name="seatDepth"><%= chair.seatDepth %>"</span></label>
+    <label for="foam-height">Foam Height:
+      <% if(chair.foamHeight === 0.4) { %>
+      <span id="foam-height" class="setting-value" name="foamHeight">No Cushion</span>
+      <% } else if(chair.foamHeight === 2) { %>
+        <span id="foam-height" class="setting-value" name="foamHeight">2" Cushion</span>
+      <% } %>
+    </label>
+    <label for="seat-back">Seat Back:
+      <% if(chair.seatBackWidth === 0.4) { %>
+        <span id="seat-back" class="setting-value" name="seatBackWidth">No Cushion</span>
+      <% } else if(chair.seatBackWidth === 2) { %>
+        <span id="seat-back" class="setting-value" name="seatBackWidth">2" Cushion</span>
+      <% } %>
+    </label>
+    <label for="wheel-diameter">Wheel Diameter: <span id="wheel-diameter" class="setting-value" name="wheelDiameter"><%= chair.wheelDiameter %>"</span></label>
     <!-- This is actually COG -->
-    <label for="axle-distance">Axle Distance</label>
-    <span id="axle-distance" class="setting-value" name="axleDistance"><%= chair.axleDistance %>"</span>
-    <label for="front-wheel-pin">Front Wheel Pin</label>
-    <span id="front-wheel-pin" class="setting-value" name="frontWheelPin"><%= chair.frontWheelPin %></span>
-    <label for="ground-clr">Ground Clearance</label>
-    <span id="ground-clr" class="setting-value" name="groundClr" ><%= chair.groundClr %>"</span>
-    <label for="dump">Dump</label>
-    <span id="dump" class="setting-value" name="dump"><%= chair.dump %>"</span>
-    <label for="seat-width">Seating Surface Width</label>
-    <span id="seat-width" class="setting-value" name="seatWidth"><%= chair.seatWidth %>"</span>
+    <label for="axle-distance">Axle Distance: <span id="axle-distance" class="setting-value" name="axleDistance"><%= chair.axleDistance %>"</span></label>
+    <label for="front-wheel-pin">Front Wheel Pin: <span id="front-wheel-pin" class="setting-value" name="frontWheelPin"><%= chair.frontWheelPin %></span></label>
+    <label for="ground-clr">Ground Clearance: <span id="ground-clr" class="setting-value" name="groundClr" ><%= chair.groundClr %>"</span></label>
+    <label for="dump">Dump: <span id="dump" class="setting-value" name="dump"><%= chair.dump %>"</span></label>
+    <label for="seat-width">Seating Surface Width: <span id="seat-width" class="setting-value" name="seatWidth"><%= chair.seatWidth %>"</span></label>
 </div>

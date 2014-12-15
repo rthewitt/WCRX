@@ -18,7 +18,7 @@ input {
     font-size: 17px;
 }
 
-span.customSelect { 
+span.customSelect {
     //font:12px sans-serif;
     font-size:17px;
     background:#adc5e0 url(../images/blah-arrow.png) right center no-repeat;
@@ -65,6 +65,9 @@ span.customSelectFocus {
 .button-holder input {
     //margin-top: 150px;
     margin-bottom: 10px;
+}
+.mxrx label span {
+  font-weight: bold;
 }
 .mxrx label {
     margin-top: 8px;

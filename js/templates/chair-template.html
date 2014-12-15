@@ -2,33 +2,33 @@
     <form>
         <div class="tmp-internal"><h3>Side Measures</h3></div>
         <label for="seat-back-height">Seat Back Height</label>
-        <input type="text" id="seat-back-height" name="seatBackHeight" value="<%= seatBackHeight %>" />
+        <input type="text" id="seat-back-height" name="seatBackHeight" value='<%= seatBackHeight %>' tabindex="2"/>
         <label for="seat-depth">Seat Depth</label>
-        <select id="seat-depth" name="seatDepth">
+        <select id="seat-depth" name="seatDepth" tabindex="3">
             <% _.each([12, 13, 14, 15, 16, 17, 18, 19], function(num) { %>
             <option value="<%= num %>" <% if(seatDepth === num) print('selected') %> ><%= num %>"</option>
             <% }); %>
             <option value="20" disabled >20"</option>
         </select>
         <label for="foam-height">Foam Height</label>
-        <select id="foam-height" name="foamHeight">
+        <select id="foam-height" name="foamHeight" tabindex="4">
             <option value="0.4" <% if(foamHeight === 0.4) print('selected') %> >No Cushion</option>
             <option value="2" <% if(foamHeight === 2) print('selected') %> >2" Cushion</option>
         </select>
         <label for="seat-back">Seat Back</label>
-        <select id="seat-back" name="seatBackWidth">
+        <select id="seat-back" name="seatBackWidth" tabindex="5">
             <option value="0.4" <% if(seatBackWidth === 0.4) print('selected') %> >No Cushion</option>
             <option value="2" <% if(seatBackWidth === 2) print('selected') %> >2" Cushion</option>
         </select>
         <label for="wheel-diameter">Wheel Diameter</label>
-        <select id="wheel-diameter" name="wheelDiameter">
+        <select id="wheel-diameter" name="wheelDiameter" tabindex="6">
             <% _.each([20, 22, 24, 25, 26], function(num) { %>
             <option value="<%= num %>" <% if(wheelDiameter === num) print('selected') %> ><%= num %>"</option>
             <% }); %>
         </select>
         <!-- This is actually COG -->
         <label for="axle-distance">Axle Distance</label>
-        <select id="axle-distance" name="axleDistance">
+        <select id="axle-distance" name="axleDistance" tabindex="7">
             <option value="0.0" disabled>0"</option>
             <option value="0.5" disabled>0.5"</option>
             <% _.each([1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0], function(num) { %>
@@ -36,7 +36,7 @@
             <% }); %>
         </select>
         <label for="front-wheel-pin">Front Wheel Pin</label>
-        <select id="front-wheel-pin" name="frontWheelPin">
+        <select id="front-wheel-pin" name="frontWheelPin" tabindex="8">
             <% _.each([1, 2, 3], function(num) { %>
             <option value="<%= num %>" <% if(frontWheelPin === num) print('selected') %> ><%= num %></option>
             <% }); %>
@@ -51,7 +51,7 @@
     <form>
         <div class="tmp-internal"><h3>Front Measures</h3></div>
         <label for="seat-width">Seating Surface Width</label>
-        <select id="seat-width" name="seatWidth">
+        <select id="seat-width" name="seatWidth" tabindex="1">
             <% _.each([12, 13, 14, 15, 16, 17, 18, 19], function(num) { %>
             <option value="<%= num %>" <% if(seatWidth === num) print('selected') %> ><%= num %>"</option>
             <% }); %>
