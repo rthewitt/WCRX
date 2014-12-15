@@ -78,7 +78,7 @@ define(['jquery', 'underscore', 'backbone', '../graphics', '../phys', '../util/d
             gx.setDebug(physics.world, context);
             physics.token = window.setInterval(function() {
                 physics.update(draw);
-                $('#dump').val(physics.calcDump());
+                $('#dump').val(physics.calcDump()+'"');
             }, 1000 / 60);
         },
 

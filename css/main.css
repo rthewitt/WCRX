@@ -14,9 +14,13 @@ body {
 //    transform: rotateZ(-30deg);
 }
 
+input {
+    font-size: 17px;
+}
+
 span.customSelect { 
     //font:12px sans-serif;
-    font-size:15px;
+    font-size:17px;
     background:#adc5e0 url(../images/blah-arrow.png) right center no-repeat;
     border: solid 2px #1b3e64;
     color: #173a61;
@@ -38,11 +42,11 @@ span.customSelectFocus {
 #temp-controls {
     width: 100%
 }
-#human-front, #chair-front {
+#human-front, #chair-front, #summary-patient {
     float: left;
     margin-left: 20px;
 }
-#human-side, #chair-side {
+#human-side, #chair-side, #summary-chair {
     float: right;
     margin-right: 20px;
 }
@@ -126,7 +130,7 @@ span.customSelectFocus {
 }
 .i-app {
     background-color: #5a8ac0;
-    min-height: 640px;
+    min-height: 660px;
     text-align: center;
 }
 .c-wrap {
@@ -196,8 +200,9 @@ span.ui-icon {
 }
 
 #slider {
+    margin-top: 15px;
     display: inline-block;
-    width: 13%;
+    width: 45%;
 }
 
 #img-source, #continue {

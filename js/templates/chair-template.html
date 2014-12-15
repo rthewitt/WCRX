@@ -38,13 +38,13 @@
         <label for="front-wheel-pin">Front Wheel Pin</label>
         <select id="front-wheel-pin" name="frontWheelPin">
             <% _.each([1, 2, 3], function(num) { %>
-            <option value="<%= num %>" <% if(axleDistance === num) print('selected') %> ><%= num %></option>
+            <option value="<%= num %>" <% if(frontWheelPin === num) print('selected') %> ><%= num %></option>
             <% }); %>
         </select>
         <label for="ground-clr">Ground Clearance</label>
-        <input type="text" id="ground-clr" name="groundClr" value="<%= groundClr %>" readonly />
+        <input type="text" id="ground-clr" name="groundClr" value='<%= groundClr %>"' readonly />
         <label for="dump">Dump</label>
-        <input type="text" id="dump" name="dump" value="<%= dump %>" readonly />
+        <input type="text" id="dump" name="dump" value='<%= dump %>"' readonly />
     </form>
 </div>
 <div id="chair-front" class="mxrx">

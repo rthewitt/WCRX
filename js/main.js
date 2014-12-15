@@ -35,13 +35,14 @@ require([ 'jquery', 'backbone',
         'views/front-view',
         'views/chair-measure-view',
         'views/person-measure-view',
+        'views/summary',
         'region-manager',
         './config',
         // discard jquery decorators
         'jquery.customSelect',
         'jqueryui'
         ], function($, Backbone, ImageData, ChairModel, PersonModel, SideView,
-            FrontView, ChairControls, PersonControls, RegionManager, config) { 
+            FrontView, ChairControls, PersonControls, Summary, RegionManager, config) { 
 
 
                 var dispatcher = _.clone(Backbone.Events);
@@ -72,6 +73,7 @@ require([ 'jquery', 'backbone',
 
                 var personControls = new PersonControls(shared);
                 var chairControls = new ChairControls(shared);
+                var summary = new Summary(shared);
                 var sideView = new SideView(shared);
                 var frontView = new FrontView(shared);
 
@@ -180,12 +182,6 @@ require([ 'jquery', 'backbone',
                                 dispatcher.trigger('flow:clear');
                                 $(this).dialog('close');
                                 $('#btn-cmx').click();
-                                // duplicated logic
-                                /*
-                                $('#btn-cmx').removeClass('active');
-                                $('#btn-pmx').addClass('active');
-                                RegionManager.show(personControls);
-                                */
                             } 
                         }]
                     });
@@ -239,9 +235,11 @@ require([ 'jquery', 'backbone',
                     $('#btn-reset').click(function() {
                         dispatcher.trigger('reset');
                     });
+                    // TODO change these specific removals to query against active instead
                     $('#btn-pmx').click(function(e) {
                         if($(this).hasClass('active')) return;
                         $('#btn-cmx').removeClass('active');
+                        $('#btn-rx').removeClass('active');
                         $('#btn-pmx').addClass('active');
                         RegionManager.show(personControls);
                     });
@@ -251,10 +249,18 @@ require([ 'jquery', 'backbone',
                             e.stopPropagation();
                             e.preventDefault();
                             return;
-                        }
+                        } else if($(this).hasClass('active')) return;
                         $('#btn-pmx').removeClass('active');
+                        $('#btn-rx').removeClass('active');
                         $('#btn-cmx').addClass('active');
                         RegionManager.show(chairControls);
+                    });
+                    $('#btn-rx').click(function(e) {
+                        if($(this).hasClass('active')) return;
+                        $('#btn-cmx').removeClass('active');
+                        $('#btn-pmx').removeClass('active');
+                        $('#btn-rx').addClass('active');
+                        RegionManager.show(summary);
                     });
                     $('#btn-chair').click(function() {
                         sideView.toggleChair();
