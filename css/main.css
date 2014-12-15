@@ -50,15 +50,6 @@ span.customSelectFocus {
     float: right;
     margin-right: 20px;
 }
-.mxrx {
-    display: inline-block;
-    margin: 40px;
-    padding-top: 0px;
-    border: solid 3px #1b3e64;
-    padding-bottom: 10px;
-    background-color: #5a8ac0;
-    width: 15%;
-}
 .button-holder {
     text-align: center;
 }
@@ -70,6 +61,7 @@ span.customSelectFocus {
   font-weight: bold;
 }
 .mxrx label {
+    font-size: 17px;
     margin-top: 8px;
     display: block;
     color: #1b3e64;
@@ -226,6 +218,16 @@ span.ui-icon {
     .btn-exit {
         display: none;
     }
+
+    .mxrx {
+        display: inline-block;
+        margin: 40px;
+        padding-top: 0px;
+        border: solid 3px #1b3e64;
+        padding-bottom: 10px;
+        background-color: #5a8ac0;
+        width: 25%;
+    }
 }
 
 @media screen {
@@ -245,6 +247,16 @@ span.ui-icon {
         width: 30px;
         right: 10px;
         top: 5px;
+    }
+
+    .mxrx {
+        display: inline-block;
+        margin: 40px;
+        padding-top: 0px;
+        border: solid 3px #1b3e64;
+        padding-bottom: 10px;
+        background-color: #5a8ac0;
+        width: 15%;
     }
 }
 #container {
