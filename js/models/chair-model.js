@@ -16,6 +16,7 @@ define(['jquery', 'underscore', 'backbone', './image-data', '../config'], functi
             seatDepth: 13,
             foamHeight: 2,
             groundClr: 0.0,
+            frontWheelPin: 1,
             dump: 0.0
         },
 

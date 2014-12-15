@@ -554,9 +554,24 @@ define(['backbone', 'box2dweb', 'underscore', 'config'], function(Backbone, Box2
                 { x: Left, y: Top },
                 { x: Delta(Right, -vertPipeWidth), y: Bottom });
 
+        // fork assembly has 3 holes for adjusting front wheel height
+        var pinSet = this.chairMeasures.get('frontWheelPin');
+        var pinDelta;
+        switch(pinSet) {
+            case 1:
+                pinDelta = { x: 0.7, y: -this.inches(0.8) };
+                break;
+            case 2:
+                pinDelta = { x: 0.7, y: -this.inches(1.5) };
+                break;
+            case 3:
+                pinDelta = { x: 0.5, y: -this.inches(2.2) };
+                break;
+        }
+
         ctx.addRevJoint('frontAxle', 'supportWheel', 'frontConnector', 
                 { x: Center, y: Center },
-                { x: Near(Left, 0.7), y: Near(Bottom, 0.8) });
+                { x: Near(Left, pinDelta.x), y: Delta(Bottom, pinDelta.y) });
 
         ctx.addWeldJoint('frontWeld', 'LBar', 'frontConnector', 
                 { x: Near(Right, 0.7), y: Bottom },
