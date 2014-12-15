@@ -200,7 +200,7 @@ span.ui-icon {
     width: 13%;
 }
 
-#img-source {
+#img-source, #continue {
     display: none;
 }
 

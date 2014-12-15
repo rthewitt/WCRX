@@ -17,6 +17,10 @@ define(["jquery", "underscore", "backbone", "../templates"], function($, _, Back
             this.modified = false;
             _.bindAll(this, "changed");
             _.bindAll(this, "blurred");
+            _.bindAll(this, "clearUnset");
+
+            this.listenTo(options.dispatcher, 'flow:clear', this.clearUnset);
+
             this.model.resize();
         },
         
@@ -48,6 +52,11 @@ define(["jquery", "underscore", "backbone", "../templates"], function($, _, Back
                 this.modified = true;
             }
             this.decorate();
+        },
+
+        clearUnset: function() {
+            this.$('input.unset').removeClass('unset');
+            this.dispatcher.trigger('measured:person');
         },
 
         blurred: function(evt) {

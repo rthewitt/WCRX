@@ -91,7 +91,7 @@ require([ 'jquery', 'backbone',
                     sideView.render();
 
                     dispatcher.on('measured:person', function() {
-                        $('#btn-cmx').prop('disabled', false);
+                        $('#btn-cmx').removeClass('blocked');
                     });
 
                     dispatcher.on('side:bgimage', function(dims) {
@@ -167,6 +167,29 @@ require([ 'jquery', 'backbone',
                         dispatcher.trigger('snapshot', { fromFile: true });
                     });
 
+                    $('#cmx-confirm').dialog({ 
+                        modal: true,
+                        title: "Are you sure?",
+                        autoOpen: false,
+                        buttons: [{ 
+                            text: "Cancel", click: function() {
+                                $(this).dialog('close');
+                            }
+                        }, { 
+                            text: "Continue", click: function() {
+                                dispatcher.trigger('flow:clear');
+                                $(this).dialog('close');
+                                $('#btn-cmx').click();
+                                // duplicated logic
+                                /*
+                                $('#btn-cmx').removeClass('active');
+                                $('#btn-pmx').addClass('active');
+                                RegionManager.show(personControls);
+                                */
+                            } 
+                        }]
+                    });
+
                     $('#img-source').dialog({ 
                         modal: true,
                         title: "Patient Image",
@@ -222,7 +245,13 @@ require([ 'jquery', 'backbone',
                         $('#btn-pmx').addClass('active');
                         RegionManager.show(personControls);
                     });
-                    $('#btn-cmx').click(function() {
+                    $('#btn-cmx').click(function(e) {
+                        if($(this).hasClass('blocked')) {
+                            $('#cmx-confirm').dialog('open');
+                            e.stopPropagation();
+                            e.preventDefault();
+                            return;
+                        }
                         $('#btn-pmx').removeClass('active');
                         $('#btn-cmx').addClass('active');
                         RegionManager.show(chairControls);
