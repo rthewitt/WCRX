@@ -273,6 +273,9 @@ require([ 'jquery', 'backbone',
                         $('#btn-rx').addClass('active');
                         RegionManager.show(summary);
                     });
+                    $('#btn-print').click(function() {
+                        window.print();
+                    });
                     $('#btn-chair').click(function() {
                         sideView.toggleChair();
                     });
