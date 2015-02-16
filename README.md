@@ -32,22 +32,24 @@ Coming soon!
 ## Help make WCRX Better
 ### Build WCRX for the first time
 1. Fork [the primary GitHub repo](https://github.com/rthewitt/WCRX)
-2. Install [Node.js](http://nodejs.org)
-2. Install [Bower](http://bower.io), and [Grunt](http://gruntjs.com)
+2. Clone your forked repository to your local development machine
+3. Install [Node.js](http://nodejs.org)
+4. Use Node Package Manager (NPM) that is included with Node.js to install [Bower](http://bower.io), and [Grunt](http://gruntjs.com)
 ```
 npm install -g bower # may need to run as sudo
 npm install -g grunt-cli # may need to run as sudo
 ```
-3. Navigate to the WCRX directory and run `bower install` and the directoy `js/libs/` will be created with the required dependencies for running WCRX.
-4. Run `npm install` to install the Grunt task runner.
-5. Run `grunt jst` to compile the WCRX view templates.
+5. Navigate to the WCRX directory on your local development machine and run `bower install` and the directoy `js/libs/` will be created with the required dependencies for running WCRX.
+6. Run `npm install` to install the Grunt task runner.
+7. Run `grunt jst` to compile the WCRX view templates.
+8. You may now open `WCRX/index.html` with Chrome or Chromium and use a typical web development workflow to update and test changes to the application.
 
-### Test Your Build
+### Create and Test a Chrome Web App Extension
 1. Read all steps below before attempting this the first time. Step 6 will open a full screen window and you'll need to understand how to regain control of Chrome after that window opens.
 2. Open Chromium (or Google Chrome).
 3. Navigate to chrome://extensions/
 4. Enable Developer Mode by checking the corresponding checkbox.
-5. Click `Load unpacked extension...` and select the WCRX directory (not the build, but the actual source code directory). You will see WCRX added to your list of extensions.
+5. Click `Load unpacked extension...` and select the WCRX directory. You will see WCRX added to your list of extensions.
 6. Click `Launch` to open the application.
 7. Press the `Esc` key to exit full screen.
 8. Enlarge the application window to your desired size, while keeping the App in windowed mode.
