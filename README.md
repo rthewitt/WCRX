@@ -1,14 +1,12 @@
 # WheelChair Rx
 An app that helps fit wheelchairs to the needs of patients.
 
-NOTE: The application cannot run without the images and libraries. These are not currently stored in this Git repo.
-
 ## License
-This is NOT free software. WheelChair Rx is distributed as beta shareware.
+This is NOT free software. WheelChair Rx is distributed as shareware. Contact Dr. Jill McNitt-Gray at the University of Southern California for licensing information.
 
-Source code copyright &copy; 2014 Ryan Hewitt and Michael C. Hogan. All rights reserved.
+Source code copyright &copy; 2014 Ryan Hewitt, Michael C. Hogan, Dr. Jill McNitt-Gray, Ian Russell. All rights reserved.
 
-Images copyright &copy; 2014 Ramiro Cazaux. All rights reserved.
+Images copyright &copy; 2014 Ramiro Cazaux, Dr. Jill McNitt-Gray, Ian Russell. All rights reserved.
 
 ## Install the Chrome Extension
 WheelChair Rx is deployed as a Chrome Extension compatible with either the open source Chromium browser or Google Chrome.

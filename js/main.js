@@ -35,13 +35,14 @@ require([ 'jquery', 'backbone',
         'views/front-view',
         'views/chair-measure-view',
         'views/person-measure-view',
+        'views/summary',
         'region-manager',
         './config',
         // discard jquery decorators
         'jquery.customSelect',
         'jqueryui'
         ], function($, Backbone, ImageData, ChairModel, PersonModel, SideView,
-            FrontView, ChairControls, PersonControls, RegionManager, config) { 
+            FrontView, ChairControls, PersonControls, Summary, RegionManager, config) { 
 
 
                 var dispatcher = _.clone(Backbone.Events);
@@ -72,6 +73,7 @@ require([ 'jquery', 'backbone',
 
                 var personControls = new PersonControls(shared);
                 var chairControls = new ChairControls(shared);
+                var summary = new Summary(shared);
                 var sideView = new SideView(shared);
                 var frontView = new FrontView(shared);
 
@@ -90,16 +92,17 @@ require([ 'jquery', 'backbone',
                     }, 1000);
                     sideView.render();
 
-                    dispatcher.on('measured:person', function() {
+                    dispatcher.on('flow:clear', function() {
                         $('#btn-cmx').removeClass('blocked');
+                        $('#btn-rx').removeClass('blocked');
                     });
 
                     dispatcher.on('side:bgimage', function(dims) {
                         $('#slider').slider({
                             min: 0.2,
-                            max: 5,
+                            max: 2,
                             value: 1,
-                            step: 0.05,
+                            step: 0.005,
                             slide: function(ev, ui) {
                                 sideView.sizeBGImage({
                                     x: dims.x * ui.value,
@@ -170,24 +173,7 @@ require([ 'jquery', 'backbone',
                     $('#cmx-confirm').dialog({ 
                         modal: true,
                         title: "Are you sure?",
-                        autoOpen: false,
-                        buttons: [{ 
-                            text: "Cancel", click: function() {
-                                $(this).dialog('close');
-                            }
-                        }, { 
-                            text: "Continue", click: function() {
-                                dispatcher.trigger('flow:clear');
-                                $(this).dialog('close');
-                                $('#btn-cmx').click();
-                                // duplicated logic
-                                /*
-                                $('#btn-cmx').removeClass('active');
-                                $('#btn-pmx').addClass('active');
-                                RegionManager.show(personControls);
-                                */
-                            } 
-                        }]
+                        autoOpen: false
                     });
 
                     $('#img-source').dialog({ 
@@ -239,22 +225,56 @@ require([ 'jquery', 'backbone',
                     $('#btn-reset').click(function() {
                         dispatcher.trigger('reset');
                     });
+                    // TODO change these specific removals to query against active instead
                     $('#btn-pmx').click(function(e) {
                         if($(this).hasClass('active')) return;
                         $('#btn-cmx').removeClass('active');
+                        $('#btn-rx').removeClass('active');
                         $('#btn-pmx').addClass('active');
                         RegionManager.show(personControls);
                     });
+
+                    function confirmPerson(origBtn) {
+                        $('#cmx-confirm').dialog('option', 'buttons', [{ 
+                            text: "Cancel", click: function() {
+                                $(this).dialog('close');
+                            }
+                        }, { 
+                            text: "Continue", click: function() {
+                                dispatcher.trigger('flow:clear');
+                                $(this).dialog('close');
+                                $(origBtn).click();
+                            } 
+                        }]);
+                        $('#cmx-confirm').dialog('open');
+                    }
+
                     $('#btn-cmx').click(function(e) {
                         if($(this).hasClass('blocked')) {
-                            $('#cmx-confirm').dialog('open');
+                            confirmPerson(this);
                             e.stopPropagation();
                             e.preventDefault();
                             return;
-                        }
+                        } else if($(this).hasClass('active')) return;
                         $('#btn-pmx').removeClass('active');
+                        $('#btn-rx').removeClass('active');
                         $('#btn-cmx').addClass('active');
                         RegionManager.show(chairControls);
+                    });
+                    $('#btn-rx').click(function(e) {
+                        if($(this).hasClass('blocked')) {
+                            confirmPerson(this);
+                            e.stopPropagation();
+                            e.preventDefault();
+                            return;
+                        } else if($(this).hasClass('active')) return;
+                        $('#btn-cmx').removeClass('active');
+                        $('#btn-pmx').removeClass('active');
+                        $('#btn-rx').addClass('active');
+                        RegionManager.show(summary);
+                    });
+                    $('#btn-print').click(function() {
+                        window.print();
                     });
                     $('#btn-chair').click(function() {
                         sideView.toggleChair();

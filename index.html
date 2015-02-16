@@ -15,6 +15,10 @@
        <div id="dynamic">
            <div id="chair-measures"></div>
            <div id="person-measures"></div>
+           <div id="summary"></div>
+      </div>
+      <div id="print-bg">
+          <img src="images/app/wcrx-small-promo.png" />
       </div>
       <div id="wrapper" class="i-app">
           <div id="canvas-center" class="c-wrap">
@@ -22,13 +26,16 @@
           </div>
       </div>
      <div class="button-holder">
+         <input id="btn-pmx" class="btn-box" type="button"  value="Person" />
+         <input id="btn-cmx" class="btn-box blocked" type="button"  value="Chair" />
+         <input id="btn-rx" class="btn-box blocked" type="button"  value="Summary" />
          <div id="cmx-confirm">
              Some patient measurements have not been modified.  Are you sure you want to continue?
          </div>
          <div id="img-source">
              <div id="src-opts">
                 <span id="img-file" class="sel-option">Browse Device</span>
-                <span id="vidcap" class="sel-option">From Camera</span> 
+                <span id="vidcap" class="sel-option">From Camera</span>
              </div>
              <div id="video-wrapper" style="display: none;">
                 <video id="video" width="640" height="480" autoplay></video>
@@ -39,12 +46,10 @@
          </div>
          <button id="btn-skeleton">Skeleton</button>
          <button id="btn-upload"><span class="ui-icon ui-icon-image white"></span>Import</button>
-         <div id="slider"></div>
+         <button id="btn-print"><span class="ui-icon ui-icon-print white"></span>Print</button>
      </div>
      <div class="button-holder">
-         <input id="btn-pmx" class="btn-box" type="button"  value="Person" />
-         <input id="btn-cmx" class="btn-box blocked" type="button"  value="Chair" />
-         <input id="btn-rx" class="btn-box" type="button"  value="Prescription" disabled  />
+         <div id="slider"></div>
      </div>
    </div>
    </body>
