@@ -65,12 +65,12 @@ See [these helpful responses on Stack Overflow](http://stackoverflow.com/questio
 2. More steps coming soon...
 
 ### Dependencies managed with Bower
-"jquery": "1.11"
-"jquery-ui": "1.11.1"
-"underscore": "1.6.0"
-"backbone": "1.1.2"
-"requirejs": "2.1.6"
+* "jquery": "1.11"
+* "jquery-ui": "1.11.1"
+* "underscore": "1.6.0"
+* "backbone": "1.1.2"
+* "requirejs": "2.1.6"
 
 ### Dependencies included in Repo
-"box2dweb": "2.1.a.3.min"
-"jquery.customSelect": "0.5.1"
+* "box2dweb": "2.1.a.3.min"
+* "jquery.customSelect": "0.5.1"
