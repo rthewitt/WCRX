@@ -4,8 +4,8 @@
     "dependencies": {
         "jquery": "1.11",
         "jquery-ui": "1.11.1",
-        "backbone": null,
-        "underscore": null,
-        "requirejs": null
+        "backbone": "1.1.2",
+        "underscore": "1.6.0",
+        "requirejs": "2.1.6"
     }
 }
