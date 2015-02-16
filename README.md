@@ -35,8 +35,8 @@ Coming soon!
 2. Install [Node.js](http://nodejs.org)
 2. Install [Bower](http://bower.io), and [Grunt](http://gruntjs.com)
 ```
-npm install -g bower
-npm install -g grunt-cli
+npm install -g bower # may need to run as sudo
+npm install -g grunt-cli # may need to run as sudo
 ```
 3. Navigate to the WCRX directory and run `bower install` and the directoy `js/libs/` will be created with the required dependencies for running WCRX.
 4. Run `npm install` to install the Grunt task runner.
@@ -53,6 +53,12 @@ npm install -g grunt-cli
 8. Enlarge the application window to your desired size, while keeping the App in windowed mode.
 9. Right click and choose `Inspect element...` to launch Chrome developer tools.
 10. Use the Chrome JavaScript console to debug WCRX.
+
+### Submit a Pull Request to the Primary GitHub Repository
+Coming soon...
+
+### Sync your copy with the Primary GitHub Repository
+See [these helpful responses on Stack Overflow](http://stackoverflow.com/questions/7244321/how-to-update-github-forked-repository)
 
 ### Publish to the Chrome Web Application Store
 1. Run `WCRX/bin/compile-and-build.sh` to build the Chrome App and a `WCRX/build/` directory will be added to your project space. The directory will include WCRX.zip, the bundled Chrome Application.
