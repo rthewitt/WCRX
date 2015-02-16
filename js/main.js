@@ -4,10 +4,10 @@ require.config({
         "jquery": ["http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min", 
                     "libs/jquery/dist/jquery.min"],
         "jqueryui": "libs/jquery-ui/jquery-ui.min",
-        "jquery.customSelect": "libs/jquery.customSelect/jquery.customSelect.min",
-        "underscore": "libs/underscore/underscore",
+        "jquery.customSelect": "jquery.customSelect/jquery.customSelect.min",
+        "underscore": "libs/underscore/underscore-min",
         "backbone": "libs/backbone/backbone",
-        "box2dweb": "libs/box2dweb/Box2dWeb-2.1.a.3.min"
+        "box2dweb": "box2dweb/Box2dWeb-2.1.a.3.min"
     },
     shim: {
         "box2dweb": {
