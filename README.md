@@ -28,3 +28,32 @@ Coming soon!
 1. Open the open source Chromium browser or Google Chrome.
 2. Navigate to <chrome://extensions/>.
 3. Click the Trash Can icon to delete the extension.
+
+## Help make WCRX Better
+### Build WCRX for the first time
+1. Fork [the primary GitHub repo](https://github.com/rthewitt/WCRX)
+2. Install [Node.js](http://nodejs.org)
+2. Install [Bower](http://bower.io), and [Grunt](http://gruntjs.com)
+```
+npm install -g bower
+npm install -g grunt-cli
+```
+3. Navigate to the WCRX directory and run `bower install` and the directoy `js/libs/` will be created with the required dependencies for running WCRX.
+4. Run `npm install` to install the Grunt task runner.
+5. Run `grunt jst` to compile the WCRX view templates.
+
+### Test Your Build
+1. Read all steps below before attempting this the first time. Step 6 will open a full screen window and you'll need to understand how to regain control of Chrome after that window opens.
+2. Open Chromium (or Google Chrome).
+3. Navigate to chrome://extensions/
+4. Enable Developer Mode by checking the corresponding checkbox.
+5. Click `Load unpacked extension...` and select the WCRX directory (not the build, but the actual source code directory). You will see WCRX added to your list of extensions.
+6. Click `Launch` to open the application.
+7. Press the `Esc` key to exit full screen.
+8. Enlarge the application window to your desired size, while keeping the App in windowed mode.
+9. Right click and choose `Inspect element...` to launch Chrome developer tools.
+10. Use the Chrome JavaScript console to debug WCRX.
+
+### Publish to the Chrome Web Application Store
+1. Run `WCRX/bin/compile-and-build.sh` to build the Chrome App and a `WCRX/build/` directory will be added to your project space. The directory will include WCRX.zip, the bundled Chrome Application.
+2. More steps coming soon...
